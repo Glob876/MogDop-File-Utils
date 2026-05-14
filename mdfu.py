@@ -7,6 +7,8 @@ from tkinter import filedialog, messagebox, ttk, simpledialog
 from datetime import datetime
 import subprocess
 import sys
+import threading
+import time
 
 # Стили оформления
 COLOR_BG = "#ececec"
@@ -46,12 +48,16 @@ LANGUAGES = {
         'single_mode': "Одиночный режим",
         'multi_mode': "Режим нескольких источников",
         'dupe_mode': "Поиск дубликатов",
+        'auto_mode': "Фоновый мониторинг (Бета)",
         'file_menu': "Файл",
         'edit_menu': "Правка",
         'settings': "Настройки",
         'action_menu': "Действия",
         'select_target': "Целевая папка:",
         'sources_list': "Источники (папки):",
+        'auto_src': "Папка слежения:",
+        'auto_interval': "Интервал (сек):",
+        'auto_enable': "Включить мониторинг",
         'include_target': "Сортировать файлы в целевой папке тоже",
         'btn_add': "Добавить папку",
         'btn_remove': "Удалить выбранную",
@@ -81,7 +87,9 @@ LANGUAGES = {
         'err_path': "Путь не найден!",
         'dupe_win': "Выбор дубликатов",
         'confirm_reverse': "Вы уверены, что хотите вернуть все файлы из категорий в общую папку?",
-        'preview_mode': "Режим предпросмотра (без перемещения)"
+        'preview_mode': "Режим предпросмотра (без перемещения)",
+        'beta_warn_title': "Бета-функция",
+        'beta_warn_msg': "ВНИМАНИЕ!\n\nФункция фонового мониторинга находится в стадии тестирования (Бета).\nПрограмма будет автоматически перемещать файлы из выбранной папки каждые N секунд.\n\nРекомендуется сначала протестировать её работу на папке с тестовыми файлами, чтобы избежать случайной потери данных."
     },
     'EN': {
         'title': "MogDop's File Utils",
@@ -91,12 +99,16 @@ LANGUAGES = {
         'single_mode': "Single Mode",
         'multi_mode': "Multiple Sources Mode",
         'dupe_mode': "Duplicate Finder",
+        'auto_mode': "Background Monitoring (Beta)",
         'file_menu': "File",
         'edit_menu': "Edit",
         'settings': "Settings",
         'action_menu': "Actions",
         'select_target': "Target Folder:",
         'sources_list': "Sources:",
+        'auto_src': "Watch Folder:",
+        'auto_interval': "Interval (sec):",
+        'auto_enable': "Enable Monitoring",
         'include_target': "Sort target folder too",
         'btn_add': "Add Folder",
         'btn_remove': "Remove Selected",
@@ -126,7 +138,9 @@ LANGUAGES = {
         'err_path': "Path not found!",
         'dupe_win': "Duplicate Selector",
         'confirm_reverse': "Are you sure you want to return all files from categories to the root folder?",
-        'preview_mode': "Preview mode (no moving)"
+        'preview_mode': "Preview mode (no moving)",
+        'beta_warn_title': "Beta Feature",
+        'beta_warn_msg': "WARNING!\n\nBackground monitoring is currently in Beta.\nThe program will automatically move files from the watched folder every N seconds.\n\nIt is highly recommended to test this feature on a folder with dummy files first to avoid accidental data loss."
     }
 }
 
@@ -136,6 +150,7 @@ HELP_TEXTS = {
         'multi_target': "Целевая папка: Место, куда будут перемещены файлы из всех папок-источников.",
         'multi_src': "Источники: Список папок, из которых программа будет забирать файлы для сортировки.",
         'dupe_scan': "Дубликаты: Программа сравнит файлы по их содержимому (хешу) и предложит удалить копии.",
+        'auto_watch': "Фоновый мониторинг: Программа будет работать в фоне и автоматически сортировать новые файлы в папке слежения.",
         'preview': "Режим предпросмотра: Программа запишет в лог, что она собирается сделать, не перемещая файлы реально.",
         'lang': "Язык: Смена языка интерфейса (требуется переоткрытие окон).",
         'excluded': "Исключения: Файлы с этими именами или расширениями будут проигнорированы программой.",
@@ -152,6 +167,7 @@ HELP_TEXTS = {
         'multi_target': "Target Folder: The destination where files from all source folders will be moved.",
         'multi_src': "Sources: A list of folders from which the program will take files to sort.",
         'dupe_scan': "Duplicates: The program compares file contents (hashes) and offers to delete copies.",
+        'auto_watch': "Background Monitor: The program runs in the background and automatically sorts new files in the watched folder.",
         'preview': "Preview Mode: The program logs intended actions without actually moving any files.",
         'lang': "Language: Change interface language (requires reopening windows).",
         'excluded': "Excluded: Files with these names or extensions will be ignored by the program.",
@@ -321,7 +337,7 @@ class FileSorterApp:
         self.lang = self.settings.get("language", "RU")
         
         self.root.title(LANGUAGES[self.lang]['title'])
-        self.root.geometry("950x850")
+        self.root.geometry("950x950")
         self.root.configure(bg=COLOR_BG)
         
         self.source_path = tk.StringVar(value=self.settings.get("last_path", ""))
@@ -330,15 +346,27 @@ class FileSorterApp:
         self.multi_sources = self.settings.get("multi_sources", [])
         self.include_target_var = tk.BooleanVar(value=self.settings.get("include_target_root", False))
         self.preview_mode = tk.BooleanVar(value=False)
+
+        # Фоновые переменные
+        self.auto_src = tk.StringVar(value=self.settings.get("auto_src", ""))
+        self.auto_dst = tk.StringVar(value=self.settings.get("auto_dst", ""))
+        self.auto_interval = tk.IntVar(value=self.settings.get("auto_interval", 10))
+        self.auto_enabled = tk.BooleanVar(value=self.settings.get("auto_enabled", False))
+        self.watch_thread = None
         
         self.create_menu()
         self.create_main_ui()
+
+        # Авто-запуск потока, если был включен в прошлый раз
+        if self.auto_enabled.get():
+            self.start_watcher()
 
     def load_settings(self):
         defaults = {
             "extensions": DEFAULT_EXTENSIONS, "auto_dupes": False, "include_target_root": False, 
             "multi_sources": [], "excluded_files": "", "move_unknown": True, "overwrite": False, 
-            "language": "RU", "date_sort": False, "clean_empty": True, "last_path": "", "multi_target": ""
+            "language": "RU", "date_sort": False, "clean_empty": True, "last_path": "", "multi_target": "",
+            "auto_src": "", "auto_dst": "", "auto_interval": 10, "auto_enabled": False
         }
         if os.path.exists(CONFIG_FILE):
             try:
@@ -350,6 +378,12 @@ class FileSorterApp:
         return defaults
 
     def save_settings(self):
+        # Сохраняем и фоновые параметры
+        self.settings["auto_src"] = self.auto_src.get()
+        self.settings["auto_dst"] = self.auto_dst.get()
+        self.settings["auto_interval"] = self.auto_interval.get()
+        self.settings["auto_enabled"] = self.auto_enabled.get()
+        
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(self.settings, f, ensure_ascii=False, indent=4)
 
@@ -358,25 +392,15 @@ class FileSorterApp:
             f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {msg}\n")
 
     def get_directory_path(self, title="Select Directory"):
-        """Оптимизированный выбор папок для Linux и других систем"""
         if sys.platform.startswith('linux'):
-            # Пробуем Zenity (нативный диалог в GNOME/GTK)
             try:
-                proc = subprocess.run(['zenity', '--file-selection', '--directory', f'--title={title}'],
-                                     capture_output=True, text=True)
-                if proc.returncode == 0:
-                    return proc.stdout.strip()
+                proc = subprocess.run(['zenity', '--file-selection', '--directory', f'--title={title}'], capture_output=True, text=True)
+                if proc.returncode == 0: return proc.stdout.strip()
             except: pass
-
-            # Пробуем KDialog (нативный диалог в KDE)
             try:
-                proc = subprocess.run(['kdialog', '--getexistingdirectory', '--title', title],
-                                     capture_output=True, text=True)
-                if proc.returncode == 0:
-                    return proc.stdout.strip()
+                proc = subprocess.run(['kdialog', '--getexistingdirectory', '--title', title], capture_output=True, text=True)
+                if proc.returncode == 0: return proc.stdout.strip()
             except: pass
-        
-        # Стандартный диалог Tkinter (Windows, Mac или Linux без утилит)
         return filedialog.askdirectory(title=title)
 
     def create_menu(self):
@@ -489,10 +513,132 @@ class FileSorterApp:
         tk.Button(f_d, text="...", command=lambda: self.browse(self.dupe_folder), bg=COLOR_BORDER, relief="flat", padx=10).pack(side="right", padx=5)
         StyledButton(dupe_f, text=LANGUAGES[self.lang]['btn_find_dupes'], command=self.run_dupe_finder).pack(fill="x", pady=5)
 
+        # 4. Фоновый мониторинг (Бета)
+        auto_f = tk.Frame(scroll_f, bg=COLOR_CARD, padx=20, pady=15, highlightbackground="#ffeaa7", highlightthickness=2)
+        auto_f.pack(fill="x", padx=15, pady=10)
+        
+        h_a = tk.Frame(auto_f, bg=COLOR_CARD)
+        h_a.pack(anchor="w", pady=(0, 10))
+        tk.Label(h_a, text=LANGUAGES[self.lang]['auto_mode'], bg=COLOR_CARD, font=("Segoe UI", 11, "bold"), fg="#e17055").pack(side="left")
+        HelpMarker(h_a, 'auto_watch', self.lang, self.status_label).pack(side="left")
+
+        # Настройки папок мониторинга
+        f_a1 = tk.Frame(auto_f, bg=COLOR_CARD); f_a1.pack(fill="x", pady=2)
+        tk.Label(f_a1, text=LANGUAGES[self.lang]['auto_src'], bg=COLOR_CARD, width=15, anchor="w").pack(side="left")
+        ttk.Entry(f_a1, textvariable=self.auto_src).pack(side="left", fill="x", expand=True, ipady=3)
+        tk.Button(f_a1, text="...", command=lambda: self.browse(self.auto_src), bg=COLOR_BORDER, relief="flat", padx=10).pack(side="right", padx=5)
+
+        f_a2 = tk.Frame(auto_f, bg=COLOR_CARD); f_a2.pack(fill="x", pady=2)
+        tk.Label(f_a2, text=LANGUAGES[self.lang]['select_target'], bg=COLOR_CARD, width=15, anchor="w").pack(side="left")
+        ttk.Entry(f_a2, textvariable=self.auto_dst).pack(side="left", fill="x", expand=True, ipady=3)
+        tk.Button(f_a2, text="...", command=lambda: self.browse(self.auto_dst), bg=COLOR_BORDER, relief="flat", padx=10).pack(side="right", padx=5)
+
+        # Интервал и включение
+        f_a3 = tk.Frame(auto_f, bg=COLOR_CARD); f_a3.pack(fill="x", pady=(10, 0))
+        tk.Label(f_a3, text=LANGUAGES[self.lang]['auto_interval'], bg=COLOR_CARD).pack(side="left")
+        ttk.Spinbox(f_a3, from_=5, to=3600, textvariable=self.auto_interval, width=8).pack(side="left", padx=5)
+        
+        cb_auto = tk.Checkbutton(f_a3, text=LANGUAGES[self.lang]['auto_enable'], variable=self.auto_enabled, bg=COLOR_CARD, font=("Segoe UI", 9, "bold"), fg=COLOR_SUCCESS, command=self.toggle_auto_watcher)
+        cb_auto.pack(side="right")
+
+        # Запись настроек при изменении текста
+        self.auto_src.trace_add("write", lambda *args: self.save_settings())
+        self.auto_dst.trace_add("write", lambda *args: self.save_settings())
+        self.auto_interval.trace_add("write", lambda *args: self.save_settings())
+
         # Превью
         f_pre = tk.Frame(scroll_f, bg=COLOR_BG); f_pre.pack(pady=10)
         tk.Checkbutton(f_pre, text=LANGUAGES[self.lang]['preview_mode'], variable=self.preview_mode, bg=COLOR_BG, fg=COLOR_ACCENT, font=("Segoe UI", 9, "bold")).pack(side="left")
         HelpMarker(f_pre, 'preview', self.lang, self.status_label).pack(side="left")
+
+    def toggle_auto_watcher(self):
+        self.save_settings()
+        if self.auto_enabled.get():
+            messagebox.showwarning(LANGUAGES[self.lang]['beta_warn_title'], LANGUAGES[self.lang]['beta_warn_msg'])
+            self.start_watcher()
+        else:
+            self.stop_watcher()
+
+    def start_watcher(self):
+        if self.watch_thread and self.watch_thread.is_alive():
+            return
+        self.log("Background watcher thread started.")
+        self.watch_thread = threading.Thread(target=self._watcher_loop, daemon=True)
+        self.watch_thread.start()
+
+    def stop_watcher(self):
+        self.log("Background watcher thread stopped.")
+        # Поскольку поток daemon, он умрет сам или при след. итерации
+        pass
+
+    def _watcher_loop(self):
+        while self.auto_enabled.get():
+            interval = max(5, self.auto_interval.get())
+            src = self.auto_src.get()
+            dst = self.auto_dst.get()
+            
+            if os.path.exists(src) and os.path.exists(dst):
+                self._silent_sort(src, dst)
+                
+            time.sleep(interval)
+
+    def _silent_sort(self, src_dir, dst_root):
+        """Тихая сортировка для фона (без GUI элементов)"""
+        excl = [x.strip().lower() for x in self.settings["excluded_files"].split(",") if x.strip()]
+        try:
+            files = [f for f in os.listdir(src_dir) if os.path.isfile(os.path.join(src_dir, f))]
+            for f in files:
+                if f not in [CONFIG_FILE, LOG_FILE] and f.lower() not in excl:
+                    fp = os.path.join(src_dir, f)
+                    self._silent_process_move(fp, dst_root, f)
+        except Exception as e:
+            self.log(f"[Auto-Watch Error] {str(e)}")
+
+    def _silent_process_move(self, src, target_root, fname):
+        ext = os.path.splitext(fname)[1].lower()
+        cat = None
+        for c, exts in self.settings["extensions"].items():
+            if ext in [e.strip().lower() for e in exts.split(',')]: cat = c; break
+        
+        if not cat and self.settings["move_unknown"]: cat = "Other" if self.lang == "EN" else "Другое"
+        if not cat: return False
+        
+        d_dir = os.path.join(target_root, cat)
+        if self.settings["date_sort"]:
+            try:
+                dt = datetime.fromtimestamp(os.path.getmtime(src))
+                m_name = MONTHS_RU[dt.month] if self.lang == "RU" else dt.strftime('%B')
+                d_dir = os.path.join(d_dir, str(dt.year), m_name)
+            except: pass
+
+        if self.preview_mode.get(): 
+            self.log(f"[AUTO-PREVIEW] {fname} -> {d_dir}")
+            return True
+            
+        os.makedirs(d_dir, exist_ok=True)
+        dst = os.path.join(d_dir, fname)
+        
+        # Если файл занят другим процессом (например, еще скачивается) - пропускаем до следующего цикла
+        try:
+            with open(src, 'a'): pass
+        except IOError:
+            return False
+
+        if os.path.exists(dst):
+            if self.settings["overwrite"]:
+                try: os.remove(dst)
+                except: return False
+            else:
+                # В фоне автоматически переименовываем (чтобы не блокировать поток окном)
+                n, e = os.path.splitext(fname)
+                dst = os.path.join(d_dir, f"{n}_auto_{datetime.now().strftime('%H%M%S')}{e}")
+                
+        try: 
+            shutil.move(src, dst)
+            self.log(f"[AUTO] Moved: {fname} -> {dst}")
+            return True
+        except: 
+            return False
 
     def browse(self, var, multi=False):
         f = self.get_directory_path("Select Directory")
@@ -663,4 +809,5 @@ if __name__ == "__main__":
     if sys.platform == 'win32':
         try: from ctypes import windll; windll.shcore.SetProcessDpiAwareness(1)
         except: pass
-    app = FileSorterApp(root); root.mainloop()
+    app = FileSorterApp(root)
+    root.mainloop()
