@@ -28,13 +28,13 @@ LOG_FILE = "sorter_log.txt"
 
 # Расширенный список форматов
 DEFAULT_EXTENSIONS = {
-    'Изображения': '.jpg,.jpeg,.png,.gif,.bmp,.svg,.webp,.tiff,.ico',
-    'Документы': '.pdf,.doc,.docx,.txt,.xlsx,.pptx,.csv,.odt,.rtf',
-    'Видео': '.mp4,.mkv,.avi,.mov,.webm,.flv,.wmv',
-    'Музыка': '.mp3,.wav,.flac,.aac,.ogg,.m4a',
-    'Архивы': '.zip,.rar,.7z,.tar,.tar.xz,.gz,.bz2,.xz',
-    'Программирование': '.py,.html,.css,.js,.cpp,.c,.h,.java,.php,.json,.xml,.sb3,.rb,.go,.rs,.swift',
-    'Системные и пакеты': '.exe,.msi,.deb,.run,.appimage,.sh,.bat,.com'
+    'Image': '.jpg,.jpeg,.png,.gif,.bmp,.svg,.webp,.tiff,.ico',
+    'Documets': '.pdf,.doc,.docx,.txt,.xlsx,.pptx,.csv,.odt,.rtf',
+    'Videos': '.mp4,.mkv,.avi,.mov,.webm,.flv,.wmv',
+    'Music': '.mp3,.wav,.flac,.aac,.ogg,.m4a',
+    'Archives': '.zip,.rar,.7z,.tar,.tar.xz,.gz,.bz2,.xz',
+    'Coding': '.py,.html,.css,.js,.cpp,.c,.h,.java,.php,.json,.xml,.sb3,.rb,.go,.rs,.swift',
+    'packs': '.exe,.msi,.deb,.run,.appimage,.sh,.bat,.com'
 }
 
 LANGUAGES = {
