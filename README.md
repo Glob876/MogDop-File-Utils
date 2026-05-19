@@ -1,5 +1,7 @@
 # MogDop's File Utils
 
+![bg](https://ibb.co.com/Z4J9hV8)
+
 **MogDop's File Utils PRO** is a powerful, feature-rich desktop application designed to eliminate your digital clutter once and for all. If your computer is overflowing with hundreds of unorganized documents, photos, downloads, and archives, this software takes the heavy lifting off your shoulders. With its intuitive interface and intelligent processing algorithms, file management becomes a fast, secure, and fully automated experience.
 
 ### Key Features of the Application:
