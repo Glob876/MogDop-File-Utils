@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" class="dark">
+<html lang="en" class="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -134,32 +134,32 @@
                 <nav class="px-4 space-y-1.5 mt-2">
                     <button onclick="showTab('single')" id="nav-single"
                         class="sidebar-item active w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="layout-grid" class="w-4 h-4"></i> Одиночный режим
+                        <i data-lucide="layout-grid" class="w-4 h-4"></i> Single Mode
                     </button>
                     <button onclick="showTab('multi')" id="nav-multi"
                         class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="git-merge" class="w-4 h-4"></i> Мульти-источники
+                        <i data-lucide="git-merge" class="w-4 h-4"></i> Multi-Source
                     </button>
                     <button onclick="showTab('dupes')" id="nav-dupes"
                         class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="copy-x" class="w-4 h-4"></i> Поиск дубликатов
+                        <i data-lucide="copy-x" class="w-4 h-4"></i> Find Duplicates
                     </button>
                     <button onclick="showTab('settings')" id="nav-settings"
                         class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Настройки
+                        <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Settings
                     </button>
                     <button onclick="showTab('logs')" id="nav-logs"
                         class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="terminal" class="w-4 h-4"></i> Логи системы
+                        <i data-lucide="terminal" class="w-4 h-4"></i> System Logs
                     </button>
                 </nav>
             </div>
             <div class="p-4 border-t border-slate-100 dark:border-darkBorder">
                 <button onclick="toggleTheme()"
-                    class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-yellow-400 w-full justify-center">
+                    class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-yellow-400 w-full justify-center hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
                     <i data-lucide="moon" id="theme-icon-moon" class="w-4 h-4 hidden dark:block"></i>
                     <i data-lucide="sun" id="theme-icon-sun" class="w-4 h-4 block dark:hidden"></i>
-                    <span class="text-xs font-semibold">Сменить тему</span>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Toggle Theme</span>
                 </button>
             </div>
         </aside>
@@ -172,12 +172,12 @@
                 class="hidden absolute top-0 left-0 w-full bg-slate-900 shadow-xl z-50 p-4 border-b border-blue-500">
                 <div class="max-w-4xl mx-auto flex flex-col gap-2">
                     <div class="flex justify-between items-center text-xs font-bold text-white">
-                        <span id="statusLabel" class="text-blue-400">Система активна...</span>
+                        <span id="statusLabel" class="text-blue-400">System is running...</span>
                         <span id="percentLabel" class="font-mono">0%</span>
                     </div>
                     <div class="w-full bg-slate-800 rounded-full h-2">
                         <div id="progressBar"
-                            class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all"
+                            class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all duration-300"
                             style="width: 0%"></div>
                     </div>
                 </div>
@@ -186,27 +186,27 @@
             <!-- Tab 1: Single Mode -->
             <section id="tab-single" class="tab-content active max-w-4xl mx-auto mt-4">
                 <header class="mb-8">
-                    <h1 class="text-3xl font-black dark:text-white">Одиночный режим</h1>
-                    <p class="text-slate-500 mt-1">Сортировка файлов внутри одной директории по категориям.</p>
+                    <h1 class="text-3xl font-black dark:text-white">Single Mode</h1>
+                    <p class="text-slate-500 mt-1">Sort files within a single directory by categories.</p>
                 </header>
                 <div
                     class="glow-transition glow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
-                    <label class="block text-sm font-bold text-slate-400 mb-2">Рабочая папка</label>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Workspace Folder</label>
                     <div class="flex gap-2">
-                        <input type="text" id="singlePath"
+                        <input type="text" id="singlePath" placeholder="/home/user/Downloads"
                             class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
                         <button onclick="browseFolder('singlePath')"
-                            class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl"><i data-lucide="folder-search"
-                                class="w-5 h-5"></i></button>
+                            class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-700 transition"><i
+                                data-lucide="folder-search" class="w-5 h-5"></i></button>
                     </div>
                     <div class="flex gap-4 mt-6">
                         <button onclick="runEngine('single', 'singlePath')"
-                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2">
-                            <i data-lucide="play" class="w-5 h-5"></i> Начать сортировку
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
+                            <i data-lucide="play" class="w-5 h-5"></i> Start Sorting
                         </button>
                         <button onclick="runEngine('unsort', 'singlePath')"
-                            class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2">
-                            <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Обратная (Распаковать)
+                            class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
+                            <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Reverse (Unsort)
                         </button>
                     </div>
                 </div>
@@ -215,35 +215,36 @@
             <!-- Tab 2: Multi Mode -->
             <section id="tab-multi" class="tab-content max-w-4xl mx-auto mt-4">
                 <header class="mb-8">
-                    <h1 class="text-3xl font-black dark:text-white">Мульти-источники</h1>
-                    <p class="text-slate-500 mt-1">Сбор и сортировка файлов из разных папок в одну целевую.</p>
+                    <h1 class="text-3xl font-black dark:text-white">Multi-Source Mode</h1>
+                    <p class="text-slate-500 mt-1">Gather and sort files from multiple locations into one target folder.
+                    </p>
                 </header>
                 <div
                     class="glow-transition glow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
-                    <label class="block text-sm font-bold text-slate-400 mb-2">Целевая папка (Куда)</label>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Target Folder (Destination)</label>
                     <div class="flex gap-2 mb-6">
-                        <input type="text" id="multiTarget"
-                            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none text-blue-400 font-bold">
+                        <input type="text" id="multiTarget" placeholder="Where should files go?"
+                            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none text-blue-500 dark:text-blue-400 font-bold focus:ring-2 focus:ring-blue-500">
                         <button onclick="browseFolder('multiTarget')"
-                            class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl"><i data-lucide="folder-down"
-                                class="w-5 h-5"></i></button>
+                            class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-700 transition"><i
+                                data-lucide="folder-down" class="w-5 h-5"></i></button>
                     </div>
 
                     <div class="flex justify-between items-end mb-2">
-                        <label class="block text-sm font-bold text-slate-400">Источники (Откуда)</label>
+                        <label class="block text-sm font-bold text-slate-400">Sources (Origin)</label>
                         <button onclick="addSourceUI()"
-                            class="text-xs bg-indigo-500/20 text-indigo-400 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-indigo-500/40">
-                            <i data-lucide="plus" class="w-4 h-4"></i> Добавить
+                            class="text-xs bg-indigo-500/20 text-indigo-500 dark:text-indigo-400 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-indigo-500/40 transition">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Add
                         </button>
                     </div>
                     <div id="sourcesListUI"
-                        class="space-y-2 max-h-48 overflow-y-auto pr-2 mb-6 border border-slate-800 p-2 rounded-xl bg-slate-900/50">
+                        class="space-y-2 max-h-48 overflow-y-auto pr-2 mb-6 border border-slate-200 dark:border-slate-800 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/50">
                         <!-- JS renders here -->
                     </div>
 
                     <button onclick="runEngineMulti()"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2">
-                        <i data-lucide="combine" class="w-5 h-5"></i> Запустить сборку
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
+                        <i data-lucide="combine" class="w-5 h-5"></i> Start Assembly
                     </button>
                 </div>
             </section>
@@ -251,33 +252,34 @@
             <!-- Tab 3: Duplicates -->
             <section id="tab-dupes" class="tab-content max-w-4xl mx-auto mt-4">
                 <header class="mb-8">
-                    <h1 class="text-3xl font-black dark:text-white">Поиск дубликатов</h1>
-                    <p class="text-slate-500 mt-1">Глубокое MD5-хеширование для поиска точных копий файлов.</p>
+                    <h1 class="text-3xl font-black dark:text-white">Duplicate Finder</h1>
+                    <p class="text-slate-500 mt-1">Deep MD5 hashing to find exact copies of files.</p>
                 </header>
                 <div
                     class="glow-transition glow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
-                    <label class="block text-sm font-bold text-slate-400 mb-2">Папка для сканирования</label>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Folder to scan</label>
                     <div class="flex gap-2">
-                        <input type="text" id="dupePath"
+                        <input type="text" id="dupePath" placeholder="Select directory..."
                             class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none focus:ring-2 focus:ring-amber-500">
                         <button onclick="browseFolder('dupePath')"
-                            class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl"><i data-lucide="search"
-                                class="w-5 h-5"></i></button>
+                            class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-700 transition"><i
+                                data-lucide="search" class="w-5 h-5"></i></button>
                     </div>
                     <button onclick="runEngine('scan_dupes', 'dupePath')"
-                        class="w-full mt-6 bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2">
-                        <i data-lucide="scan-line" class="w-5 h-5"></i> Начать сканирование
+                        class="w-full mt-6 bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
+                        <i data-lucide="scan-line" class="w-5 h-5"></i> Start Scan
                     </button>
                 </div>
 
                 <!-- Duplicates Result Area -->
-                <div id="dupeResultsArea" class="hidden mt-6 bg-slate-900 rounded-2xl p-6 border border-amber-500/50">
-                    <h3 class="text-amber-400 font-bold mb-4 flex items-center gap-2"><i data-lucide="alert-circle"
-                            class="w-5 h-5"></i> Выберите файлы для удаления</h3>
+                <div id="dupeResultsArea"
+                    class="hidden mt-6 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-amber-300 dark:border-amber-500/50 shadow-lg">
+                    <h3 class="text-amber-600 dark:text-amber-400 font-bold mb-4 flex items-center gap-2"><i
+                            data-lucide="alert-circle" class="w-5 h-5"></i> Select files to delete</h3>
                     <div id="dupeGroupsList" class="space-y-4 max-h-96 overflow-y-auto pr-2"></div>
                     <button onclick="deleteSelectedDupes()"
-                        class="w-full mt-6 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold shadow-lg shadow-red-900/50">
-                        УДАЛИТЬ ВЫБРАННЫЕ НАВСЕГДА
+                        class="w-full mt-6 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold shadow-lg shadow-red-900/50 transition transform active:scale-95">
+                        DELETE SELECTED PERMANENTLY
                     </button>
                 </div>
             </section>
@@ -285,20 +287,23 @@
             <!-- Tab: Settings -->
             <section id="tab-settings" class="tab-content max-w-4xl mx-auto mt-4">
                 <header class="mb-8">
-                    <h1 class="text-3xl font-black dark:text-white">Конфигурация</h1>
+                    <h1 class="text-3xl font-black dark:text-white">Configuration</h1>
                 </header>
                 <div class="space-y-6">
                     <div
-                        class="bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
-                        <h2 class="text-lg font-bold mb-4 text-blue-500">Системные переключатели</h2>
+                        class="bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder shadow-sm">
+                        <h2 class="text-lg font-bold mb-4 text-blue-600 dark:text-blue-500 flex items-center gap-2"><i
+                                data-lucide="toggle-right" class="w-5 h-5"></i> System Toggles</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="generalSettings"></div>
                     </div>
                     <div
-                        class="bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
-                        <h2 class="text-lg font-bold mb-4 text-indigo-500">Расширения категорий</h2>
+                        class="bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder shadow-sm">
+                        <h2 class="text-lg font-bold mb-4 text-indigo-600 dark:text-indigo-500 flex items-center gap-2">
+                            <i data-lucide="folder-cog" class="w-5 h-5"></i> Category Extensions</h2>
                         <div id="configArea" class="space-y-3"></div>
                         <button onclick="saveSettings()"
-                            class="mt-6 w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Сохранить</button>
+                            class="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition transform active:scale-95 shadow-lg shadow-blue-500/30">Save
+                            Configuration</button>
                     </div>
                 </div>
             </section>
@@ -306,14 +311,19 @@
             <!-- Tab: Logs -->
             <section id="tab-logs" class="tab-content max-w-4xl mx-auto mt-4">
                 <header class="mb-8 flex justify-between items-end">
-                    <h1 class="text-3xl font-black dark:text-white">Терминал системы</h1>
+                    <div>
+                        <h1 class="text-3xl font-black dark:text-white">System Terminal</h1>
+                        <p class="text-slate-500 mt-1">Real-time detailed log of backend operations.</p>
+                    </div>
                     <button onclick="document.getElementById('logTerminal').innerHTML=''"
-                        class="text-xs text-slate-500">Очистить лог</button>
+                        class="text-xs font-medium text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center gap-1 transition">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i> Clear log
+                    </button>
                 </header>
                 <div id="terminalCard"
-                    class="glow-transition glow-idle bg-slate-950 rounded-2xl p-6 border border-slate-800 h-[600px] flex flex-col font-mono text-sm">
+                    class="glow-transition glow-idle bg-slate-900 dark:bg-slate-950 rounded-2xl p-6 border border-slate-800 h-[600px] flex flex-col font-mono text-sm shadow-2xl">
                     <div id="logTerminal" class="flex-1 overflow-y-auto space-y-2 pr-2 text-slate-300">
-                        <p class="text-slate-500">> Терминал инициализирован...</p>
+                        <p class="text-slate-500">> Terminal initialized...</p>
                     </div>
                 </div>
             </section>
@@ -349,14 +359,14 @@
             const time = new Date().toLocaleTimeString();
             let color = "text-slate-300", icon = "info", iconColor = "text-sky-400";
 
-            if (type === "move") { color = "text-emerald-300"; icon = "check"; iconColor = "text-emerald-500"; }
-            else if (type === "skip") { color = "text-slate-500"; icon = "slash"; iconColor = "text-slate-600"; }
+            if (type === "move") { color = "text-emerald-400"; icon = "check"; iconColor = "text-emerald-500"; }
+            else if (type === "skip") { color = "text-slate-500 italic"; icon = "slash"; iconColor = "text-slate-600"; }
             else if (type === "error") { color = "text-rose-400 font-bold"; icon = "x"; iconColor = "text-rose-500"; }
             else if (type === "conflict") { color = "text-amber-300"; icon = "alert-triangle"; iconColor = "text-amber-500"; }
             else if (type === "success") { color = "text-emerald-400 font-bold"; icon = "zap"; iconColor = "text-emerald-400"; }
 
             const el = document.createElement("div");
-            el.className = "flex items-start gap-2 animate__animated animate__fadeInLeft";
+            el.className = "flex items-start gap-2 animate__animated animate__fadeInLeft hover:bg-slate-800 p-1 rounded transition-colors";
             el.innerHTML = `<span class="text-slate-600 text-xs mt-0.5">[${time}]</span><span class="${iconColor} mt-0.5"><i data-lucide="${icon}" class="w-4 h-4"></i></span><span class="${color}">${msg}</span>`;
             term.appendChild(el);
             lucide.createIcons();
@@ -368,10 +378,9 @@
                 const res = await fetch('/api/browse');
                 const data = await res.json();
                 if (data.path) document.getElementById(inputId).value = data.path;
-            } catch (e) { addLog("Ошибка окна обзора", "error"); }
+            } catch (e) { addLog("Folder browse error", "error"); }
         }
 
-        // Multi Source Logic
         async function addSourceUI() {
             try {
                 const res = await fetch('/api/browse');
@@ -389,25 +398,23 @@
         function renderSources() {
             const list = document.getElementById('sourcesListUI');
             list.innerHTML = multiSourcesArray.map((s, i) => `
-                <div class="flex justify-between items-center bg-slate-800 p-2 rounded-lg">
-                    <span class="text-xs font-mono text-slate-300 break-all">${s}</span>
-                    <button onclick="remSourceUI(${i})" class="text-red-400 hover:text-red-300 p-1"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                <div class="flex justify-between items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-lg shadow-sm">
+                    <span class="text-xs font-mono text-slate-600 dark:text-slate-300 break-all">${s}</span>
+                    <button onclick="remSourceUI(${i})" class="text-red-500 hover:text-red-600 p-1 transition"><i data-lucide="trash" class="w-4 h-4"></i></button>
                 </div>
             `).join('');
             lucide.createIcons();
         }
 
-        // Generic Engine Runner (Single, Unsort, Dupes Scan)
         function runEngine(action, inputId) {
             const path = document.getElementById(inputId).value;
-            if (!path) return alert("Укажите путь!");
+            if (!path) return alert("Please specify a path!");
             startStream(`/api/stream?action=${action}&path=${encodeURIComponent(path)}`);
         }
 
-        // Multi Engine Runner
         function runEngineMulti() {
             const target = document.getElementById('multiTarget').value;
-            if (!target || multiSourcesArray.length === 0) return alert("Укажите цель и минимум 1 источник!");
+            if (!target || multiSourcesArray.length === 0) return alert("Specify target and at least 1 source!");
             const incl = document.getElementById('include_target_root')?.checked || false;
             const url = `/api/stream?action=multi&target=${encodeURIComponent(target)}&sources=${encodeURIComponent(JSON.stringify(multiSourcesArray))}&include_target=${incl}`;
             startStream(url);
@@ -432,7 +439,7 @@
                     const p = Math.round((data.message.current / data.message.total) * 100);
                     document.getElementById('progressBar').style.width = p + '%';
                     document.getElementById('percentLabel').innerText = p + '%';
-                    document.getElementById('statusLabel').innerText = `Система работает...`;
+                    document.getElementById('statusLabel').innerText = `System is active...`;
                 } else if (data.type === 'dupe_groups') {
                     renderDupeGroups(data.message);
                 } else if (data.type === 'success' || data.type === 'error') {
@@ -446,32 +453,31 @@
             };
         }
 
-        // Dupes UI Builder
         function renderDupeGroups(groups) {
             const area = document.getElementById('dupeResultsArea');
             const list = document.getElementById('dupeGroupsList');
             area.classList.remove('hidden');
 
             list.innerHTML = groups.map((g, idx) => `
-                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                    <div class="text-xs text-amber-500 font-bold mb-2">Группа ${idx + 1} (${g.length} файлов)</div>
+                <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div class="text-xs text-amber-600 dark:text-amber-500 font-bold mb-2">Group ${idx + 1} (${g.length} files)</div>
                     ${g.map((f, i) => `
-                        <label class="flex items-center gap-2 mb-1 cursor-pointer hover:bg-slate-700 p-1 rounded">
-                            <input type="checkbox" value="${f}" class="dupe-cb w-4 h-4" ${i > 0 ? 'checked' : ''}>
-                            <span class="text-xs font-mono text-slate-300 break-all">${f}</span>
+                        <label class="flex items-center gap-2 mb-1 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 p-1.5 rounded transition">
+                            <input type="checkbox" value="${f}" class="dupe-cb w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-500" ${i > 0 ? 'checked' : ''}>
+                            <span class="text-xs font-mono text-slate-700 dark:text-slate-300 break-all">${f}</span>
                         </label>
                     `).join('')}
                 </div>
             `).join('');
 
             showTab('dupes');
-            addLog("Вывод окна ручного выбора дубликатов...", "info");
+            addLog("Displaying manual duplicate selection window...", "info");
         }
 
         async function deleteSelectedDupes() {
             const cbs = document.querySelectorAll('.dupe-cb:checked');
             const files = Array.from(cbs).map(cb => cb.value);
-            if (files.length === 0) return alert("Файлы не выбраны");
+            if (files.length === 0) return alert("No files selected");
 
             const res = await fetch('/api/dupes/delete', {
                 method: 'POST',
@@ -481,11 +487,10 @@
             const data = await res.json();
             document.getElementById('dupeResultsArea').classList.add('hidden');
             showTab('logs');
-            addLog(`Удаление завершено. Уничтожено: ${data.count} файлов`, "success");
+            addLog(`Deletion complete. Destroyed: ${data.count} files`, "success");
             setGlowState('green');
         }
 
-        // Settings
         async function loadConfig() {
             const res = await fetch('/api/config');
             const config = await res.json();
@@ -500,24 +505,24 @@
             for (const [cat, exts] of Object.entries(config.extensions)) {
                 area.innerHTML += `
                     <div class="flex items-center gap-4">
-                        <span class="w-40 font-bold text-xs uppercase">${cat}</span>
-                        <input type="text" value="${exts}" data-cat="${cat}" class="cat-input flex-1 bg-slate-900 border border-slate-700 p-2 rounded text-sm">
+                        <span class="w-40 font-bold text-xs uppercase text-slate-600 dark:text-slate-400">${cat}</span>
+                        <input type="text" value="${exts}" data-cat="${cat}" class="cat-input flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
                     </div>`;
             }
 
             const general = document.getElementById('generalSettings');
             const bools = [
-                { id: 'date_sort', label: 'Подпапки по дате (Год/Месяц)' },
-                { id: 'clean_empty', label: 'Удалять пустые папки' },
-                { id: 'move_unknown', label: 'Неизвестные в "Другое"' },
-                { id: 'overwrite', label: 'Перезаписывать конфликты' },
-                { id: 'auto_dupes', label: 'Авто-удаление дубликатов' },
-                { id: 'include_target_root', label: 'Мульти: захватывать целевую' }
+                { id: 'date_sort', label: 'Subfolders by date (Year/Month)' },
+                { id: 'clean_empty', label: 'Delete empty folders' },
+                { id: 'move_unknown', label: 'Unknowns to "Other"' },
+                { id: 'overwrite', label: 'Overwrite conflicts' },
+                { id: 'auto_dupes', label: 'Auto-delete duplicates' },
+                { id: 'include_target_root', label: 'Multi: Include target folder' }
             ];
             general.innerHTML = bools.map(b => `
-                <label class="flex items-center gap-3 p-3 bg-slate-900 rounded-xl cursor-pointer">
-                    <input type="checkbox" id="${b.id}" ${config[b.id] ? 'checked' : ''} class="w-5 h-5 rounded border-slate-700 text-blue-500">
-                    <span class="text-xs font-semibold">${b.label}</span>
+                <label class="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl cursor-pointer border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                    <input type="checkbox" id="${b.id}" ${config[b.id] ? 'checked' : ''} class="w-5 h-5 rounded border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-blue-500 dark:bg-slate-800">
+                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">${b.label}</span>
                 </label>
             `).join('');
         }
@@ -538,7 +543,8 @@
                 last_path: document.getElementById('singlePath').value
             };
             await fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            alert("Настройки сохранены!");
+            alert("Settings saved!");
+            addLog("System configuration updated.", "info");
         }
 
         window.onload = () => { lucide.createIcons(); loadConfig(); };

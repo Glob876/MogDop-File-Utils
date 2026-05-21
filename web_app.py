@@ -19,7 +19,7 @@ def index():
 
 @app.route('/api/stream')
 def stream_action():
-    """Главный роут потоковой передачи (SSE) для всех функций"""
+    """Main SSE stream route for all functions"""
     action = request.args.get('action')
     path = request.args.get('path', '')
     
@@ -41,18 +41,17 @@ def stream_action():
                     sources.append(target)
                     
                 if not target:
-                    yield f"data: {json.dumps({'type': 'error', 'message': 'Целевая папка не указана!'})}\n\n"
+                    yield f"data: {json.dumps({'type': 'error', 'message': 'Target folder not specified!'})}\n\n"
                     return
                     
                 for src in sources:
                     yield from core.sort_directory_generator(src, target_dir=target)
                     
-                yield "success", "Мульти-сортировка полностью завершена!"
+                yield "success", "Multi-source sorting fully completed!"
                 
         except Exception as e:
-            yield "error", f"Критическая ошибка: {str(e)}"
+            yield "error", f"Critical error: {str(e)}"
 
-    # Вспомогательная обертка для JSON
     def format_sse(gen):
         for event_type, message in gen:
             yield f"data: {json.dumps({'type': event_type, 'message': message}, ensure_ascii=False)}\n\n"
@@ -61,7 +60,6 @@ def stream_action():
 
 @app.route('/api/dupes/delete', methods=['POST'])
 def delete_dupes():
-    """Обработка ручного выбора файлов на удаление"""
     files = request.json.get('files', [])
     count = 0
     for f in files:
@@ -84,7 +82,7 @@ def browse():
     selected_path = ""
     if sys.platform.startswith('linux'):
         try:
-            proc = subprocess.run(['zenity', '--file-selection', '--directory', '--title=Выберите папку'],
+            proc = subprocess.run(['zenity', '--file-selection', '--directory', '--title=Select Folder'],
                                  capture_output=True, text=True)
             if proc.returncode == 0:
                 selected_path = proc.stdout.strip()
@@ -95,7 +93,7 @@ def browse():
             root = tk.Tk()
             root.withdraw()
             root.attributes('-topmost', True)
-            selected_path = filedialog.askdirectory()
+            selected_path = filedialog.askdirectory(title="Select Folder")
             root.destroy()
         except Exception as e:
             return jsonify({"error": str(e), "path": ""})
