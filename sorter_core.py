@@ -4,9 +4,9 @@ import json
 import hashlib
 from datetime import datetime
 
-MONTHS_RU = {
-    1: "Январь", 2: "Февраль", 3: "Март", 4: "Апрель", 5: "Май", 6: "Июнь", 
-    7: "Июль", 8: "Август", 9: "Сентябрь", 10: "Октябрь", 11: "Ноябрь", 12: "Декабрь"
+MONTHS_EN = {
+    1: "January", 2: "February", 3: "March", 4: "April", 5: "May", 6: "June", 
+    7: "July", 8: "August", 9: "September", 10: "October", 11: "November", 12: "December"
 }
 
 class FileSorterCore:
@@ -14,15 +14,14 @@ class FileSorterCore:
         self.config_path = config_path
         self.defaults = {
             "extensions": {
-                'Изображения': '.jpg,.jpeg,.png,.gif,.bmp,.svg,.webp,.tiff,.ico',
-                'Документы': '.pdf,.doc,.docx,.txt,.xlsx,.pptx,.csv,.odt,.rtf',
-                'Видео': '.mp4,.mkv,.avi,.mov,.webm,.flv,.wmv',
-                'Музыка': '.mp3,.wav,.flac,.aac,.ogg,.m4a',
-                'Архивы': '.zip,.rar,.7z,.tar,.tar.xz,.gz,.bz2,.xz',
-                'Программирование': '.py,.html,.css,.js,.cpp,.c,.h,.java,.php,.json,.xml,.sb3,.rb,.go,.rs,.swift',
-                'Системные и пакеты': '.exe,.msi,.deb,.run,.appimage,.sh,.bat,.com'
+                'Images': '.jpg,.jpeg,.png,.gif,.bmp,.svg,.webp,.tiff,.ico',
+                'Documents': '.pdf,.doc,.docx,.txt,.xlsx,.pptx,.csv,.odt,.rtf',
+                'Video': '.mp4,.mkv,.avi,.mov,.webm,.flv,.wmv',
+                'Music': '.mp3,.wav,.flac,.aac,.ogg,.m4a',
+                'Archives': '.zip,.rar,.7z,.tar,.tar.xz,.gz,.bz2,.xz',
+                'Programming': '.py,.html,.css,.js,.cpp,.c,.h,.java,.php,.json,.xml,.sb3,.rb,.go,.rs,.swift',
+                'System': '.exe,.msi,.deb,.run,.appimage,.sh,.bat,.com'
             },
-            "language": "RU",
             "move_unknown": True,
             "date_sort": False,
             "clean_empty": True,
@@ -74,24 +73,24 @@ class FileSorterCore:
                     if not os.listdir(dp): os.rmdir(dp)
                 except: pass
 
-    # --- 1. ПРЯМАЯ СОРТИРОВКА (Single & Multi) ---
+    # --- 1. SORTING (Single & Multi) ---
     def sort_directory_generator(self, src_dir, target_dir=None):
         if not target_dir: target_dir = src_dir
         if not os.path.exists(src_dir):
-            yield "error", f"Указанный путь не существует: {src_dir}"
+            yield "error", f"Specified path does not exist: {src_dir}"
             return
             
-        yield "info", f"Анализ папки: {src_dir}"
+        yield "info", f"Analyzing directory: {src_dir}"
         
         try:
             files = [f for f in os.listdir(src_dir) if os.path.isfile(os.path.join(src_dir, f))]
         except Exception as e:
-            yield "error", f"Не удалось прочитать директорию: {str(e)}"
+            yield "error", f"Failed to read directory: {str(e)}"
             return
 
         total = len(files)
         if total == 0:
-            yield "skip", f"Нет файлов для сортировки в: {src_dir}"
+            yield "skip", f"No files to sort in: {src_dir}"
             return
 
         count = 0
@@ -101,7 +100,7 @@ class FileSorterCore:
             yield "progress", {"current": index + 1, "total": total}
             
             if f.lower() in excl or f in ["sorter_config.json", "sorter_log.txt"]:
-                yield "skip", f"Пропущен (в исключениях): {f}"
+                yield "skip", f"Skipped (in exceptions): {f}"
                 continue
                 
             src_path = os.path.join(src_dir, f)
@@ -113,16 +112,16 @@ class FileSorterCore:
                     category = cat; break
             
             if not category and self.config["move_unknown"]:
-                category = "Other" if self.config["language"] == "EN" else "Другое"
+                category = "Other"
             
             if not category:
-                yield "skip", f"Категория не найдена, файл оставлен: {f}"
+                yield "skip", f"Category not found, file left intact: {f}"
                 continue
 
             dest_dir = os.path.join(target_dir, category)
             if self.config["date_sort"]:
                 dt = datetime.fromtimestamp(os.path.getmtime(src_path))
-                m_name = MONTHS_RU.get(dt.month, dt.strftime('%B')) if self.config["language"] == "RU" else dt.strftime('%B')
+                m_name = MONTHS_EN.get(dt.month, "Unknown")
                 dest_dir = os.path.join(dest_dir, str(dt.year), m_name)
             
             os.makedirs(dest_dir, exist_ok=True)
@@ -135,29 +134,29 @@ class FileSorterCore:
                 else:
                     n, e = os.path.splitext(f)
                     dest_path = os.path.join(dest_dir, f"{n}_{datetime.now().strftime('%H%M%S')}{e}")
-                    yield "conflict", f"Конфликт имен. Переименован в {os.path.basename(dest_path)}"
+                    yield "conflict", f"Name conflict. Renamed to {os.path.basename(dest_path)}"
 
             try:
                 shutil.move(src_path, dest_path)
                 count += 1
-                yield "move", f"Перемещен: {f} -> {category}"
+                yield "move", f"Moved: {f} -> {category}"
             except Exception as e:
-                yield "error", f"Ошибка перемещения {f}: {str(e)}"
+                yield "error", f"Move error for {f}: {str(e)}"
         
         if self.config["clean_empty"]:
             self._clean_empty_folders(src_dir)
             
-        yield "success", f"Обработка завершена для {src_dir}! Перемещено: {count}"
+        yield "success", f"Processing completed for {src_dir}! Moved: {count} files"
 
-    # --- 2. ОБРАТНАЯ СОРТИРОВКА (Unsort) ---
+    # --- 2. REVERSE SORTING (Unsort) ---
     def unsort_directory_generator(self, target_dir):
         if not target_dir or not os.path.exists(target_dir):
-            yield "error", "Указанный путь не найден!"
+            yield "error", "Specified path not found!"
             return
 
-        yield "info", f"Запуск обратной сортировки (извлечение) для: {target_dir}"
+        yield "info", f"Starting reverse sorting (extraction) for: {target_dir}"
         all_files = []
-        cats = list(self.config["extensions"].keys()) + ["Other", "Другое"]
+        cats = list(self.config["extensions"].keys()) + ["Other"]
         
         for c in cats:
             cp = os.path.join(target_dir, c)
@@ -167,9 +166,9 @@ class FileSorterCore:
                         all_files.append(os.path.join(r, f))
                         
         total = len(all_files)
-        yield "info", f"Найдено файлов в категориях: {total}"
+        yield "info", f"Found files in categories: {total}"
         if total == 0:
-            yield "success", "Нет файлов для возврата."
+            yield "success", "No files to extract."
             return
 
         count = 0
@@ -181,37 +180,37 @@ class FileSorterCore:
             if os.path.exists(dst):
                 n, e = os.path.splitext(fname)
                 dst = os.path.join(target_dir, f"{n}_old_{datetime.now().strftime('%H%M%S')}{e}")
-                yield "conflict", f"Конфликт. Изменен на: {os.path.basename(dst)}"
+                yield "conflict", f"Conflict. Renamed to: {os.path.basename(dst)}"
                 
             try:
                 shutil.move(fp, dst)
                 count += 1
-                yield "move", f"Возвращен: {fname}"
+                yield "move", f"Extracted: {fname}"
             except Exception as e:
-                yield "error", f"Ошибка возврата {fname}: {str(e)}"
+                yield "error", f"Extraction error for {fname}: {str(e)}"
 
         if self.config["clean_empty"]:
-            yield "info", "Очистка пустых папок категорий..."
+            yield "info", "Cleaning up empty category folders..."
             self._clean_empty_folders(target_dir)
 
-        yield "success", f"Обратная сортировка завершена! Извлечено файлов: {count}"
+        yield "success", f"Reverse sorting completed! Extracted files: {count}"
 
-    # --- 3. ПОИСК ДУБЛИКАТОВ ---
+    # --- 3. DUPLICATE FINDER ---
     def scan_duplicates_generator(self, path):
         if not path or not os.path.exists(path):
-            yield "error", "Указанный путь не найден!"
+            yield "error", "Specified path not found!"
             return
             
-        yield "info", f"Сканирование дубликатов в: {path}"
+        yield "info", f"Scanning for duplicates in: {path}"
         all_files = []
         for root_dir, _, files in os.walk(path):
             for f in files: 
                 all_files.append(os.path.join(root_dir, f))
                 
         total = len(all_files)
-        yield "info", f"Файлов для анализа: {total}"
+        yield "info", f"Files to analyze: {total}"
         if total == 0:
-            yield "success", "Папка пуста."
+            yield "success", "Directory is empty."
             return
 
         hashes = {}
@@ -224,25 +223,25 @@ class FileSorterCore:
         groups = [ps for ps in hashes.values() if len(ps) > 1]
         
         if not groups:
-            yield "success", "Дубликаты не найдены."
+            yield "success", "No duplicates found."
             return
 
         if self.config.get("auto_dupes", False):
             to_del = []
             for g in groups: to_del.extend(g[1:])
-            yield "info", f"Найдено дубликатов: {len(to_del)}. Запуск авто-удаления..."
+            yield "info", f"Found {len(to_del)} duplicates. Starting auto-deletion..."
             count = 0
             for i, p in enumerate(to_del):
                 try:
                     os.remove(p)
                     count += 1
-                    yield "move", f"Удален дубликат: {p}"
+                    yield "move", f"Deleted duplicate: {p}"
                 except Exception as e:
-                    yield "error", f"Ошибка удаления: {str(e)}"
+                    yield "error", f"Deletion error: {str(e)}"
                 if i % 5 == 0:
                     yield "progress", {"current": i + 1, "total": len(to_del)}
-            yield "success", f"Авто-удаление завершено. Удалено: {count}"
+            yield "success", f"Auto-deletion completed. Destroyed: {count}"
         else:
             yield "progress", {"current": total, "total": total}
             yield "dupe_groups", groups
-            yield "info", "Ожидание выбора пользователя для удаления..."
+            yield "info", "Waiting for user selection to delete..."
