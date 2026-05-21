@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MogDop File Utils | Premium Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { darkBg: '#090d16', darkCard: '#131a2a', darkBorder: '#1e293b' } } }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .sidebar-item.active {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: #3b82f6;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .glow-transition {
+            transition: box-shadow 0.6s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.6s;
+        }
+
+        @keyframes pulseGlowBlue {
+
+            0%,
+            100% {
+                box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+                border-color: rgba(59, 130, 246, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 35px rgba(59, 130, 246, 0.55);
+                border-color: rgba(59, 130, 246, 0.6);
+            }
+        }
+
+        @keyframes pulseGlowGreen {
+
+            0%,
+            100% {
+                box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+                border-color: rgba(16, 185, 129, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 35px rgba(16, 185, 129, 0.55);
+                border-color: rgba(16, 185, 129, 0.6);
+            }
+        }
+
+        @keyframes pulseGlowRed {
+
+            0%,
+            100% {
+                box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+                border-color: rgba(239, 68, 68, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 35px rgba(239, 68, 68, 0.55);
+                border-color: rgba(239, 68, 68, 0.6);
+            }
+        }
+
+        .glow-idle {
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+        }
+
+        .glow-blue {
+            animation: pulseGlowBlue 2.5s infinite ease-in-out;
+        }
+
+        .glow-green {
+            animation: pulseGlowGreen 2.5s infinite ease-in-out;
+        }
+
+        .glow-red {
+            animation: pulseGlowRed 2.5s infinite ease-in-out;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 dark:bg-darkBg dark:text-slate-100 min-h-screen">
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside
+            class="w-68 bg-white dark:bg-darkCard border-r border-slate-200 dark:border-darkBorder flex flex-col justify-between">
+            <div>
+                <div class="p-6 flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                        <i data-lucide="layers" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-lg tracking-tight">MogDop Utils</span>
+                        <p class="text-[10px] font-semibold uppercase text-blue-500">Core Engine</p>
+                    </div>
+                </div>
+
+                <nav class="px-4 space-y-1.5 mt-2">
+                    <button onclick="showTab('single')" id="nav-single"
+                        class="sidebar-item active w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
+                        <i data-lucide="layout-grid" class="w-4 h-4"></i> Одиночный режим
+                    </button>
+                    <button onclick="showTab('multi')" id="nav-multi"
+                        class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
+                        <i data-lucide="git-merge" class="w-4 h-4"></i> Мульти-источники
+                    </button>
+                    <button onclick="showTab('dupes')" id="nav-dupes"
+                        class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
+                        <i data-lucide="copy-x" class="w-4 h-4"></i> Поиск дубликатов
+                    </button>
+                    <button onclick="showTab('settings')" id="nav-settings"
+                        class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
+                        <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Настройки
+                    </button>
+                    <button onclick="showTab('logs')" id="nav-logs"
+                        class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
+                        <i data-lucide="terminal" class="w-4 h-4"></i> Логи системы
+                    </button>
+                </nav>
+            </div>
+            <div class="p-4 border-t border-slate-100 dark:border-darkBorder">
+                <button onclick="toggleTheme()"
+                    class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-yellow-400 w-full justify-center">
+                    <i data-lucide="moon" id="theme-icon-moon" class="w-4 h-4 hidden dark:block"></i>
+                    <i data-lucide="sun" id="theme-icon-sun" class="w-4 h-4 block dark:hidden"></i>
+                    <span class="text-xs font-semibold">Сменить тему</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-8 lg:p-12 relative" id="mainArea">
+
+            <!-- Global Progress Bar (Top) -->
+            <div id="progressBox"
+                class="hidden absolute top-0 left-0 w-full bg-slate-900 shadow-xl z-50 p-4 border-b border-blue-500">
+                <div class="max-w-4xl mx-auto flex flex-col gap-2">
+                    <div class="flex justify-between items-center text-xs font-bold text-white">
+                        <span id="statusLabel" class="text-blue-400">Система активна...</span>
+                        <span id="percentLabel" class="font-mono">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2">
+                        <div id="progressBar"
+                            class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all"
+                            style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 1: Single Mode -->
+            <section id="tab-single" class="tab-content active max-w-4xl mx-auto mt-4">
+                <header class="mb-8">
+                    <h1 class="text-3xl font-black dark:text-white">Одиночный режим</h1>
+                    <p class="text-slate-500 mt-1">Сортировка файлов внутри одной директории по категориям.</p>
+                </header>
+                <div
+                    class="glow-transition glow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Рабочая папка</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="singlePath"
+                            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                        <button onclick="browseFolder('singlePath')"
+                            class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl"><i data-lucide="folder-search"
+                                class="w-5 h-5"></i></button>
+                    </div>
+                    <div class="flex gap-4 mt-6">
+                        <button onclick="runEngine('single', 'singlePath')"
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2">
+                            <i data-lucide="play" class="w-5 h-5"></i> Начать сортировку
+                        </button>
+                        <button onclick="runEngine('unsort', 'singlePath')"
+                            class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2">
+                            <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Обратная (Распаковать)
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 2: Multi Mode -->
+            <section id="tab-multi" class="tab-content max-w-4xl mx-auto mt-4">
+                <header class="mb-8">
+                    <h1 class="text-3xl font-black dark:text-white">Мульти-источники</h1>
+                    <p class="text-slate-500 mt-1">Сбор и сортировка файлов из разных папок в одну целевую.</p>
+                </header>
+                <div
+                    class="glow-transition glow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Целевая папка (Куда)</label>
+                    <div class="flex gap-2 mb-6">
+                        <input type="text" id="multiTarget"
+                            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none text-blue-400 font-bold">
+                        <button onclick="browseFolder('multiTarget')"
+                            class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl"><i data-lucide="folder-down"
+                                class="w-5 h-5"></i></button>
+                    </div>
+
+                    <div class="flex justify-between items-end mb-2">
+                        <label class="block text-sm font-bold text-slate-400">Источники (Откуда)</label>
+                        <button onclick="addSourceUI()"
+                            class="text-xs bg-indigo-500/20 text-indigo-400 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-indigo-500/40">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Добавить
+                        </button>
+                    </div>
+                    <div id="sourcesListUI"
+                        class="space-y-2 max-h-48 overflow-y-auto pr-2 mb-6 border border-slate-800 p-2 rounded-xl bg-slate-900/50">
+                        <!-- JS renders here -->
+                    </div>
+
+                    <button onclick="runEngineMulti()"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2">
+                        <i data-lucide="combine" class="w-5 h-5"></i> Запустить сборку
+                    </button>
+                </div>
+            </section>
+
+            <!-- Tab 3: Duplicates -->
+            <section id="tab-dupes" class="tab-content max-w-4xl mx-auto mt-4">
+                <header class="mb-8">
+                    <h1 class="text-3xl font-black dark:text-white">Поиск дубликатов</h1>
+                    <p class="text-slate-500 mt-1">Глубокое MD5-хеширование для поиска точных копий файлов.</p>
+                </header>
+                <div
+                    class="glow-transition glow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Папка для сканирования</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="dupePath"
+                            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none focus:ring-2 focus:ring-amber-500">
+                        <button onclick="browseFolder('dupePath')"
+                            class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl"><i data-lucide="search"
+                                class="w-5 h-5"></i></button>
+                    </div>
+                    <button onclick="runEngine('scan_dupes', 'dupePath')"
+                        class="w-full mt-6 bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2">
+                        <i data-lucide="scan-line" class="w-5 h-5"></i> Начать сканирование
+                    </button>
+                </div>
+
+                <!-- Duplicates Result Area -->
+                <div id="dupeResultsArea" class="hidden mt-6 bg-slate-900 rounded-2xl p-6 border border-amber-500/50">
+                    <h3 class="text-amber-400 font-bold mb-4 flex items-center gap-2"><i data-lucide="alert-circle"
+                            class="w-5 h-5"></i> Выберите файлы для удаления</h3>
+                    <div id="dupeGroupsList" class="space-y-4 max-h-96 overflow-y-auto pr-2"></div>
+                    <button onclick="deleteSelectedDupes()"
+                        class="w-full mt-6 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold shadow-lg shadow-red-900/50">
+                        УДАЛИТЬ ВЫБРАННЫЕ НАВСЕГДА
+                    </button>
+                </div>
+            </section>
+
+            <!-- Tab: Settings -->
+            <section id="tab-settings" class="tab-content max-w-4xl mx-auto mt-4">
+                <header class="mb-8">
+                    <h1 class="text-3xl font-black dark:text-white">Конфигурация</h1>
+                </header>
+                <div class="space-y-6">
+                    <div
+                        class="bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
+                        <h2 class="text-lg font-bold mb-4 text-blue-500">Системные переключатели</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="generalSettings"></div>
+                    </div>
+                    <div
+                        class="bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
+                        <h2 class="text-lg font-bold mb-4 text-indigo-500">Расширения категорий</h2>
+                        <div id="configArea" class="space-y-3"></div>
+                        <button onclick="saveSettings()"
+                            class="mt-6 w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Сохранить</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Logs -->
+            <section id="tab-logs" class="tab-content max-w-4xl mx-auto mt-4">
+                <header class="mb-8 flex justify-between items-end">
+                    <h1 class="text-3xl font-black dark:text-white">Терминал системы</h1>
+                    <button onclick="document.getElementById('logTerminal').innerHTML=''"
+                        class="text-xs text-slate-500">Очистить лог</button>
+                </header>
+                <div id="terminalCard"
+                    class="glow-transition glow-idle bg-slate-950 rounded-2xl p-6 border border-slate-800 h-[600px] flex flex-col font-mono text-sm">
+                    <div id="logTerminal" class="flex-1 overflow-y-auto space-y-2 pr-2 text-slate-300">
+                        <p class="text-slate-500">> Терминал инициализирован...</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        let eventSource = null;
+        let multiSourcesArray = [];
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content, .sidebar-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            document.getElementById('nav-' + tabId).classList.add('active');
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
+        if (localStorage.getItem('theme') !== 'light') document.documentElement.classList.add('dark');
+
+        function setGlowState(state) {
+            document.querySelectorAll('.glow-transition').forEach(card => {
+                card.classList.remove('glow-idle', 'glow-blue', 'glow-green', 'glow-red');
+                card.classList.add(state === 'idle' ? 'glow-idle' : `glow-${state}`);
+            });
+        }
+
+        function addLog(msg, type = "info") {
+            const term = document.getElementById('logTerminal');
+            const time = new Date().toLocaleTimeString();
+            let color = "text-slate-300", icon = "info", iconColor = "text-sky-400";
+
+            if (type === "move") { color = "text-emerald-300"; icon = "check"; iconColor = "text-emerald-500"; }
+            else if (type === "skip") { color = "text-slate-500"; icon = "slash"; iconColor = "text-slate-600"; }
+            else if (type === "error") { color = "text-rose-400 font-bold"; icon = "x"; iconColor = "text-rose-500"; }
+            else if (type === "conflict") { color = "text-amber-300"; icon = "alert-triangle"; iconColor = "text-amber-500"; }
+            else if (type === "success") { color = "text-emerald-400 font-bold"; icon = "zap"; iconColor = "text-emerald-400"; }
+
+            const el = document.createElement("div");
+            el.className = "flex items-start gap-2 animate__animated animate__fadeInLeft";
+            el.innerHTML = `<span class="text-slate-600 text-xs mt-0.5">[${time}]</span><span class="${iconColor} mt-0.5"><i data-lucide="${icon}" class="w-4 h-4"></i></span><span class="${color}">${msg}</span>`;
+            term.appendChild(el);
+            lucide.createIcons();
+            term.scrollTop = term.scrollHeight;
+        }
+
+        async function browseFolder(inputId) {
+            try {
+                const res = await fetch('/api/browse');
+                const data = await res.json();
+                if (data.path) document.getElementById(inputId).value = data.path;
+            } catch (e) { addLog("Ошибка окна обзора", "error"); }
+        }
+
+        // Multi Source Logic
+        async function addSourceUI() {
+            try {
+                const res = await fetch('/api/browse');
+                const data = await res.json();
+                if (data.path && !multiSourcesArray.includes(data.path)) {
+                    multiSourcesArray.push(data.path);
+                    renderSources();
+                }
+            } catch (e) { }
+        }
+        function remSourceUI(idx) {
+            multiSourcesArray.splice(idx, 1);
+            renderSources();
+        }
+        function renderSources() {
+            const list = document.getElementById('sourcesListUI');
+            list.innerHTML = multiSourcesArray.map((s, i) => `
+                <div class="flex justify-between items-center bg-slate-800 p-2 rounded-lg">
+                    <span class="text-xs font-mono text-slate-300 break-all">${s}</span>
+                    <button onclick="remSourceUI(${i})" class="text-red-400 hover:text-red-300 p-1"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // Generic Engine Runner (Single, Unsort, Dupes Scan)
+        function runEngine(action, inputId) {
+            const path = document.getElementById(inputId).value;
+            if (!path) return alert("Укажите путь!");
+            startStream(`/api/stream?action=${action}&path=${encodeURIComponent(path)}`);
+        }
+
+        // Multi Engine Runner
+        function runEngineMulti() {
+            const target = document.getElementById('multiTarget').value;
+            if (!target || multiSourcesArray.length === 0) return alert("Укажите цель и минимум 1 источник!");
+            const incl = document.getElementById('include_target_root')?.checked || false;
+            const url = `/api/stream?action=multi&target=${encodeURIComponent(target)}&sources=${encodeURIComponent(JSON.stringify(multiSourcesArray))}&include_target=${incl}`;
+            startStream(url);
+        }
+
+        function startStream(url) {
+            document.getElementById('dupeResultsArea').classList.add('hidden');
+            setTimeout(() => showTab('logs'), 300);
+            document.getElementById('logTerminal').innerHTML = '';
+
+            const pb = document.getElementById('progressBox');
+            pb.classList.remove('hidden');
+            document.getElementById('progressBar').style.width = '0%';
+
+            setGlowState('blue');
+            if (eventSource) eventSource.close();
+
+            eventSource = new EventSource(url);
+            eventSource.onmessage = function (e) {
+                const data = JSON.parse(e.data);
+                if (data.type === 'progress') {
+                    const p = Math.round((data.message.current / data.message.total) * 100);
+                    document.getElementById('progressBar').style.width = p + '%';
+                    document.getElementById('percentLabel').innerText = p + '%';
+                    document.getElementById('statusLabel').innerText = `Система работает...`;
+                } else if (data.type === 'dupe_groups') {
+                    renderDupeGroups(data.message);
+                } else if (data.type === 'success' || data.type === 'error') {
+                    addLog(data.message, data.type);
+                    setGlowState(data.type === 'success' ? 'green' : 'red');
+                    setTimeout(() => pb.classList.add('hidden'), 2000);
+                    eventSource.close();
+                } else {
+                    addLog(data.message, data.type);
+                }
+            };
+        }
+
+        // Dupes UI Builder
+        function renderDupeGroups(groups) {
+            const area = document.getElementById('dupeResultsArea');
+            const list = document.getElementById('dupeGroupsList');
+            area.classList.remove('hidden');
+
+            list.innerHTML = groups.map((g, idx) => `
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                    <div class="text-xs text-amber-500 font-bold mb-2">Группа ${idx + 1} (${g.length} файлов)</div>
+                    ${g.map((f, i) => `
+                        <label class="flex items-center gap-2 mb-1 cursor-pointer hover:bg-slate-700 p-1 rounded">
+                            <input type="checkbox" value="${f}" class="dupe-cb w-4 h-4" ${i > 0 ? 'checked' : ''}>
+                            <span class="text-xs font-mono text-slate-300 break-all">${f}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            `).join('');
+
+            showTab('dupes');
+            addLog("Вывод окна ручного выбора дубликатов...", "info");
+        }
+
+        async function deleteSelectedDupes() {
+            const cbs = document.querySelectorAll('.dupe-cb:checked');
+            const files = Array.from(cbs).map(cb => cb.value);
+            if (files.length === 0) return alert("Файлы не выбраны");
+
+            const res = await fetch('/api/dupes/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ files })
+            });
+            const data = await res.json();
+            document.getElementById('dupeResultsArea').classList.add('hidden');
+            showTab('logs');
+            addLog(`Удаление завершено. Уничтожено: ${data.count} файлов`, "success");
+            setGlowState('green');
+        }
+
+        // Settings
+        async function loadConfig() {
+            const res = await fetch('/api/config');
+            const config = await res.json();
+
+            multiSourcesArray = config.multi_sources || [];
+            document.getElementById('singlePath').value = config.last_path || "";
+            document.getElementById('multiTarget').value = config.multi_target || "";
+            renderSources();
+
+            const area = document.getElementById('configArea');
+            area.innerHTML = '';
+            for (const [cat, exts] of Object.entries(config.extensions)) {
+                area.innerHTML += `
+                    <div class="flex items-center gap-4">
+                        <span class="w-40 font-bold text-xs uppercase">${cat}</span>
+                        <input type="text" value="${exts}" data-cat="${cat}" class="cat-input flex-1 bg-slate-900 border border-slate-700 p-2 rounded text-sm">
+                    </div>`;
+            }
+
+            const general = document.getElementById('generalSettings');
+            const bools = [
+                { id: 'date_sort', label: 'Подпапки по дате (Год/Месяц)' },
+                { id: 'clean_empty', label: 'Удалять пустые папки' },
+                { id: 'move_unknown', label: 'Неизвестные в "Другое"' },
+                { id: 'overwrite', label: 'Перезаписывать конфликты' },
+                { id: 'auto_dupes', label: 'Авто-удаление дубликатов' },
+                { id: 'include_target_root', label: 'Мульти: захватывать целевую' }
+            ];
+            general.innerHTML = bools.map(b => `
+                <label class="flex items-center gap-3 p-3 bg-slate-900 rounded-xl cursor-pointer">
+                    <input type="checkbox" id="${b.id}" ${config[b.id] ? 'checked' : ''} class="w-5 h-5 rounded border-slate-700 text-blue-500">
+                    <span class="text-xs font-semibold">${b.label}</span>
+                </label>
+            `).join('');
+        }
+
+        async function saveSettings() {
+            const extensions = {};
+            document.querySelectorAll('.cat-input').forEach(i => extensions[i.dataset.cat] = i.value);
+            const payload = {
+                extensions,
+                date_sort: document.getElementById('date_sort').checked,
+                clean_empty: document.getElementById('clean_empty').checked,
+                move_unknown: document.getElementById('move_unknown').checked,
+                overwrite: document.getElementById('overwrite').checked,
+                auto_dupes: document.getElementById('auto_dupes').checked,
+                include_target_root: document.getElementById('include_target_root').checked,
+                multi_sources: multiSourcesArray,
+                multi_target: document.getElementById('multiTarget').value,
+                last_path: document.getElementById('singlePath').value
+            };
+            await fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            alert("Настройки сохранены!");
+        }
+
+        window.onload = () => { lucide.createIcons(); loadConfig(); };
+    </script>
+</body>
+
+</html>
