@@ -36,66 +36,148 @@
             border-left: 4px solid #3b82f6;
         }
 
+        /* ГЛОБАЛЬНЫЕ ТРАНЗИЦИИ (Плавное перетекание эффектов свечения) */
         .glow-transition {
-            transition: box-shadow 0.6s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.6s;
+            transition: box-shadow 2.5s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 2.5s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        @keyframes pulseGlowBlue {
+        /* 1. РАДУЖНОЕ ЗАТУХАНИЕ (Режим бездействия) */
+        @keyframes rainbowIdleBreath {
+            0% {
+                box-shadow: 0 0 5px rgba(239, 68, 68, 0.1);
+                border-color: rgba(239, 68, 68, 0.2);
+            }
 
-            0%,
-            100% {
-                box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
-                border-color: rgba(59, 130, 246, 0.3);
+            10% {
+                box-shadow: 0 0 45px rgba(245, 158, 11, 0.5);
+                border-color: rgba(245, 158, 11, 0.4);
+            }
+
+            20% {
+                box-shadow: 0 0 5px rgba(234, 179, 8, 0.1);
+                border-color: rgba(234, 179, 8, 0.2);
+            }
+
+            30% {
+                box-shadow: 0 0 45px rgba(16, 185, 129, 0.5);
+                border-color: rgba(16, 185, 129, 0.4);
+            }
+
+            40% {
+                box-shadow: 0 0 5px rgba(6, 182, 212, 0.1);
+                border-color: rgba(6, 182, 212, 0.2);
             }
 
             50% {
-                box-shadow: 0 0 35px rgba(59, 130, 246, 0.55);
-                border-color: rgba(59, 130, 246, 0.6);
+                box-shadow: 0 0 45px rgba(59, 130, 246, 0.5);
+                border-color: rgba(59, 130, 246, 0.4);
+            }
+
+            60% {
+                box-shadow: 0 0 5px rgba(139, 92, 246, 0.1);
+                border-color: rgba(139, 92, 246, 0.2);
+            }
+
+            70% {
+                box-shadow: 0 0 45px rgba(217, 70, 239, 0.5);
+                border-color: rgba(217, 70, 239, 0.4);
+            }
+
+            80% {
+                box-shadow: 0 0 5px rgba(244, 63, 94, 0.1);
+                border-color: rgba(244, 63, 94, 0.2);
+            }
+
+            90% {
+                box-shadow: 0 0 45px rgba(239, 68, 68, 0.5);
+                border-color: rgba(239, 68, 68, 0.4);
+            }
+
+            100% {
+                box-shadow: 0 0 5px rgba(239, 68, 68, 0.1);
+                border-color: rgba(239, 68, 68, 0.2);
             }
         }
 
-        @keyframes pulseGlowGreen {
+        .glow-rainbow-idle {
+            animation: rainbowIdleBreath 16s infinite ease-in-out;
+        }
 
-            0%,
-            100% {
-                box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+        /* 2. ЗЕЛЕНОЕ МЕРЦАНИЕ (При сортировке) */
+        @keyframes runningGreenShimmer {
+            0% {
+                box-shadow: 0 0 10px rgba(16, 185, 129, 0.2), inset 0 0 5px rgba(16, 185, 129, 0.1);
                 border-color: rgba(16, 185, 129, 0.3);
             }
 
-            50% {
-                box-shadow: 0 0 35px rgba(16, 185, 129, 0.55);
-                border-color: rgba(16, 185, 129, 0.6);
+            33% {
+                box-shadow: 0 0 50px rgba(52, 211, 153, 0.7), inset 0 0 20px rgba(52, 211, 153, 0.4);
+                border-color: rgba(52, 211, 153, 0.8);
             }
-        }
 
-        @keyframes pulseGlowRed {
+            66% {
+                box-shadow: 0 0 15px rgba(4, 120, 87, 0.3), inset 0 0 10px rgba(4, 120, 87, 0.2);
+                border-color: rgba(4, 120, 87, 0.5);
+            }
 
-            0%,
             100% {
-                box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
-                border-color: rgba(239, 68, 68, 0.3);
+                box-shadow: 0 0 10px rgba(16, 185, 129, 0.2), inset 0 0 5px rgba(16, 185, 129, 0.1);
+                border-color: rgba(16, 185, 129, 0.3);
+            }
+        }
+
+        .glow-running-green {
+            animation: runningGreenShimmer 2.8s infinite alternate ease-in-out;
+        }
+
+        /* 3. БИРЮЗОВОЕ ДЫХАНИЕ (Успех) */
+        @keyframes successCyanBreath {
+            0% {
+                box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+                border-color: rgba(6, 182, 212, 0.3);
             }
 
             50% {
-                box-shadow: 0 0 35px rgba(239, 68, 68, 0.55);
-                border-color: rgba(239, 68, 68, 0.6);
+                box-shadow: 0 0 60px rgba(6, 182, 212, 0.8), inset 0 0 25px rgba(6, 182, 212, 0.3);
+                border-color: rgba(6, 182, 212, 0.9);
+            }
+
+            100% {
+                box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+                border-color: rgba(6, 182, 212, 0.3);
             }
         }
 
-        .glow-idle {
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+        .glow-success-cyan {
+            animation: successCyanBreath 3.5s infinite alternate ease-in-out;
         }
 
-        .glow-blue {
-            animation: pulseGlowBlue 2.5s infinite ease-in-out;
-        }
+        /* 4. КРАСНАЯ ТРЕВОГА (Ошибка) */
+        @keyframes sharpGlowRed {
+            0% {
+                box-shadow: 0 0 5px rgba(239, 68, 68, 0.2);
+            }
 
-        .glow-green {
-            animation: pulseGlowGreen 2.5s infinite ease-in-out;
+            15% {
+                box-shadow: 0 0 70px rgba(239, 68, 68, 0.9);
+            }
+
+            40% {
+                box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+            }
+
+            55% {
+                box-shadow: 0 0 80px rgba(239, 68, 68, 1);
+            }
+
+            100% {
+                box-shadow: 0 0 5px rgba(239, 68, 68, 0.2);
+            }
         }
 
         .glow-red {
-            animation: pulseGlowRed 2.5s infinite ease-in-out;
+            animation: sharpGlowRed 1.8s infinite alternate cubic-bezier(0.2, 0.8, 0.2, 1);
+            border-color: rgba(239, 68, 68, 0.6);
         }
 
         ::-webkit-scrollbar {
@@ -111,7 +193,6 @@
             border-radius: 10px;
         }
 
-        /* Checkbox styling */
         .toggle-checkbox:checked {
             right: 0;
             border-color: #3b82f6;
@@ -126,7 +207,7 @@
 <body class="bg-slate-50 text-slate-800 dark:bg-darkBg dark:text-slate-100 min-h-screen">
 
     <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar (Width 64 = 16rem) -->
+        <!-- Sidebar -->
         <aside
             class="w-64 bg-white dark:bg-darkCard border-r border-slate-200 dark:border-darkBorder flex flex-col justify-between shrink-0">
             <div>
@@ -137,30 +218,33 @@
                     </div>
                     <div>
                         <span class="font-extrabold text-lg tracking-tight">MogDop Utils</span>
-                        <p class="text-[10px] font-semibold uppercase text-blue-500">Core Engine</p>
+                        <p class="text-[10px] font-semibold uppercase text-blue-500" data-i18n="core_engine">Core Engine
+                        </p>
                     </div>
                 </div>
 
                 <nav class="px-4 space-y-1.5 mt-2">
                     <button onclick="showTab('single')" id="nav-single"
                         class="sidebar-item active w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="layout-grid" class="w-4 h-4"></i> Single Mode
+                        <i data-lucide="layout-grid" class="w-4 h-4"></i> <span data-i18n="nav_single">Single
+                            Mode</span>
                     </button>
                     <button onclick="showTab('multi')" id="nav-multi"
                         class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="git-merge" class="w-4 h-4"></i> Multi-Source
+                        <i data-lucide="git-merge" class="w-4 h-4"></i> <span data-i18n="nav_multi">Multi-Source</span>
                     </button>
                     <button onclick="showTab('dupes')" id="nav-dupes"
                         class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="copy-x" class="w-4 h-4"></i> Find Duplicates
+                        <i data-lucide="copy-x" class="w-4 h-4"></i> <span data-i18n="nav_dupes">Find Duplicates</span>
                     </button>
                     <button onclick="showTab('settings')" id="nav-settings"
                         class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Settings
+                        <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> <span
+                            data-i18n="nav_settings">Settings</span>
                     </button>
                     <button onclick="showTab('logs')" id="nav-logs"
                         class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="terminal" class="w-4 h-4"></i> System Logs
+                        <i data-lucide="terminal" class="w-4 h-4"></i> <span data-i18n="nav_logs">System Logs</span>
                     </button>
                 </nav>
             </div>
@@ -169,7 +253,8 @@
                     class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-yellow-400 w-full justify-center hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
                     <i data-lucide="moon" id="theme-icon-moon" class="w-4 h-4 hidden dark:block"></i>
                     <i data-lucide="sun" id="theme-icon-sun" class="w-4 h-4 block dark:hidden"></i>
-                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Toggle Theme</span>
+                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300"
+                        data-i18n="toggle_theme">Toggle Theme</span>
                 </button>
             </div>
         </aside>
@@ -177,17 +262,18 @@
         <!-- Main Content -->
         <main class="flex-1 overflow-y-auto p-8 lg:p-12 relative" id="mainArea">
 
-            <!-- Global Progress Bar (Fixed at top) -->
+            <!-- Global Progress Bar -->
             <div id="progressBox"
-                class="hidden fixed top-0 left-0 md:left-64 right-0 bg-slate-900 shadow-xl z-50 p-4 border-b border-blue-500">
+                class="hidden fixed top-0 left-0 md:left-64 right-0 bg-slate-900 shadow-xl z-50 p-4 border-b border-emerald-500">
                 <div class="max-w-4xl mx-auto flex flex-col gap-2">
                     <div class="flex justify-between items-center text-xs font-bold text-white">
-                        <span id="statusLabel" class="text-blue-400">System is running...</span>
+                        <span id="statusLabel" class="text-emerald-400" data-i18n="sys_running">System is
+                            running...</span>
                         <span id="percentLabel" class="font-mono">0%</span>
                     </div>
                     <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
                         <div id="progressBar"
-                            class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all duration-300"
+                            class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-300"
                             style="width: 0%"></div>
                     </div>
                 </div>
@@ -196,54 +282,57 @@
             <!-- Tab 1: Single Mode -->
             <section id="tab-single" class="tab-content active max-w-4xl mx-auto mt-4">
                 <header class="mb-8">
-                    <h1 class="text-3xl font-black dark:text-white">Single Mode</h1>
-                    <p class="text-slate-500 mt-1">Sort files within a single directory by categories.</p>
+                    <h1 class="text-3xl font-black dark:text-white" data-i18n="single_title">Single Mode</h1>
+                    <p class="text-slate-500 mt-1" data-i18n="single_desc">Sort files within a single directory by
+                        categories.</p>
                 </header>
                 <div
-                    class="glow-transition glow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
-                    <label class="block text-sm font-bold text-slate-400 mb-2">Workspace Folder</label>
+                    class="glow-transition glow-rainbow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
+                    <label class="block text-sm font-bold text-slate-400 mb-2" data-i18n="workspace_folder">Workspace
+                        Folder</label>
                     <div class="flex gap-2">
-                        <input type="text" id="singlePath" placeholder="/home/user/Downloads"
-                            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="singlePath" data-i18n="ph_single_path" placeholder="/home/user/Downloads"
+                            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
                         <button onclick="browseFolder('singlePath')"
                             class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-700 transition"><i
                                 data-lucide="folder-search" class="w-5 h-5"></i></button>
                     </div>
 
-                    <!-- Contextual Settings -->
                     <div
-                        class="flex flex-wrap gap-6 mt-5 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
+                        class="flex flex-wrap gap-6 mt-5 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" id="cfg_date_sort"
-                                class="w-4 h-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 bg-transparent focus:ring-blue-500">
-                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Sort by Date</span>
+                                class="w-4 h-4 text-emerald-600 rounded border-slate-300 dark:border-slate-600 bg-transparent focus:ring-emerald-500">
+                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                                data-i18n="sort_by_date">Sort by Date</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" id="cfg_overwrite"
                                 class="w-4 h-4 text-red-600 rounded border-slate-300 dark:border-slate-600 bg-transparent focus:ring-red-500">
-                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Overwrite
-                                Conflicts</span>
+                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                                data-i18n="overwrite_conflicts">Overwrite Conflicts</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" id="cfg_clean_empty"
-                                class="w-4 h-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 bg-transparent focus:ring-blue-500">
-                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Clean Empty
-                                Folders</span>
+                                class="w-4 h-4 text-emerald-600 rounded border-slate-300 dark:border-slate-600 bg-transparent focus:ring-emerald-500">
+                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                                data-i18n="clean_empty">Clean Empty Folders</span>
                         </label>
                     </div>
 
                     <div class="flex gap-4 mt-6">
                         <button onclick="runEngine('single', 'singlePath')"
-                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
-                            <i data-lucide="play" class="w-5 h-5"></i> Start Sorting
+                            class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
+                            <i data-lucide="play" class="w-5 h-5"></i> <span data-i18n="btn_start_single">Start
+                                Sorting</span>
                         </button>
                         <button onclick="runEngine('unsort', 'singlePath')"
                             class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
-                            <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Reverse (Unsort)
+                            <i data-lucide="rotate-ccw" class="w-5 h-5"></i> <span data-i18n="btn_reverse">Reverse
+                                (Unsort)</span>
                         </button>
                     </div>
 
-                    <!-- Quick Log -->
                     <div
                         class="quickLog hidden mt-6 p-4 bg-slate-900 rounded-xl text-xs font-mono text-slate-300 border border-slate-800 h-32 overflow-y-auto space-y-1 shadow-inner">
                     </div>
@@ -253,70 +342,73 @@
             <!-- Tab 2: Multi Mode -->
             <section id="tab-multi" class="tab-content max-w-4xl mx-auto mt-4">
                 <header class="mb-8">
-                    <h1 class="text-3xl font-black dark:text-white">Multi-Source Mode</h1>
-                    <p class="text-slate-500 mt-1">Gather and sort files from multiple locations into one target folder.
-                    </p>
+                    <h1 class="text-3xl font-black dark:text-white" data-i18n="multi_title">Multi-Source Mode</h1>
+                    <p class="text-slate-500 mt-1" data-i18n="multi_desc">Gather and sort files from multiple locations
+                        into one target folder.</p>
                 </header>
                 <div
-                    class="glow-transition glow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
-                    <label class="block text-sm font-bold text-slate-400 mb-2">Target Folder (Destination)</label>
+                    class="glow-transition glow-rainbow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
+                    <label class="block text-sm font-bold text-slate-400 mb-2" data-i18n="target_folder">Target Folder
+                        (Destination)</label>
                     <div class="flex gap-2 mb-6">
-                        <input type="text" id="multiTarget" placeholder="Where should files go?"
-                            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none text-blue-500 dark:text-blue-400 font-bold focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="multiTarget" data-i18n="ph_multi_target"
+                            placeholder="Where should files go?"
+                            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none text-emerald-500 dark:text-emerald-400 font-bold focus:ring-2 focus:ring-emerald-500 transition-colors">
                         <button onclick="browseFolder('multiTarget')"
                             class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-700 transition"><i
                                 data-lucide="folder-down" class="w-5 h-5"></i></button>
                     </div>
 
                     <div class="flex justify-between items-end mb-2">
-                        <label class="block text-sm font-bold text-slate-400">Sources (Origin)</label>
+                        <label class="block text-sm font-bold text-slate-400" data-i18n="sources_origin">Sources
+                            (Origin)</label>
                         <button onclick="addSourceUI()"
                             class="text-xs bg-indigo-500/20 text-indigo-500 dark:text-indigo-400 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-indigo-500/40 transition">
-                            <i data-lucide="plus" class="w-4 h-4"></i> Add
+                            <i data-lucide="plus" class="w-4 h-4"></i> <span data-i18n="btn_add">Add</span>
                         </button>
                     </div>
                     <div id="sourcesListUI"
-                        class="space-y-2 max-h-48 overflow-y-auto pr-2 mb-6 border border-slate-200 dark:border-slate-800 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/50">
-                        <!-- JS renders here -->
+                        class="space-y-2 max-h-48 overflow-y-auto pr-2 mb-6 border border-slate-200 dark:border-slate-800 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/50 transition-colors">
                     </div>
 
-                    <!-- Contextual Settings Multi -->
                     <div
-                        class="flex flex-col gap-3 mb-6 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
+                        class="flex flex-col gap-3 mb-6 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
                         <label
                             class="flex items-center gap-2 cursor-pointer border-b border-slate-200 dark:border-slate-700 pb-3">
                             <input type="checkbox" id="cfg_include_target"
-                                class="w-4 h-4 text-indigo-600 rounded border-slate-300 dark:border-slate-600 focus:ring-indigo-500 bg-transparent">
-                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Include Target Folder
-                                (Sort files already inside target)</span>
+                                class="w-4 h-4 text-emerald-600 rounded border-slate-300 dark:border-slate-600 focus:ring-emerald-500 bg-transparent">
+                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                                data-i18n="include_target">Include Target Folder (Sort files already inside
+                                target)</span>
                         </label>
                         <div class="flex flex-wrap gap-6 pt-1">
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" id="cfg_date_sort_m"
-                                    class="w-4 h-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 bg-transparent">
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Sort by
-                                    Date</span>
+                                    class="w-4 h-4 text-emerald-600 rounded border-slate-300 dark:border-slate-600 focus:ring-emerald-500 bg-transparent">
+                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                                    data-i18n="sort_by_date">Sort by Date</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" id="cfg_overwrite_m"
                                     class="w-4 h-4 text-red-600 rounded border-slate-300 dark:border-slate-600 focus:ring-red-500 bg-transparent">
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Overwrite</span>
+                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                                    data-i18n="overwrite_conflicts">Overwrite Conflicts</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" id="cfg_clean_empty_m"
-                                    class="w-4 h-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 bg-transparent">
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Clean Empty
-                                    Folders</span>
+                                    class="w-4 h-4 text-emerald-600 rounded border-slate-300 dark:border-slate-600 focus:ring-emerald-500 bg-transparent">
+                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                                    data-i18n="clean_empty">Clean Empty Folders</span>
                             </label>
                         </div>
                     </div>
 
                     <button onclick="runEngineMulti()"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
-                        <i data-lucide="combine" class="w-5 h-5"></i> Start Assembly
+                        class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
+                        <i data-lucide="combine" class="w-5 h-5"></i> <span data-i18n="btn_start_multi">Start
+                            Assembly</span>
                     </button>
 
-                    <!-- Quick Log -->
                     <div
                         class="quickLog hidden mt-6 p-4 bg-slate-900 rounded-xl text-xs font-mono text-slate-300 border border-slate-800 h-32 overflow-y-auto space-y-1 shadow-inner">
                     </div>
@@ -326,97 +418,115 @@
             <!-- Tab 3: Duplicates -->
             <section id="tab-dupes" class="tab-content max-w-4xl mx-auto mt-4">
                 <header class="mb-8">
-                    <h1 class="text-3xl font-black dark:text-white">Duplicate Finder</h1>
-                    <p class="text-slate-500 mt-1">Deep MD5 hashing to find exact copies of files.</p>
+                    <h1 class="text-3xl font-black dark:text-white" data-i18n="dupes_title">Duplicate Finder</h1>
+                    <p class="text-slate-500 mt-1" data-i18n="dupes_desc">Deep MD5 hashing to find exact copies of
+                        files.</p>
                 </header>
                 <div
-                    class="glow-transition glow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
-                    <label class="block text-sm font-bold text-slate-400 mb-2">Folder to scan</label>
+                    class="glow-transition glow-rainbow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
+                    <label class="block text-sm font-bold text-slate-400 mb-2" data-i18n="folder_scan">Folder to
+                        scan</label>
                     <div class="flex gap-2 mb-5">
-                        <input type="text" id="dupePath" placeholder="Select directory..."
-                            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none focus:ring-2 focus:ring-amber-500">
+                        <input type="text" id="dupePath" data-i18n="ph_dupe_path" placeholder="Select directory..."
+                            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 transition-colors">
                         <button onclick="browseFolder('dupePath')"
                             class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-700 transition"><i
                                 data-lucide="search" class="w-5 h-5"></i></button>
                     </div>
 
                     <label
-                        class="flex items-center gap-2 cursor-pointer mb-6 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-200 dark:border-amber-900/30">
+                        class="flex items-center gap-2 cursor-pointer mb-6 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-200 dark:border-amber-900/30 transition-colors">
                         <input type="checkbox" id="cfg_auto_dupes"
                             class="w-4 h-4 text-amber-600 rounded border-amber-300 dark:border-amber-700 focus:ring-amber-500 bg-transparent">
-                        <span class="text-xs font-semibold text-amber-800 dark:text-amber-500">Auto-delete duplicates
-                            without asking</span>
+                        <span class="text-xs font-semibold text-amber-800 dark:text-amber-500"
+                            data-i18n="auto_dupes_desc">Auto-delete duplicates without asking</span>
                     </label>
 
                     <button onclick="runEngine('scan_dupes', 'dupePath')"
                         class="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
-                        <i data-lucide="scan-line" class="w-5 h-5"></i> Start Scan
+                        <i data-lucide="scan-line" class="w-5 h-5"></i> <span data-i18n="btn_start_scan">Start
+                            Scan</span>
                     </button>
 
-                    <!-- Quick Log -->
                     <div
                         class="quickLog hidden mt-6 p-4 bg-slate-900 rounded-xl text-xs font-mono text-slate-300 border border-slate-800 h-32 overflow-y-auto space-y-1 shadow-inner">
                     </div>
                 </div>
 
-                <!-- Duplicates Result Area -->
                 <div id="dupeResultsArea"
-                    class="hidden mt-6 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-amber-300 dark:border-amber-500/50 shadow-lg">
+                    class="hidden mt-6 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-amber-300 dark:border-amber-500/50 shadow-lg transition-colors">
                     <h3 class="text-amber-600 dark:text-amber-400 font-bold mb-4 flex items-center gap-2"><i
-                            data-lucide="alert-circle" class="w-5 h-5"></i> Select files to delete</h3>
+                            data-lucide="alert-circle" class="w-5 h-5"></i> <span data-i18n="select_to_delete">Select
+                            files to delete</span></h3>
                     <div id="dupeGroupsList" class="space-y-4 max-h-96 overflow-y-auto pr-2"></div>
                     <button onclick="deleteSelectedDupes()"
-                        class="w-full mt-6 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold shadow-lg shadow-red-900/50 transition transform active:scale-95">
+                        class="w-full mt-6 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold shadow-lg shadow-red-900/50 transition transform active:scale-95"
+                        data-i18n="btn_delete_selected">
                         DELETE SELECTED PERMANENTLY
                     </button>
                 </div>
             </section>
 
-            <!-- Tab: Settings (Simplified) -->
+            <!-- Tab: Settings -->
             <section id="tab-settings" class="tab-content max-w-4xl mx-auto mt-4">
-                <header class="mb-8">
-                    <h1 class="text-3xl font-black dark:text-white">Configuration</h1>
-                    <p class="text-slate-500 mt-1">Global extension rules and behavior.</p>
+                <header class="mb-8 flex justify-between items-end">
+                    <div>
+                        <h1 class="text-3xl font-black dark:text-white" data-i18n="settings_title">Configuration</h1>
+                        <p class="text-slate-500 mt-1" data-i18n="settings_desc">Global extension rules and behavior.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-bold text-slate-400" data-i18n="interface_language">Interface
+                            Language</span>
+                        <select id="langSelect" onchange="setLang(this.value)"
+                            class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-2 rounded-lg text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                            <option value="en">🇺🇸 English</option>
+                            <option value="ru">🇷🇺 Русский</option>
+                        </select>
+                    </div>
                 </header>
                 <div class="space-y-6">
                     <div
-                        class="bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder shadow-sm">
+                        class="bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder shadow-sm transition-colors">
                         <h2 class="text-lg font-bold mb-4 text-blue-600 dark:text-blue-500 flex items-center gap-2"><i
-                                data-lucide="toggle-right" class="w-5 h-5"></i> Global Toggles</h2>
+                                data-lucide="toggle-right" class="w-5 h-5"></i> <span data-i18n="global_toggles">Global
+                                Toggles</span></h2>
                         <label
                             class="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl cursor-pointer border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                             <input type="checkbox" id="cfg_move_unknown"
                                 class="w-5 h-5 rounded border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-blue-500 dark:bg-slate-800">
-                            <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Move unknown
-                                extensions to "Other"</span>
+                            <span class="text-sm font-semibold text-slate-700 dark:text-slate-300"
+                                data-i18n="move_unknown">Move unknown extensions to "Other"</span>
                         </label>
                     </div>
                     <div
-                        class="bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder shadow-sm">
+                        class="bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder shadow-sm transition-colors">
                         <h2 class="text-lg font-bold mb-4 text-indigo-600 dark:text-indigo-500 flex items-center gap-2">
-                            <i data-lucide="folder-cog" class="w-5 h-5"></i> Category Extensions</h2>
+                            <i data-lucide="folder-cog" class="w-5 h-5"></i> <span
+                                data-i18n="category_extensions">Category Extensions</span></h2>
                         <div id="configArea" class="space-y-3"></div>
                         <button onclick="saveGlobalSettings()"
-                            class="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition transform active:scale-95 shadow-lg shadow-blue-500/30">Save
-                            Configuration</button>
+                            class="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition transform active:scale-95 shadow-lg shadow-blue-500/30"
+                            data-i18n="btn_save_config">Save Configuration</button>
                     </div>
                 </div>
             </section>
 
-            <!-- Tab: Logs (Full Terminal) -->
+            <!-- Tab: Logs -->
             <section id="tab-logs" class="tab-content max-w-4xl mx-auto mt-4">
                 <header class="mb-8 flex justify-between items-end">
                     <div>
-                        <h1 class="text-3xl font-black dark:text-white">System Terminal</h1>
-                        <p class="text-slate-500 mt-1">Real-time detailed log of backend operations.</p>
+                        <h1 class="text-3xl font-black dark:text-white" data-i18n="logs_title">System Terminal</h1>
+                        <p class="text-slate-500 mt-1" data-i18n="logs_desc">Real-time detailed log of backend
+                            operations.</p>
                     </div>
                     <button onclick="document.getElementById('logTerminal').innerHTML=''"
                         class="text-xs font-medium text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center gap-1 transition">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i> Clear log
+                        <i data-lucide="trash-2" class="w-4 h-4"></i> <span data-i18n="clear_log">Clear log</span>
                     </button>
                 </header>
                 <div id="terminalCard"
-                    class="glow-transition glow-idle bg-slate-900 dark:bg-slate-950 rounded-2xl p-6 border border-slate-800 h-[600px] flex flex-col font-mono text-sm shadow-2xl">
+                    class="glow-transition glow-rainbow-idle bg-slate-900 dark:bg-slate-950 rounded-2xl p-6 border border-slate-800 h-[600px] flex flex-col font-mono text-sm shadow-2xl transition-colors">
                     <div id="logTerminal" class="flex-1 overflow-y-auto space-y-2 pr-2 text-slate-300">
                         <p class="text-slate-500">> Terminal initialized...</p>
                     </div>
@@ -427,8 +537,74 @@
     </div>
 
     <script>
+        // --- TRANSLATION SYSTEM (i18n) ---
+        const i18n = {
+            en: {
+                "core_engine": "Core Engine", "toggle_theme": "Toggle Theme", "interface_language": "Interface Language",
+                "nav_single": "Single Mode", "nav_multi": "Multi-Source", "nav_dupes": "Find Duplicates", "nav_settings": "Settings", "nav_logs": "System Logs",
+                "single_title": "Single Mode", "single_desc": "Sort files within a single directory by categories.", "workspace_folder": "Workspace Folder", "ph_single_path": "/home/user/Downloads",
+                "sort_by_date": "Sort by Date", "overwrite_conflicts": "Overwrite Conflicts", "clean_empty": "Clean Empty Folders", "btn_start_single": "Start Sorting", "btn_reverse": "Reverse (Unsort)",
+                "multi_title": "Multi-Source Mode", "multi_desc": "Gather and sort files from multiple locations into one target folder.", "target_folder": "Target Folder (Destination)", "ph_multi_target": "Where should files go?",
+                "sources_origin": "Sources (Origin)", "btn_add": "Add", "include_target": "Include Target Folder (Sort files already inside target)", "btn_start_multi": "Start Assembly",
+                "dupes_title": "Duplicate Finder", "dupes_desc": "Deep MD5 hashing to find exact copies of files.", "folder_scan": "Folder to scan", "ph_dupe_path": "Select directory...",
+                "auto_dupes_desc": "Auto-delete duplicates without asking", "btn_start_scan": "Start Scan", "select_to_delete": "Select files to delete", "btn_delete_selected": "DELETE SELECTED PERMANENTLY",
+                "group": "Group", "files": "files", "original_keep": "Original (Keep)", "duplicate_delete": "Duplicate (Delete)",
+                "settings_title": "Configuration", "settings_desc": "Global extension rules and behavior.", "global_toggles": "Global Toggles", "move_unknown": "Move unknown extensions to \"Other\"",
+                "category_extensions": "Category Extensions", "btn_save_config": "Save Configuration",
+                "logs_title": "System Terminal", "logs_desc": "Real-time detailed log of backend operations.", "clear_log": "Clear log", "sys_running": "System is running...",
+                "secret_on": "[SECRET] Deep Scan Mode: ENABLED", "secret_off": "[SECRET] Deep Scan Mode: DISABLED"
+            },
+            ru: {
+                "core_engine": "Ядро Системы", "toggle_theme": "Сменить тему", "interface_language": "Язык интерфейса",
+                "nav_single": "Одиночный режим", "nav_multi": "Мульти-режим", "nav_dupes": "Поиск дубликатов", "nav_settings": "Настройки", "nav_logs": "Логи системы",
+                "single_title": "Одиночный режим", "single_desc": "Сортировка файлов внутри одной директории по категориям.", "workspace_folder": "Рабочая папка", "ph_single_path": "/home/user/Загрузки",
+                "sort_by_date": "Сортировать по дате", "overwrite_conflicts": "Перезаписывать конфликты", "clean_empty": "Удалять пустые папки", "btn_start_single": "Начать сортировку", "btn_reverse": "Обратно (Распаковать)",
+                "multi_title": "Мульти-режим", "multi_desc": "Сбор файлов из разных мест в одну целевую папку.", "target_folder": "Целевая папка (Куда)", "ph_multi_target": "Куда переместить файлы?",
+                "sources_origin": "Источники (Откуда)", "btn_add": "Добавить", "include_target": "Включить целевую (Сортировать файлы уже внутри нее)", "btn_start_multi": "Запустить сборку",
+                "dupes_title": "Поиск дубликатов", "dupes_desc": "Глубокое MD5-хеширование для точного поиска копий.", "folder_scan": "Папка для сканирования", "ph_dupe_path": "Выберите директорию...",
+                "auto_dupes_desc": "Автоматически удалять копии без подтверждения", "btn_start_scan": "Начать сканирование", "select_to_delete": "Выберите файлы для удаления", "btn_delete_selected": "УДАЛИТЬ ВЫБРАННЫЕ НАВСЕГДА",
+                "group": "Группа", "files": "файлов", "original_keep": "Оригинал (Оставить)", "duplicate_delete": "Копия (Удалить)",
+                "settings_title": "Конфигурация", "settings_desc": "Глобальные правила и системное поведение.", "global_toggles": "Глобальные параметры", "move_unknown": "Перемещать неизвестные файлы в \"Другое\"",
+                "category_extensions": "Расширения категорий", "btn_save_config": "Сохранить конфигурацию",
+                "logs_title": "Системный терминал", "logs_desc": "Детальный лог операций ядра в реальном времени.", "clear_log": "Очистить лог", "sys_running": "Система работает...",
+                "secret_on": "[СЕКРЕТ] Режим глубокого сканирования: АКТИВИРОВАН", "secret_off": "[СЕКРЕТ] Режим глубокого сканирования: ОТКЛЮЧЕН"
+            }
+        };
+
+        let currentLang = localStorage.getItem('lang') || 'en';
+
+        function setLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('lang', lang);
+            document.getElementById('langSelect').value = lang;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang][key]) {
+                    if (el.tagName === 'INPUT' && el.hasAttribute('placeholder')) {
+                        el.placeholder = i18n[lang][key];
+                    } else {
+                        el.innerText = i18n[lang][key];
+                    }
+                }
+            });
+            if (multiSourcesArray.length > 0) renderSources();
+        }
+
+        // --- CORE APP LOGIC ---
         let eventSource = null;
         let multiSourcesArray = [];
+        let isSlowMode = false;
+        let eventQueue = [];
+        let isProcessingQueue = false;
+
+        // СЕКРЕТНАЯ ФУНКЦИЯ (ALT + M)
+        document.addEventListener('keydown', (e) => {
+            if (e.altKey && e.key.toLowerCase() === 'm') {
+                isSlowMode = !isSlowMode;
+                addLog(isSlowMode ? i18n[currentLang].secret_on : i18n[currentLang].secret_off, isSlowMode ? 'success' : 'error');
+            }
+        });
 
         function showTab(tabId) {
             document.querySelectorAll('.tab-content, .sidebar-item').forEach(el => el.classList.remove('active'));
@@ -444,8 +620,11 @@
 
         function setGlowState(state) {
             document.querySelectorAll('.glow-transition').forEach(card => {
-                card.classList.remove('glow-idle', 'glow-blue', 'glow-green', 'glow-red');
-                card.classList.add(state === 'idle' ? 'glow-idle' : `glow-${state}`);
+                card.classList.remove('glow-rainbow-idle', 'glow-running-green', 'glow-success-cyan', 'glow-red');
+                if (state === 'idle') card.classList.add('glow-rainbow-idle');
+                else if (state === 'running') card.classList.add('glow-running-green');
+                else if (state === 'success') card.classList.add('glow-success-cyan');
+                else if (state === 'error') card.classList.add('glow-red');
             });
         }
 
@@ -457,9 +636,8 @@
             else if (type === "skip") { color = "text-slate-500 italic"; icon = "slash"; iconColor = "text-slate-600"; }
             else if (type === "error") { color = "text-rose-400 font-bold"; icon = "x"; iconColor = "text-rose-500"; }
             else if (type === "conflict") { color = "text-amber-300"; icon = "alert-triangle"; iconColor = "text-amber-500"; }
-            else if (type === "success") { color = "text-emerald-400 font-bold"; icon = "zap"; iconColor = "text-emerald-400"; }
+            else if (type === "success") { color = "text-cyan-400 font-bold"; icon = "zap"; iconColor = "text-cyan-400"; }
 
-            // Add to Main Terminal
             const term = document.getElementById('logTerminal');
             const el = document.createElement("div");
             el.className = "flex items-start gap-2 animate__animated animate__fadeInLeft hover:bg-slate-800 p-1 rounded transition-colors";
@@ -467,18 +645,49 @@
             term.appendChild(el);
             term.scrollTop = term.scrollHeight;
 
-            // Add to Quick Logs
             document.querySelectorAll('.quickLog').forEach(ql => {
                 ql.classList.remove('hidden');
                 const qlLine = document.createElement("div");
-                qlLine.className = `truncate ${color}`;
+                qlLine.className = `truncate ${color} animate__animated animate__fadeIn`;
                 qlLine.innerText = `> ${msg}`;
                 ql.appendChild(qlLine);
                 if (ql.childNodes.length > 5) ql.firstChild.remove();
                 ql.scrollTop = ql.scrollHeight;
             });
-
             lucide.createIcons();
+        }
+
+        // QUEUE PROCESSOR FOR SLOW MODE
+        async function processQueue() {
+            isProcessingQueue = true;
+            while (eventQueue.length > 0) {
+                const data = eventQueue.shift();
+                handleEventData(data);
+
+                // Искусственная случайная задержка для имитации "глубокого сканирования"
+                let delay = Math.random() * 200 + 100; // от 100мс до 300мс на файл
+                if (data.type === 'success' || data.type === 'error') delay = 0;
+
+                await new Promise(r => setTimeout(r, delay));
+            }
+            isProcessingQueue = false;
+        }
+
+        function handleEventData(data) {
+            const pb = document.getElementById('progressBox');
+            if (data.type === 'progress') {
+                const p = Math.round((data.message.current / data.message.total) * 100);
+                document.getElementById('progressBar').style.width = p + '%';
+                document.getElementById('percentLabel').innerText = p + '%';
+            } else if (data.type === 'dupe_groups') {
+                renderDupeGroups(data.message);
+            } else if (data.type === 'success' || data.type === 'error') {
+                addLog(data.message, data.type);
+                setGlowState(data.type === 'success' ? 'success' : 'error');
+                setTimeout(() => { pb.classList.add('hidden'); setGlowState('idle'); }, 4000); // 4 sec success glow before going back to rainbow
+            } else {
+                addLog(data.message, data.type);
+            }
         }
 
         async function browseFolder(inputId) {
@@ -506,7 +715,7 @@
         function renderSources() {
             const list = document.getElementById('sourcesListUI');
             list.innerHTML = multiSourcesArray.map((s, i) => `
-                <div class="flex justify-between items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-lg shadow-sm transition-colors">
                     <span class="text-xs font-mono text-slate-600 dark:text-slate-300 break-all">${s}</span>
                     <button onclick="remSourceUI(${i})" class="text-red-500 hover:text-red-600 p-1 transition"><i data-lucide="trash" class="w-4 h-4"></i></button>
                 </div>
@@ -514,9 +723,7 @@
             lucide.createIcons();
         }
 
-        // Auto-save UI Context Settings before running
         async function silentSaveConfig() {
-            // Read values from active checkboxes in UI
             const payload = {
                 date_sort: document.getElementById('cfg_date_sort').checked || document.getElementById('cfg_date_sort_m').checked,
                 clean_empty: document.getElementById('cfg_clean_empty').checked || document.getElementById('cfg_clean_empty_m').checked,
@@ -528,25 +735,22 @@
                 multi_target: document.getElementById('multiTarget').value,
                 last_path: document.getElementById('singlePath').value
             };
-
-            // Re-append extensions from DOM
             const extensions = {};
             document.querySelectorAll('.cat-input').forEach(i => extensions[i.dataset.cat] = i.value);
             payload.extensions = extensions;
-
             await fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         }
 
         async function runEngine(action, inputId) {
             const path = document.getElementById(inputId).value;
-            if (!path) return alert("Please specify a path!");
+            if (!path) return;
             await silentSaveConfig();
             startStream(`/api/stream?action=${action}&path=${encodeURIComponent(path)}`);
         }
 
         async function runEngineMulti() {
             const target = document.getElementById('multiTarget').value;
-            if (!target || multiSourcesArray.length === 0) return alert("Specify target and at least 1 source!");
+            if (!target || multiSourcesArray.length === 0) return;
             await silentSaveConfig();
             const incl = document.getElementById('cfg_include_target').checked;
             const url = `/api/stream?action=multi&target=${encodeURIComponent(target)}&sources=${encodeURIComponent(JSON.stringify(multiSourcesArray))}&include_target=${incl}`;
@@ -555,32 +759,31 @@
 
         function startStream(url) {
             document.getElementById('dupeResultsArea').classList.add('hidden');
-            document.querySelectorAll('.quickLog').forEach(el => el.innerHTML = ''); // clear quick logs
+            document.querySelectorAll('.quickLog').forEach(el => el.innerHTML = '');
 
             const pb = document.getElementById('progressBox');
             pb.classList.remove('hidden');
             document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('statusLabel').innerText = i18n[currentLang].sys_running;
 
-            setGlowState('blue');
+            eventQueue = [];
+            setGlowState('running');
             if (eventSource) eventSource.close();
 
             eventSource = new EventSource(url);
             eventSource.onmessage = function (e) {
                 const data = JSON.parse(e.data);
-                if (data.type === 'progress') {
-                    const p = Math.round((data.message.current / data.message.total) * 100);
-                    document.getElementById('progressBar').style.width = p + '%';
-                    document.getElementById('percentLabel').innerText = p + '%';
-                    document.getElementById('statusLabel').innerText = `System is active...`;
-                } else if (data.type === 'dupe_groups') {
-                    renderDupeGroups(data.message);
-                } else if (data.type === 'success' || data.type === 'error') {
-                    addLog(data.message, data.type);
-                    setGlowState(data.type === 'success' ? 'green' : 'red');
-                    setTimeout(() => pb.classList.add('hidden'), 2000);
+
+                // Закрываем источник событий, если получено событие успеха/ошибки
+                if (data.type === 'success' || data.type === 'error') {
                     eventSource.close();
+                }
+
+                if (isSlowMode) {
+                    eventQueue.push(data);
+                    if (!isProcessingQueue) processQueue();
                 } else {
-                    addLog(data.message, data.type);
+                    handleEventData(data);
                 }
             };
         }
@@ -589,10 +792,11 @@
             const area = document.getElementById('dupeResultsArea');
             const list = document.getElementById('dupeGroupsList');
             area.classList.remove('hidden');
+            const loc = i18n[currentLang];
 
             list.innerHTML = groups.map((g, idx) => `
-                <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <div class="text-xs text-amber-600 dark:text-amber-500 font-bold mb-2">Group ${idx + 1} (${g.length} files)</div>
+                <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors">
+                    <div class="text-xs text-amber-600 dark:text-amber-500 font-bold mb-2">${loc.group} ${idx + 1} (${g.length} ${loc.files})</div>
                     ${g.map((f, i) => `
                         <label class="flex items-center justify-between gap-2 mb-1 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 p-2 rounded transition border ${i === 0 ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-transparent'}">
                             <div class="flex items-center gap-2 truncate">
@@ -600,30 +804,25 @@
                                 <span class="text-xs font-mono text-slate-700 dark:text-slate-300 truncate" title="${f}">${f}</span>
                             </div>
                             <span class="shrink-0 text-[10px] font-bold uppercase px-2 py-0.5 rounded ${i === 0 ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/20 text-red-600 dark:text-red-400'}">
-                                ${i === 0 ? 'Original (Keep)' : 'Duplicate (Delete)'}
+                                ${i === 0 ? loc.original_keep : loc.duplicate_delete}
                             </span>
                         </label>
                     `).join('')}
                 </div>
             `).join('');
-
-            addLog("Displaying manual duplicate selection window...", "info");
         }
 
         async function deleteSelectedDupes() {
             const cbs = document.querySelectorAll('.dupe-cb:checked');
             const files = Array.from(cbs).map(cb => cb.value);
-            if (files.length === 0) return alert("No files selected");
+            if (files.length === 0) return;
 
-            const res = await fetch('/api/dupes/delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ files })
-            });
+            const res = await fetch('/api/dupes/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ files }) });
             const data = await res.json();
             document.getElementById('dupeResultsArea').classList.add('hidden');
-            addLog(`Deletion complete. Destroyed: ${data.count} files`, "success");
-            setGlowState('green');
+            addLog(`Destroyed: ${data.count} files`, "success");
+            setGlowState('success');
+            setTimeout(() => setGlowState('idle'), 4000);
         }
 
         async function loadConfig() {
@@ -635,7 +834,6 @@
             document.getElementById('multiTarget').value = config.multi_target || "";
             renderSources();
 
-            // Set contextual checkboxes
             document.getElementById('cfg_date_sort').checked = config.date_sort;
             document.getElementById('cfg_date_sort_m').checked = config.date_sort;
             document.getElementById('cfg_clean_empty').checked = config.clean_empty;
@@ -646,7 +844,6 @@
             document.getElementById('cfg_auto_dupes').checked = config.auto_dupes;
             document.getElementById('cfg_move_unknown').checked = config.move_unknown;
 
-            // Sync multi/single toggles visually
             const sync = (id1, id2) => {
                 const el1 = document.getElementById(id1), el2 = document.getElementById(id2);
                 el1.addEventListener('change', () => el2.checked = el1.checked);
@@ -662,15 +859,16 @@
                 area.innerHTML += `
                     <div class="flex items-center gap-4">
                         <span class="w-40 font-bold text-xs uppercase text-slate-600 dark:text-slate-400">${cat}</span>
-                        <input type="text" value="${exts}" data-cat="${cat}" class="cat-input flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" value="${exts}" data-cat="${cat}" class="cat-input flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
                     </div>`;
             }
+
+            setLang(currentLang);
         }
 
         async function saveGlobalSettings() {
             await silentSaveConfig();
-            alert("Settings saved successfully!");
-            addLog("Global configuration updated.", "info");
+            addLog("Global configuration saved.", "info");
         }
 
         window.onload = () => { lucide.createIcons(); loadConfig(); };
