@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MogDop File Utils | Premium Engine</title>
+    <title>MD File Utils</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -35,6 +35,13 @@
             --accent-color: #3b82f6;
             --accent-glow: rgba(59, 130, 246, 0.3);
             --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+        }
+
+        html.dark {
+            background-color: #05070a;
+        }
+        html.light {
+            background-color: #f8fafc;
         }
 
         body {
@@ -179,7 +186,7 @@
     </style>
 </head>
 
-<body class="bg-slate-50 dark:bg-darkBg text-slate-800 dark:text-slate-100 min-h-screen overflow-hidden flex">
+<body class="text-slate-800 dark:text-slate-100 min-h-screen overflow-hidden flex bg-transparent">
     <div class="bg-mesh"></div>
     <div class="bg-grid-pattern" id="bgGrid"></div>
 
@@ -196,7 +203,7 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-400">
-                            MogDop
+                            MD File Utils
                         </h1>
                         <p class="text-[10px] font-black uppercase tracking-widest text-accent" data-i18n="core_engine">Premium Suite</p>
                     </div>
@@ -274,7 +281,7 @@
                     <!-- Tab 1: Single Mode -->
                     <section id="tab-single" class="tab-content active">
                         <header class="mb-8">
-                            <h2 class="text-3xl lg:text-4xl font-black tracking-tight" data-i18n="single_title">Single Workspace</h2>
+                            <h2 class="text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white" data-i18n="single_title">Single Workspace</h2>
                             <p class="text-slate-500 mt-2 text-sm lg:text-base" data-i18n="single_desc">Instantly distribute, sort, and categorize directory contents.</p>
                         </header>
 
@@ -340,7 +347,7 @@
                     <!-- Tab 2: Multi-Source -->
                     <section id="tab-multi" class="tab-content">
                         <header class="mb-8">
-                            <h2 class="text-3xl lg:text-4xl font-black tracking-tight" data-i18n="multi_title">Multi-Source Gatherer</h2>
+                            <h2 class="text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white" data-i18n="multi_title">Multi-Source Gatherer</h2>
                             <p class="text-slate-500 mt-2 text-sm lg:text-base" data-i18n="multi_desc">Aggregate data pipelines from distinct folders into a target pool.</p>
                         </header>
 
@@ -409,7 +416,7 @@
                     <!-- Tab 3: Duplicates -->
                     <section id="tab-dupes" class="tab-content">
                         <header class="mb-8">
-                            <h2 class="text-3xl lg:text-4xl font-black tracking-tight" data-i18n="dupes_title">Hash Duplicate Finder</h2>
+                            <h2 class="text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white" data-i18n="dupes_title">Hash Duplicate Finder</h2>
                             <p class="text-slate-500 mt-2 text-sm lg:text-base" data-i18n="dupes_desc">Perform hardware-accelerated MD5 scans to locate binary clones.</p>
                         </header>
 
@@ -460,16 +467,18 @@
                     <section id="tab-settings" class="tab-content">
                         <header class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                             <div>
-                                <h2 class="text-3xl lg:text-4xl font-black tracking-tight" data-i18n="settings_title">Control Panel</h2>
+                                <h2 class="text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white" data-i18n="settings_title">Control Panel</h2>
                                 <p class="text-slate-500 mt-2 text-sm lg:text-base" data-i18n="settings_desc">Adjust aesthetic characteristics, performance and categorization dictionary.</p>
                             </div>
-                            <div class="flex items-center gap-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-100/50 dark:bg-black/25 p-3 rounded-2xl border border-slate-200 dark:border-white/5">
                                 <span class="text-xs font-bold text-slate-400" data-i18n="interface_language">Language</span>
-                                <select id="langSelect" onchange="setLang(this.value)"
-                                    class="glass-panel text-slate-800 dark:text-slate-100 px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/5 outline-none cursor-pointer">
-                                    <option value="en">🇺🇸 English</option>
-                                    <option value="ru">🇷🇺 Русский</option>
-                                </select>
+                                <div id="langSelectorList" class="flex flex-wrap gap-1.5">
+                                    <button onclick="setLang('en')" data-lang-btn="en" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300">🇺🇸 EN</button>
+                                    <button onclick="setLang('ru')" data-lang-btn="ru" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300">🇷🇺 RU</button>
+                                    <button onclick="setLang('es')" data-lang-btn="es" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300">🇪🇸 ES</button>
+                                    <button onclick="setLang('zh')" data-lang-btn="zh" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300">🇨🇳 ZH</button>
+                                    <button onclick="setLang('de')" data-lang-btn="de" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300">🇩🇪 DE</button>
+                                </div>
                             </div>
                         </header>
 
@@ -540,7 +549,7 @@
                             <h3 class="text-xs font-black uppercase tracking-widest text-accent flex items-center gap-2">
                                 <i data-lucide="folder-cog" class="w-5 h-5"></i> <span data-i18n="category_extensions">Category Mapping</span>
                             </h3>
-                            <div id="configArea" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                            <div id="configArea" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
                             <button onclick="saveGlobalSettings()"
                                 class="w-full bg-accent-gradient hover:opacity-95 text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-wider transition"
                                 data-i18n="btn_save_config">Update Dictionary</button>
@@ -551,7 +560,7 @@
                     <section id="tab-logs" class="tab-content h-full">
                         <header class="mb-8 flex justify-between items-end">
                             <div>
-                                <h2 class="text-3xl lg:text-4xl font-black tracking-tight" data-i18n="logs_title">System Terminal</h2>
+                                <h2 class="text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white" data-i18n="logs_title">System Terminal</h2>
                                 <p class="text-slate-500 mt-2 text-sm lg:text-base" data-i18n="logs_desc">Direct telemetry flow from active indexing and categorization processes.</p>
                             </div>
                             <button onclick="document.getElementById('logTerminal').innerHTML=''"
@@ -590,18 +599,18 @@
         // --- TRANSLATION SYSTEM (i18n) ---
         const i18n = {
             en: {
-                "core_engine": "Core Engine", "toggle_theme": "Toggle Theme", "interface_language": "Interface Language",
-                "nav_single": "Single Mode", "nav_multi": "Multi-Source", "nav_dupes": "Find Duplicates", "nav_settings": "Settings", "nav_logs": "System Logs",
-                "single_title": "Single Mode", "single_desc": "Sort files within a single directory by categories.", "workspace_folder": "Workspace Folder", "ph_single_path": "/home/user/Downloads",
-                "sort_by_date": "Sort by Date", "overwrite_conflicts": "Overwrite Conflicts", "clean_empty": "Clean Empty Folders", "btn_start_single": "Start Sorting", "btn_reverse": "Reverse (Unsort)",
-                "multi_title": "Multi-Source Mode", "multi_desc": "Gather and sort files from multiple locations into one target folder.", "target_folder": "Target Folder (Destination)", "ph_multi_target": "Where should files go?",
-                "sources_origin": "Sources (Origin)", "btn_add": "Add Source", "include_target": "Include Target Folder (Self-Sort)", "btn_start_multi": "Assemble Sources",
-                "dupes_title": "Duplicate Finder", "dupes_desc": "Deep MD5 hashing to find exact copies of files.", "folder_scan": "Folder to scan", "ph_dupe_path": "Select directory...",
-                "auto_dupes_desc": "Auto-delete duplicates without asking", "btn_start_scan": "Start Scan", "select_to_delete": "Select files to delete", "btn_delete_selected": "DELETE SELECTED PERMANENTLY",
+                "core_engine": "Sorter", "toggle_theme": "Interface Theme", "interface_language": "Language",
+                "nav_single": "Single Mode", "nav_multi": "Multi-Source", "nav_dupes": "Duplicates", "nav_settings": "Settings", "nav_logs": "Terminal",
+                "single_title": "Single Workspace", "single_desc": "Instantly distribute, sort, and categorize directory contents.", "workspace_folder": "Workspace Folder", "ph_single_path": "/home/user/Downloads",
+                "sort_by_date": "Sort by Date", "overwrite_conflicts": "Overwrite Conflicts", "clean_empty": "Clean Empty", "btn_start_single": "Start Sorting", "btn_reverse": "Reverse Action",
+                "multi_title": "Multi-Source Gatherer", "multi_desc": "Aggregate data pipelines from distinct folders into a target pool.", "target_folder": "Target Folder (Destination)", "ph_multi_target": "Where should files go?",
+                "sources_origin": "Sources", "btn_add": "Add Source", "include_target": "Include Target Folder (Self-Sort)", "btn_start_multi": "Assemble Sources",
+                "dupes_title": "Hash Duplicate Finder", "dupes_desc": "Perform hardware-accelerated MD5 scans to locate binary clones.", "folder_scan": "Directory to Analyze", "ph_dupe_path": "/home/user/Documents",
+                "auto_dupes_desc": "Instant Deletion (Bypass manual selection)", "btn_start_scan": "Initialize Deep Scan", "select_to_delete": "Binary Match Groups", "btn_delete_selected": "Purge Selected Clones",
                 "group": "Group", "files": "files", "original_keep": "Original (Keep)", "duplicate_delete": "Duplicate (Delete)",
-                "settings_title": "Configuration", "settings_desc": "Global extension rules and behavior.", "global_toggles": "Global Toggles", "move_unknown": "Move unknown extensions to \"Other\"",
-                "category_extensions": "Category Extensions", "btn_save_config": "Save Configuration",
-                "logs_title": "System Terminal", "logs_desc": "Real-time detailed log of backend operations.", "clear_log": "Clear log", "sys_running": "System is running...",
+                "settings_title": "Control Panel", "settings_desc": "Adjust aesthetic characteristics, performance and categorization dictionary.", "global_toggles": "Operation Core & Filters", "move_unknown": "Isolate Unknowns",
+                "category_extensions": "Category Mapping", "btn_save_config": "Update Dictionary",
+                "logs_title": "System Terminal", "logs_desc": "Direct telemetry flow from active indexing and categorization processes.", "clear_log": "Flush Console", "sys_running": "System Core Active",
                 "secret_on": "[SECRET] Deep Scan Mode: ENABLED", "secret_off": "[SECRET] Deep Scan Mode: DISABLED",
                 "active_core": "Active Core", "core_accent": "Core Accent Hue", "backdrop_pattern": "Backdrop Pattern",
                 "dynamic_gradient": "Dynamic Gradient", "cyber_grid": "Cyber Grid", "simulation_mode": "Simulation Mode (Dry Run)",
@@ -611,25 +620,88 @@
                 "aesthetic_customizer": "Aesthetic customizer"
             },
             ru: {
-                "core_engine": "Ядро Системы", "toggle_theme": "Сменить тему", "interface_language": "Язык интерфейса",
-                "nav_single": "Одиночный режим", "nav_multi": "Мульти-режим", "nav_dupes": "Поиск дубликатов", "nav_settings": "Настройки", "nav_logs": "Логи системы",
-                "single_title": "Одиночный режим", "single_desc": "Сортировка файлов внутри одной директории по категориям.", "workspace_folder": "Рабочая папка", "ph_single_path": "/home/user/Загрузки",
-                "sort_by_date": "Сортировать по дате", "overwrite_conflicts": "Перезаписывать конфликты", "clean_empty": "Удалять пустые папки", "btn_start_single": "Начать сортировку", "btn_reverse": "Обратно (Распаковать)",
-                "multi_title": "Мульти-режим", "multi_desc": "Сбор файлов из разных мест в одну целевую папку.", "target_folder": "Целевая папка (Куда)", "ph_multi_target": "Куда переместить файлы?",
-                "sources_origin": "Источники (Откуда)", "btn_add": "Добавить источник", "include_target": "Включить целевую (Сортировать файлы уже внутри нее)", "btn_start_multi": "Запустить сборку",
-                "dupes_title": "Поиск дубликатов", "dupes_desc": "Глубокое MD5-хеширование для точного поиска копий.", "folder_scan": "Папка для сканирования", "ph_dupe_path": "Выберите директорию...",
-                "auto_dupes_desc": "Автоматически удалять копии без подтверждения", "btn_start_scan": "Начать сканирование", "select_to_delete": "Выберите файлы для удаления", "btn_delete_selected": "УДАЛИТЬ ВЫБРАННЫЕ НАВСЕГДА",
+                "core_engine": "Sorter", "toggle_theme": "Тема интерфейса", "interface_language": "Язык интерфейса",
+                "nav_single": "Одиночный режим", "nav_multi": "Мульти-режим", "nav_dupes": "Дубликаты", "nav_settings": "Настройки", "nav_logs": "Терминал",
+                "single_title": "Одиночное пространство", "single_desc": "Мгновенно распределяйте, сортируйте и категоризируйте содержимое папок.", "workspace_folder": "Рабочая папка", "ph_single_path": "/home/user/Загрузки",
+                "sort_by_date": "Сортировать по дате", "overwrite_conflicts": "Перезаписывать конфликты", "clean_empty": "Очищать пустые папки", "btn_start_single": "Начать сортировку", "btn_reverse": "Обратное действие",
+                "multi_title": "Мульти-сборщик", "multi_desc": "Объединяйте потоки данных из разных папок в одну целевую папку.", "target_folder": "Целевая папка (Куда)", "ph_multi_target": "Куда отправить файлы?",
+                "sources_origin": "Источники (Откуда)", "btn_add": "Добавить источник", "include_target": "Включить целевую (Сортировка внутри себя)", "btn_start_multi": "Собрать источники",
+                "dupes_title": "Поиск дубликатов по хешу", "dupes_desc": "Выполняйте MD5-сканирование для поиска точных бинарных копий файлов.", "folder_scan": "Папка для анализа", "ph_dupe_path": "/home/user/Документы",
+                "auto_dupes_desc": "Мгновенное удаление (Без ручного выбора)", "btn_start_scan": "Запустить глубокий анализ", "select_to_delete": "Найденные группы дубликатов", "btn_delete_selected": "УДАЛИТЬ ВЫБРАННЫЕ НАВСЕГДА",
                 "group": "Группа", "files": "файлов", "original_keep": "Оригинал (Оставить)", "duplicate_delete": "Копия (Удалить)",
-                "settings_title": "Конфигурация", "settings_desc": "Глобальные правила и системное поведение.", "global_toggles": "Глобальные параметры", "move_unknown": "Перемещать неизвестные файлы в \"Другое\"",
-                "category_extensions": "Расширения категорий", "btn_save_config": "Сохранить конфигурацию",
-                "logs_title": "Системный терминал", "logs_desc": "Детальный лог операций ядра в реальном времени.", "clear_log": "Очистить лог", "sys_running": "Система работает...",
+                "settings_title": "Панель управления", "settings_desc": "Настройка внешнего вида, производительности и словаря категорий.", "global_toggles": "Параметры ядра и фильтры", "move_unknown": "Изолировать неизвестные",
+                "category_extensions": "Расширения категорий", "btn_save_config": "Обновить словарь",
+                "logs_title": "Системный терминал", "logs_desc": "Прямой поток телеметрии процессов индексации и категоризации.", "clear_log": "Очистить консоль", "sys_running": "Ядро системы активно...",
                 "secret_on": "[СЕКРЕТ] Режим глубокого сканирования: АКТИВИРОВАН", "secret_off": "[СЕКРЕТ] Режим глубокого сканирования: ОТКЛЮЧЕН",
                 "active_core": "Активное Ядро", "core_accent": "Цвет интерфейса", "backdrop_pattern": "Паттерн фона",
                 "dynamic_gradient": "Плавный градиент", "cyber_grid": "Сетка киберпанка", "simulation_mode": "Режим симуляции (Dry Run)",
                 "simulation_desc": "Предпросмотр структуры папок без записи на диск", "ignore_hidden": "Пропускать скрытые файлы",
-                "ignore_hidden_desc": "Игнорировать скрытые директории и файлы ОС", "skip_hidden_dupes": "Пропускать скрытые копии",
+                "ignore_hidden_desc": "Игнорировать скрытые директории и файлы ОС", "skip_hidden_dupes": "Пропускать скрытые дубликаты",
                 "size_filters": "Фильтрация размера (МБ)", "min_size_label": "Мин. размер (0=выкл)", "max_size_label": "Макс. размер (0=выкл)",
                 "aesthetic_customizer": "Кастомизация дизайна"
+            },
+            es: {
+                "core_engine": "Clasificador", "toggle_theme": "Tema de Interfaz", "interface_language": "Idioma",
+                "nav_single": "Modo Único", "nav_multi": "Multi-Origen", "nav_dupes": "Duplicados", "nav_settings": "Ajustes", "nav_logs": "Terminal",
+                "single_title": "Espacio Único", "single_desc": "Distribuye, ordena y categoriza instantáneamente el contenido de carpetas.", "workspace_folder": "Carpeta de Trabajo", "ph_single_path": "/home/user/Descargas",
+                "sort_by_date": "Ordenar por Fecha", "overwrite_conflicts": "Sobrescribir Conflictos", "clean_empty": "Limpiar Vacíos", "btn_start_single": "Iniciar Ordenación", "btn_reverse": "Revertir Acción",
+                "multi_title": "Recolector Multi-Origen", "multi_desc": "Agrega flujos de datos de carpetas distintas a un destino común.", "target_folder": "Carpeta Destino (Destino)", "ph_multi_target": "¿A dónde deben ir los archivos?",
+                "sources_origin": "Orígenes", "btn_add": "Añadir Origen", "include_target": "Incluir Carpeta Destino (Auto-Ordenar)", "btn_start_multi": "Ensamblar Orígenes",
+                "dupes_title": "Buscador de Duplicados Hash", "dupes_desc": "Realiza análisis MD5 acelerados por hardware para localizar clones binarios.", "folder_scan": "Directorio a Analizar", "ph_dupe_path": "/home/user/Documentos",
+                "auto_dupes_desc": "Eliminación Inmediata (Omitir selección manual)", "btn_start_scan": "Iniciar Análisis Profundo", "select_to_delete": "Grupos de Archivos Binarios", "btn_delete_selected": "Eliminar Clones Seleccionados",
+                "group": "Grupo", "files": "archivos", "original_keep": "Original (Conservar)", "duplicate_delete": "Duplicado (Eliminar)",
+                "settings_title": "Panel de Control", "settings_desc": "Ajusta características estéticas, rendimiento y diccionario de categorización.", "global_toggles": "Núcleo de Operación y Filtros", "move_unknown": "Aislar Desconocidos",
+                "category_extensions": "Mapeo de Categorías", "btn_save_config": "Actualizar Diccionario",
+                "logs_title": "Terminal del Sistema", "logs_desc": "Flujo de telemetría directa de los procesos de indexación y categorización activos.", "clear_log": "Vaciar Consola", "sys_running": "Núcleo del Sistema Activo",
+                "secret_on": "[SECRETO] Modo de Análisis Profundo: ACTIVADO", "secret_off": "[SECRETO] Modo de Análisis Profundo: DESACTIVADO",
+                "active_core": "Núcleo Activo", "core_accent": "Tono de Acento del Núcleo", "backdrop_pattern": "Patrón de Fondo",
+                "dynamic_gradient": "Gradiente Dinámico", "cyber_grid": "Rejilla Cyber", "simulation_mode": "Modo Simulación (Dry Run)",
+                "simulation_desc": "Previsualizar cambios sin escribir en el disco", "ignore_hidden": "Ignorar Archivos Ocultos",
+                "ignore_hidden_desc": "Omitir directorios y rutas de archivos ocultos del sistema", "skip_hidden_dupes": "Omitir duplicados ocultos",
+                "size_filters": "Filtros de Tamaño (MB)", "min_size_label": "Tamaño Mín (0=Ninguno)", "max_size_label": "Tamaño Máx (0=Ninguno)",
+                "aesthetic_customizer": "Personalizador Estético"
+            },
+            zh: {
+                "core_engine": "分类器", "toggle_theme": "界面主题", "interface_language": "语言",
+                "nav_single": "单文件夹模式", "nav_multi": "多源汇总", "nav_dupes": "重复文件", "nav_settings": "设置", "nav_logs": "终端",
+                "single_title": "单空间工作区", "single_desc": "立即分发、排序和分类目录内容。", "workspace_folder": "工作区文件夹", "ph_single_path": "/home/user/Downloads",
+                "sort_by_date": "按日期排序", "overwrite_conflicts": "覆盖冲突", "clean_empty": "清理空文件夹", "btn_start_single": "开始排序", "btn_reverse": "撤销操作",
+                "multi_title": "多源收集器", "multi_desc": "将不同文件夹的数据流汇总到目标池中。", "target_folder": "目标文件夹（目的地）", "ph_multi_target": "文件应该存放到哪里？",
+                "sources_origin": "源目录", "btn_add": "添加源", "include_target": "包括目标文件夹（自排序）", "btn_start_multi": "汇聚源文件",
+                "dupes_title": "哈希重复文件查找器", "dupes_desc": "执行硬件加速的 MD5 扫描以定位二进制克隆文件。", "folder_scan": "要分析的目录", "ph_dupe_path": "/home/user/Documents",
+                "auto_dupes_desc": "立即删除（跳过手动选择）", "btn_start_scan": "初始化深度扫描", "select_to_delete": "二进制匹配组", "btn_delete_selected": "清除选中的克隆",
+                "group": "分组", "files": "个文件", "original_keep": "原始文件（保留）", "duplicate_delete": "重复副本（删除）",
+                "settings_title": "控制面板", "settings_desc": "调整美学外观、性能和分类字典。", "global_toggles": "操作核心与过滤器", "move_unknown": "隔离未知类型",
+                "category_extensions": "类别映射", "btn_save_config": "更新字典",
+                "logs_title": "系统终端", "logs_desc": "来自活动索引和分类过程的直接遥测流。", "clear_log": "清空控制台", "sys_running": "系统核心处于活动状态",
+                "secret_on": "[秘密] 深度扫描模式：已启用", "secret_off": "[秘密] 深度扫描模式：已禁用",
+                "active_core": "活动核心", "core_accent": "核心强调色", "backdrop_pattern": "背景图案",
+                "dynamic_gradient": "动态渐变", "cyber_grid": "赛博网格", "simulation_mode": "模拟模式 (Dry Run)",
+                "simulation_desc": "预览更改而不写入磁盘", "ignore_hidden": "忽略隐藏文件",
+                "ignore_hidden_desc": "跳过隐藏的系统目录和文件路径", "skip_hidden_dupes": "跳过隐藏的重复文件",
+                "size_filters": "大小过滤器 (MB)", "min_size_label": "最小大小 (0=无限制)", "max_size_label": "最大大小 (0=无限制)",
+                "aesthetic_customizer": "美学定制器"
+            },
+            de: {
+                "core_engine": "Sortierer", "toggle_theme": "Oberflächendesign", "interface_language": "Sprache",
+                "nav_single": "Einzelmodus", "nav_multi": "Multi-Quelle", "nav_dupes": "Duplikate", "nav_settings": "Einstellungen", "nav_logs": "Terminal",
+                "single_title": "Einzelner Arbeitsbereich", "single_desc": "Inhalte sofort verteilen, sortieren und kategorisieren.", "workspace_folder": "Arbeitsverzeichnis", "ph_single_path": "/home/user/Downloads",
+                "sort_by_date": "Nach Datum sortieren", "overwrite_conflicts": "Konflikte überschreiben", "clean_empty": "Leere Ordner bereinigen", "btn_start_single": "Sortierung starten", "btn_reverse": "Aktion rückgängig machen",
+                "multi_title": "Multi-Quellen-Sammler", "multi_desc": "Datenströme aus verschiedenen Ordnern in einem Ziel-Pool zusammenführen.", "target_folder": "Zielordner (Ziel)", "ph_multi_target": "Wohin sollen die Dateien verschoben werden?",
+                "sources_origin": "Quellen", "btn_add": "Quelle hinzufügen", "include_target": "Zielordner einbeziehen (Selbstsortierung)", "btn_start_multi": "Quellen zusammenführen",
+                "dupes_title": "Hash-Duplikatsuche", "dupes_desc": "Führen Sie hardwarebeschleunigte MD5-Scans durch, um binäre Klone zu finden.", "folder_scan": "Zu analysierendes Verzeichnis", "ph_dupe_path": "/home/user/Dokumente",
+                "auto_dupes_desc": "Sofortige Löschung (Manuelle Auswahl überspringen)", "btn_start_scan": "Tiefenscan initialisieren", "select_to_delete": "Binäre Übereinstimmungsgruppen", "btn_delete_selected": "Ausgewählte Klone bereinigen",
+                "group": "Gruppe", "files": "Dateien", "original_keep": "Original (Behalten)", "duplicate_delete": "Duplikat (Löschen)",
+                "settings_title": "Systemsteuerung", "settings_desc": "Passen Sie ästhetische Merkmale, Leistung und das Zuordnungswörterbuch an.", "global_toggles": "Betriebskern & Filter", "move_unknown": "Unbekannte isolieren",
+                "category_extensions": "Kategorie-Zuordnung", "btn_save_config": "Wörterbuch aktualisieren",
+                "logs_title": "System-Terminal", "logs_desc": "Direkte Telemetriedaten von aktiven Indizierungs- und Kategorisierungsprozessen.", "clear_log": "Konsole leeren", "sys_running": "Systemkern aktiv",
+                "secret_on": "[GEHEIMNISS] Tiefenscan-Modus: AKTIVIERT", "secret_off": "[GEHEIMNISS] Tiefenscan-Modus: DEAKTIVIERT",
+                "active_core": "Aktiver Kern", "core_accent": "Farbton des Systemkerns", "backdrop_pattern": "Hintergrundmuster",
+                "dynamic_gradient": "Dynamischer Verlauf", "cyber_grid": "Cyber-Gitter", "simulation_mode": "Simulationsmodus (Dry Run)",
+                "simulation_desc": "Änderungen vorschauen, ohne auf die Festplatte zu schreiben", "ignore_hidden": "Versteckte Dateien ignorieren",
+                "ignore_hidden_desc": "Versteckte Systemverzeichnisse und Dateipfade überspringen", "skip_hidden_dupes": "Versteckte Duplikate überspringen",
+                "size_filters": "Größenfilter (MB)", "min_size_label": "Min. Größe (0=Keine)", "max_size_label": "Max. Größe (0=Keine)",
+                "aesthetic_customizer": "Ästhetische Anpassung"
             }
         };
 
@@ -638,11 +710,26 @@
         function setLang(lang) {
             currentLang = lang;
             localStorage.setItem('lang', lang);
-            document.getElementById('langSelect').value = lang;
+
+            // Обновление стилей кнопок языкового селектора
+            document.querySelectorAll('[data-lang-btn]').forEach(btn => {
+                const btnLang = btn.getAttribute('data-lang-btn');
+                if (btnLang === lang) {
+                    btn.classList.add('bg-accent', 'text-white', 'border-transparent', 'shadow-md');
+                    btn.classList.remove('bg-slate-100', 'dark:bg-white/5', 'text-slate-700', 'dark:text-slate-300', 'border-slate-200', 'dark:border-white/5');
+                    btn.style.boxShadow = `0 0 10px var(--accent-glow)`;
+                    btn.style.borderColor = `var(--accent-color)`;
+                } else {
+                    btn.classList.remove('bg-accent', 'text-white', 'border-transparent', 'shadow-md');
+                    btn.classList.add('bg-slate-100', 'dark:bg-white/5', 'text-slate-700', 'dark:text-slate-300', 'border-slate-200', 'dark:border-white/5');
+                    btn.style.boxShadow = '';
+                    btn.style.borderColor = '';
+                }
+            });
 
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (i18n[lang][key]) {
+                if (i18n[lang] && i18n[lang][key]) {
                     if (el.tagName === 'INPUT' && el.hasAttribute('placeholder')) {
                         el.placeholder = i18n[lang][key];
                     } else {
@@ -651,6 +738,7 @@
                 }
             });
             if (multiSourcesArray.length > 0) renderSources();
+            renderCategoryExtensions();
         }
 
         // --- CORE APP LOGIC ---
@@ -659,12 +747,24 @@
         let isSlowMode = false;
         let eventQueue = [];
         let isProcessingQueue = false;
+        let categoryExtensionsState = {}; // Глобальное состояние расширений
 
         // СЕКРЕТНАЯ ФУНКЦИЯ (ALT + M)
         document.addEventListener('keydown', (e) => {
             if (e.altKey && e.key.toLowerCase() === 'm') {
                 isSlowMode = !isSlowMode;
                 addLog(isSlowMode ? i18n[currentLang].secret_on : i18n[currentLang].secret_off, isSlowMode ? 'success' : 'error');
+            }
+        });
+
+        // ВТОРАЯ СЕКРЕТНАЯ КОМБИНАЦИЯ (CTRL + SHIFT + S) - Эмуляция задержки рендеринга для отладки эффектов
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's') {
+                isSlowMode = !isSlowMode;
+                const statusMsg = isSlowMode ? 
+                    "[DEBUG] Slow-Motion Debug Mode: ENABLED (500ms delay per UI update)" : 
+                    "[DEBUG] Slow-Motion Debug Mode: DISABLED";
+                addLog(statusMsg, isSlowMode ? 'success' : 'error');
             }
         });
 
@@ -677,14 +777,18 @@
             localStorage.setItem('--accent-glow', glow);
             localStorage.setItem('--accent-gradient', gradient);
             addLog("System Core palette accent updated.", "success");
+            setLang(currentLang); // Обновить подсветку кнопок языка с новым акцентным цветом
+            renderCategoryExtensions();
         }
 
         function setPattern(style) {
             const grid = document.getElementById('bgGrid');
-            if (style === 'grid') {
-                grid.style.opacity = '0.15';
-            } else {
-                grid.style.opacity = '0';
+            if (grid) {
+                if (style === 'grid') {
+                    grid.style.opacity = '0.15';
+                } else {
+                    grid.style.opacity = '0';
+                }
             }
             localStorage.setItem('bgStyle', style);
         }
@@ -757,11 +861,13 @@
             else if (type === "success") { color = "text-cyan-400 font-bold"; icon = "zap"; iconColor = "text-cyan-400"; }
 
             const term = document.getElementById('logTerminal');
-            const el = document.createElement("div");
-            el.className = "flex items-start gap-2 py-0.5 animate__animated animate__fadeInLeft hover:bg-slate-900 px-2 rounded transition-colors";
-            el.innerHTML = `<span class="text-slate-600 text-[10px] mt-0.5 shrink-0">[${time}]</span><span class="${iconColor} mt-0.5 shrink-0"><i data-lucide="${icon}" class="w-3.5 h-3.5"></i></span><span class="${color}">${msg}</span>`;
-            term.appendChild(el);
-            term.scrollTop = term.scrollHeight;
+            if (term) {
+                const el = document.createElement("div");
+                el.className = "flex items-start gap-2 py-0.5 animate__animated animate__fadeInLeft hover:bg-slate-900 px-2 rounded transition-colors";
+                el.innerHTML = `<span class="text-slate-600 text-[10px] mt-0.5 shrink-0">[${time}]</span><span class="${iconColor} mt-0.5 shrink-0"><i data-lucide="${icon}" class="w-3.5 h-3.5"></i></span><span class="${color}">${msg}</span>`;
+                term.appendChild(el);
+                term.scrollTop = term.scrollHeight;
+            }
 
             document.querySelectorAll('.quickLog').forEach(ql => {
                 ql.classList.remove('hidden');
@@ -781,9 +887,8 @@
             while (eventQueue.length > 0) {
                 const data = eventQueue.shift();
                 handleEventData(data);
-                let delay = Math.random() * 200 + 100;
-                if (data.type === 'success' || data.type === 'error') delay = 0;
-                await new Promise(r => setTimeout(r, delay));
+                // Задержка 500мс в режиме отладки/замедления
+                await new Promise(r => setTimeout(r, 500));
             }
             isProcessingQueue = false;
         }
@@ -799,7 +904,7 @@
             } else if (data.type === 'success' || data.type === 'error') {
                 addLog(data.message, data.type);
                 setGlowState(data.type === 'success' ? 'success' : 'error');
-                setTimeout(() => { pb.classList.add('hidden'); setGlowState('idle'); }, 4000);
+                setTimeout(() => { if (pb) pb.classList.add('hidden'); setGlowState('idle'); }, 4000);
             } else {
                 addLog(data.message, data.type);
             }
@@ -838,6 +943,60 @@
             lucide.createIcons();
         }
 
+        // --- КРАСИВЫЙ РЕДАКТОР СЛОВАРЯ РАСШИРЕНИЙ ---
+        function renderCategoryExtensions() {
+            const area = document.getElementById('configArea');
+            if (!area) return;
+            area.innerHTML = '';
+
+            for (const [cat, extsArray] of Object.entries(categoryExtensionsState)) {
+                const tagsHtml = extsArray.map(ext => {
+                    const cleanExt = ext.trim();
+                    if (!cleanExt) return '';
+                    return `
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 shadow-sm animate__animated animate__zoomIn">
+                            <span>${cleanExt}</span>
+                            <button onclick="removeExtensionTag('${cat}', '${cleanExt}')" class="text-slate-400 hover:text-red-500 transition-colors font-black text-xs leading-none">×</button>
+                        </span>
+                    `;
+                }).join('');
+
+                area.innerHTML += `
+                    <div class="flex flex-col gap-3 p-5 bg-white/5 rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm">
+                        <span class="font-extrabold text-xs uppercase text-slate-500 dark:text-slate-400 tracking-wider">${cat}</span>
+                        
+                        <div class="flex flex-wrap gap-2 max-h-36 overflow-y-auto pr-1">
+                            ${tagsHtml || `<span class="text-xs text-slate-500 italic">No extensions</span>`}
+                        </div>
+                        
+                        <div class="flex gap-2 mt-2">
+                            <input type="text" id="add-input-${cat}" placeholder=".ext" class="flex-1 input-premium px-3 py-2 rounded-xl text-xs outline-none">
+                            <button onclick="addExtensionTag('${cat}')" class="bg-accent-gradient text-white px-4 py-2 rounded-xl text-xs font-extrabold hover:opacity-95 transition-all transform active:scale-95 shadow-md shadow-blue-500/10 uppercase tracking-wider">ADD</button>
+                        </div>
+                    </div>`;
+            }
+            lucide.createIcons();
+        }
+
+        function removeExtensionTag(cat, ext) {
+            categoryExtensionsState[cat] = categoryExtensionsState[cat].filter(e => e !== ext);
+            renderCategoryExtensions();
+        }
+
+        function addExtensionTag(cat) {
+            const input = document.getElementById(`add-input-${cat}`);
+            if (!input) return;
+            let val = input.value.trim().toLowerCase();
+            if (!val) return;
+            if (!val.startsWith('.')) val = '.' + val;
+            
+            if (!categoryExtensionsState[cat].includes(val)) {
+                categoryExtensionsState[cat].push(val);
+                renderCategoryExtensions();
+            }
+            input.value = '';
+        }
+
         async function silentSaveConfig() {
             // Синхронизация между чекбоксами экранов
             const dryRunChecked = document.getElementById('cfg_dry_run_single').checked || document.getElementById('cfg_dry_run_multi').checked;
@@ -858,9 +1017,14 @@
                 min_size_mb: parseFloat(document.getElementById('cfg_min_size').value) || 0,
                 max_size_mb: parseFloat(document.getElementById('cfg_max_size').value) || 0
             };
+
+            // Сериализуем интерактивное состояние расширений обратно в плоские строки для Python
             const extensions = {};
-            document.querySelectorAll('.cat-input').forEach(i => extensions[i.dataset.cat] = i.value);
+            for (const [cat, arr] of Object.entries(categoryExtensionsState)) {
+                extensions[cat] = arr.join(',');
+            }
             payload.extensions = extensions;
+
             await fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         }
 
@@ -915,7 +1079,7 @@
             const loc = i18n[currentLang];
 
             list.innerHTML = groups.map((g, idx) => `
-                <div class="bg-white/5 p-4 rounded-2xl border border-white/5 transition-colors">
+                <div class="glass-panel p-4 rounded-2xl transition-colors">
                     <div class="text-xs text-amber-500 font-bold mb-3">${loc.group} ${idx + 1} (${g.length} ${loc.files})</div>
                     ${g.map((f, i) => `
                         <label class="flex items-center justify-between gap-2 mb-1.5 cursor-pointer hover:bg-white/10 p-2.5 rounded-xl transition border ${i === 0 ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-transparent'}">
@@ -976,8 +1140,10 @@
 
             const sync = (id1, id2) => {
                 const el1 = document.getElementById(id1), el2 = document.getElementById(id2);
-                el1.addEventListener('change', () => el2.checked = el1.checked);
-                el2.addEventListener('change', () => el1.checked = el2.checked);
+                if (el1 && el2) {
+                    el1.addEventListener('change', () => el2.checked = el1.checked);
+                    el2.addEventListener('change', () => el1.checked = el2.checked);
+                }
             };
             sync('cfg_date_sort', 'cfg_date_sort_m');
             sync('cfg_clean_empty', 'cfg_clean_empty_m');
@@ -988,18 +1154,19 @@
             const h1 = document.getElementById('cfg_ignore_hidden_single');
             const h2 = document.getElementById('cfg_ignore_hidden_multi');
             const h3 = document.getElementById('cfg_ignore_hidden_dupes');
-            h1.addEventListener('change', () => { h2.checked = h1.checked; h3.checked = h1.checked; });
-            h2.addEventListener('change', () => { h1.checked = h2.checked; h3.checked = h2.checked; });
-            h3.addEventListener('change', () => { h1.checked = h3.checked; h2.checked = h3.checked; });
+            if (h1 && h2 && h3) {
+                h1.addEventListener('change', () => { h2.checked = h1.checked; h3.checked = h1.checked; });
+                h2.addEventListener('change', () => { h1.checked = h2.checked; h3.checked = h2.checked; });
+                h3.addEventListener('change', () => { h1.checked = h3.checked; h2.checked = h3.checked; });
+            }
 
-            const area = document.getElementById('configArea');
-            area.innerHTML = '';
-            for (const [cat, exts] of Object.entries(config.extensions)) {
-                area.innerHTML += `
-                    <div class="flex flex-col gap-1 p-3 bg-white/5 rounded-xl border border-white/5">
-                        <span class="font-black text-[9px] uppercase text-slate-400 tracking-wider">${cat}</span>
-                        <input type="text" value="${exts}" data-cat="${cat}" class="cat-input bg-transparent border-none p-0 text-sm font-bold text-accent outline-none focus:ring-0">
-                    </div>`;
+            // Парсим список расширений во внутреннее состояние массивов
+            categoryExtensionsState = {};
+            for (const [cat, extsString] of Object.entries(config.extensions)) {
+                categoryExtensionsState[cat] = extsString
+                    .split(',')
+                    .map(e => e.trim())
+                    .filter(e => e.length > 0);
             }
 
             setLang(currentLang);
@@ -1012,10 +1179,13 @@
 
         // Live Clock Widget Logic
         function startSystemClock() {
-            setInterval(() => {
-                const now = new Date();
-                document.getElementById('systemClock').innerText = now.toLocaleTimeString([], { hour12: false });
-            }, 1000);
+            const clock = document.getElementById('systemClock');
+            if (clock) {
+                setInterval(() => {
+                    const now = new Date();
+                    clock.innerText = now.toLocaleTimeString([], { hour12: false });
+                }, 1000);
+            }
         }
 
         window.onload = () => {
