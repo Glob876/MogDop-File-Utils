@@ -1,6 +1,6 @@
 MD File Utils - File Management Suite
 
-https://i.ibb.co.com/bw3trPB/Chat-GPT-Image-May-19-2026-04-47-23-PM.png
+![bg](https://i.ibb.co.com/bw3trPB/Chat-GPT-Image-May-19-2026-04-47-23-PM.png)
 
 MD File Utils is a modern, feature-rich desktop file management application built with a Python backend and a glass-morphism web interface. It transforms chaotic file organization into a streamlined, automated experience with intelligent sorting, duplicate detection, and real-time monitoring.
 Features
