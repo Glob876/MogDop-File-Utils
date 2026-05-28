@@ -41,7 +41,7 @@ def stream_action():
                     sources.append(target)
                     
                 if not target:
-                    yield f"data: {json.dumps({'type': 'error', 'message': 'Target folder not specified!'})}\n\n"
+                    yield "error", "Target folder not specified!"
                     return
                     
                 for src in sources:

@@ -208,7 +208,7 @@
                 <div class="p-4 rounded-2xl bg-white/5 dark:bg-black/20 border border-white/5 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active Core</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest" data-i18n="active_core">Active Core</span>
                     </div>
                     <span id="systemClock" class="text-xs font-mono font-bold text-slate-400">00:00:00</span>
                 </div>
@@ -290,6 +290,7 @@
                                 </div>
                             </div>
 
+                            <!-- Engine Options Grid -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-2 bg-slate-100/50 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/5">
                                 <label class="flex items-center gap-3 p-4 rounded-xl cursor-pointer hover:bg-white/50 dark:hover:bg-white/5 transition">
                                     <input type="checkbox" id="cfg_date_sort" class="w-5 h-5 rounded-lg border-slate-300 dark:border-white/10 bg-transparent text-accent focus:ring-0">
@@ -305,12 +306,30 @@
                                 </label>
                             </div>
 
+                            <!-- Simulation and Exclusions toggles inside single mode -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-100/30 dark:bg-black/10 rounded-2xl border border-slate-200 dark:border-white/5">
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" id="cfg_dry_run_single" class="w-5 h-5 rounded-lg text-amber-500 border-slate-300 dark:border-white/10 bg-transparent">
+                                    <div>
+                                        <span class="text-xs font-bold block text-amber-600 dark:text-amber-500" data-i18n="simulation_mode">Simulation Mode (Dry Run)</span>
+                                        <span class="text-[10px] text-slate-500" data-i18n="simulation_desc">Preview changes without writing to disk</span>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" id="cfg_ignore_hidden_single" class="w-5 h-5 rounded-lg text-accent border-slate-300 dark:border-white/10 bg-transparent">
+                                    <div>
+                                        <span class="text-xs font-bold block text-slate-600 dark:text-slate-300" data-i18n="ignore_hidden">Ignore Hidden Files</span>
+                                        <span class="text-[10px] text-slate-500" data-i18n="ignore_hidden_desc">Skip hidden system directories and file paths</span>
+                                    </div>
+                                </label>
+                            </div>
+
                             <div class="flex flex-col sm:flex-row gap-4 pt-4">
                                 <button onclick="runEngine('single', 'singlePath')" class="flex-1 bg-accent-gradient hover:opacity-90 text-white py-4 px-6 rounded-2xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-blue-500/10 flex justify-center items-center gap-2 transform active:scale-98 transition">
                                     <i data-lucide="play" class="w-5 h-5"></i> <span data-i18n="btn_start_single">Start Sorting</span>
                                 </button>
                                 <button onclick="runEngine('unsort', 'singlePath')" class="flex-1 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 py-4 px-6 rounded-2xl font-bold text-sm transform active:scale-98 transition border border-slate-200 dark:border-white/5 flex justify-center items-center gap-2" data-i18n="btn_reverse">
-                                    <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Reverse Action
+                                    <i data-lucide="rotate-ccw" class="w-5 h-5"></i> <span data-i18n="btn_reverse">Reverse Action</span>
                                 </button>
                             </div>
 
@@ -361,6 +380,24 @@
                                 </div>
                             </div>
 
+                            <!-- Simulation/Ignore checkboxes in multi mode -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-100/30 dark:bg-black/10 rounded-2xl border border-slate-200 dark:border-white/5">
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" id="cfg_dry_run_multi" class="w-5 h-5 rounded-lg text-amber-500 border-slate-300 dark:border-white/10 bg-transparent">
+                                    <div>
+                                        <span class="text-xs font-bold block text-amber-600 dark:text-amber-500" data-i18n="simulation_mode">Simulation Mode (Dry Run)</span>
+                                        <span class="text-[10px] text-slate-500" data-i18n="simulation_desc">Preview multi-assembly without modifying folders</span>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" id="cfg_ignore_hidden_multi" class="w-5 h-5 rounded-lg text-accent border-slate-300 dark:border-white/10 bg-transparent">
+                                    <div>
+                                        <span class="text-xs font-bold block text-slate-600 dark:text-slate-300" data-i18n="ignore_hidden">Ignore Hidden Files</span>
+                                        <span class="text-[10px] text-slate-500" data-i18n="ignore_hidden_desc">Do not ingest system-hidden structures</span>
+                                    </div>
+                                </label>
+                            </div>
+
                             <button onclick="runEngineMulti()" class="w-full bg-accent-gradient text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-wider shadow-lg hover:opacity-95 transition flex justify-center items-center gap-2">
                                 <i data-lucide="combine" class="w-5 h-5"></i> <span data-i18n="btn_start_multi">Assemble Sources</span>
                             </button>
@@ -388,10 +425,16 @@
                                 </div>
                             </div>
 
-                            <label class="flex items-center gap-3 p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl cursor-pointer">
-                                <input type="checkbox" id="cfg_auto_dupes" class="w-5 h-5 rounded-lg border-amber-500/20 bg-transparent text-amber-500">
-                                <span class="text-xs font-semibold text-amber-700 dark:text-amber-500/80" data-i18n="auto_dupes_desc">Instant Deletion (Bypass manual selection)</span>
-                            </label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <label class="flex items-center gap-3 p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl cursor-pointer">
+                                    <input type="checkbox" id="cfg_auto_dupes" class="w-5 h-5 rounded-lg border-amber-500/20 bg-transparent text-amber-500">
+                                    <span class="text-xs font-semibold text-amber-700 dark:text-amber-500/80" data-i18n="auto_dupes_desc">Instant Deletion (Bypass manual selection)</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-4 bg-slate-100/30 dark:bg-black/10 rounded-2xl border border-slate-200 dark:border-white/5 cursor-pointer">
+                                    <input type="checkbox" id="cfg_ignore_hidden_dupes" class="w-5 h-5 rounded-lg text-accent border-slate-300 dark:border-white/10 bg-transparent">
+                                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300" data-i18n="skip_hidden_dupes">Skip hidden duplicates</span>
+                                </label>
+                            </div>
 
                             <button onclick="runEngine('scan_dupes', 'dupePath')" class="w-full bg-amber-600 hover:bg-amber-500 text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-wider flex justify-center items-center gap-2 transition">
                                 <i data-lucide="scan-line" class="w-5 h-5"></i> <span data-i18n="btn_start_scan">Initialize Deep Scan</span>
@@ -406,7 +449,7 @@
                                     <i data-lucide="alert-circle" class="w-5 h-5"></i> <span data-i18n="select_to_delete">Binary Match Groups</span>
                                 </h3>
                                 <div id="dupeGroupsList" class="space-y-4 max-h-[400px] overflow-y-auto pr-2"></div>
-                                <button onclick="deleteSelectedDupes()" class="w-full mt-6 bg-red-600 hover:bg-red-500 text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-wider transition">
+                                <button onclick="deleteSelectedDupes()" class="w-full mt-6 bg-red-600 hover:bg-red-500 text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-wider transition" data-i18n="btn_delete_selected">
                                     Purge Selected Clones
                                 </button>
                             </div>
@@ -434,13 +477,13 @@
                             
                             <!-- Design and Palette Panel -->
                             <div class="glass-panel rounded-3xl p-6 lg:p-8 space-y-6">
-                                <h3 class="text-xs font-black uppercase tracking-widest text-accent flex items-center gap-2">
+                                <h3 class="text-xs font-black uppercase tracking-widest text-accent flex items-center gap-2" data-i18n="aesthetic_customizer">
                                     <i data-lucide="palette" class="w-4 h-4"></i> Aesthetic customizer
                                 </h3>
 
                                 <!-- Accent Selector -->
                                 <div class="space-y-3">
-                                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Core Accent Hue</span>
+                                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400" data-i18n="core_accent">Core Accent Hue</span>
                                     <div class="grid grid-cols-4 gap-2">
                                         <button onclick="setSystemAccent('#3b82f6', 'rgba(59, 130, 246, 0.3)', 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)')" class="h-10 rounded-xl bg-blue-500 hover:scale-105 active:scale-95 transition flex items-center justify-center text-white text-[10px] font-bold">Cyber</button>
                                         <button onclick="setSystemAccent('#10b981', 'rgba(16, 185, 129, 0.3)', 'linear-gradient(135deg, #10b981 0%, #059669 100%)')" class="h-10 rounded-xl bg-emerald-500 hover:scale-105 active:scale-95 transition flex items-center justify-center text-white text-[10px] font-bold">Eco</button>
@@ -451,27 +494,42 @@
 
                                 <!-- Background patterns -->
                                 <div class="space-y-3">
-                                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Backdrop Pattern</span>
+                                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400" data-i18n="backdrop_pattern">Backdrop Pattern</span>
                                     <div class="grid grid-cols-2 gap-2">
-                                        <button onclick="setPattern('mesh')" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition">Dynamic Gradient</button>
-                                        <button onclick="setPattern('grid')" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition">Cyber Grid</button>
+                                        <button onclick="setPattern('mesh')" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition" data-i18n="dynamic_gradient">Dynamic Gradient</button>
+                                        <button onclick="setPattern('grid')" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition" data-i18n="cyber_grid">Cyber Grid</button>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Process rules card -->
                             <div class="glass-panel rounded-3xl p-6 lg:p-8 space-y-6">
-                                <h3 class="text-xs font-black uppercase tracking-widest text-accent flex items-center gap-2">
-                                    <i data-lucide="shield-check" class="w-4 h-4"></i> Operation Core
+                                <h3 class="text-xs font-black uppercase tracking-widest text-accent flex items-center gap-2" data-i18n="global_toggles">
+                                    <i data-lucide="shield-check" class="w-4 h-4"></i> Operation Core & Filters
                                 </h3>
                                 <div class="space-y-4">
                                     <label class="flex items-center gap-4 p-4 rounded-2xl bg-slate-100/50 dark:bg-black/20 hover:bg-slate-200/50 dark:hover:bg-white/5 transition cursor-pointer">
-                                        <input type="checkbox" id="cfg_move_unknown" class="w-5 h-5 rounded-lg border-slate-300 dark:border-white/10 bg-transparent text-accent">
+                                        <input type="checkbox" id="cfg_move_unknown" class="w-6 h-6 rounded-lg text-blue-600 border-white/10 bg-white/5">
                                         <div>
                                             <span class="text-xs font-bold block" data-i18n="move_unknown">Isolate Unknowns</span>
                                             <span class="text-[10px] text-slate-500">Redirect undefined extensions to "Other"</span>
                                         </div>
                                     </label>
+
+                                    <!-- Size Filtering Threshold UI -->
+                                    <div class="p-4 rounded-2xl bg-slate-100/30 dark:bg-black/15 border border-slate-200 dark:border-white/5 space-y-3">
+                                        <span class="text-[10px] font-black uppercase text-slate-500 tracking-wider" data-i18n="size_filters">Size Filters (MB)</span>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label class="text-[9px] text-slate-400 block mb-1" data-i18n="min_size_label">Min Size (0=None)</label>
+                                                <input type="number" id="cfg_min_size" class="w-full input-premium px-3 py-1.5 rounded-xl text-xs" min="0" value="0">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] text-slate-400 block mb-1" data-i18n="max_size_label">Max Size (0=None)</label>
+                                                <input type="number" id="cfg_max_size" class="w-full input-premium px-3 py-1.5 rounded-xl text-xs" min="0" value="0">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -537,14 +595,20 @@
                 "single_title": "Single Mode", "single_desc": "Sort files within a single directory by categories.", "workspace_folder": "Workspace Folder", "ph_single_path": "/home/user/Downloads",
                 "sort_by_date": "Sort by Date", "overwrite_conflicts": "Overwrite Conflicts", "clean_empty": "Clean Empty Folders", "btn_start_single": "Start Sorting", "btn_reverse": "Reverse (Unsort)",
                 "multi_title": "Multi-Source Mode", "multi_desc": "Gather and sort files from multiple locations into one target folder.", "target_folder": "Target Folder (Destination)", "ph_multi_target": "Where should files go?",
-                "sources_origin": "Sources (Origin)", "btn_add": "Add", "include_target": "Include Target Folder (Sort files already inside target)", "btn_start_multi": "Start Assembly",
+                "sources_origin": "Sources (Origin)", "btn_add": "Add Source", "include_target": "Include Target Folder (Self-Sort)", "btn_start_multi": "Assemble Sources",
                 "dupes_title": "Duplicate Finder", "dupes_desc": "Deep MD5 hashing to find exact copies of files.", "folder_scan": "Folder to scan", "ph_dupe_path": "Select directory...",
                 "auto_dupes_desc": "Auto-delete duplicates without asking", "btn_start_scan": "Start Scan", "select_to_delete": "Select files to delete", "btn_delete_selected": "DELETE SELECTED PERMANENTLY",
                 "group": "Group", "files": "files", "original_keep": "Original (Keep)", "duplicate_delete": "Duplicate (Delete)",
                 "settings_title": "Configuration", "settings_desc": "Global extension rules and behavior.", "global_toggles": "Global Toggles", "move_unknown": "Move unknown extensions to \"Other\"",
                 "category_extensions": "Category Extensions", "btn_save_config": "Save Configuration",
                 "logs_title": "System Terminal", "logs_desc": "Real-time detailed log of backend operations.", "clear_log": "Clear log", "sys_running": "System is running...",
-                "secret_on": "[SECRET] Deep Scan Mode: ENABLED", "secret_off": "[SECRET] Deep Scan Mode: DISABLED"
+                "secret_on": "[SECRET] Deep Scan Mode: ENABLED", "secret_off": "[SECRET] Deep Scan Mode: DISABLED",
+                "active_core": "Active Core", "core_accent": "Core Accent Hue", "backdrop_pattern": "Backdrop Pattern",
+                "dynamic_gradient": "Dynamic Gradient", "cyber_grid": "Cyber Grid", "simulation_mode": "Simulation Mode (Dry Run)",
+                "simulation_desc": "Preview changes without writing to disk", "ignore_hidden": "Ignore Hidden Files",
+                "ignore_hidden_desc": "Skip hidden system directories and file paths", "skip_hidden_dupes": "Skip hidden duplicates",
+                "size_filters": "Size Filters (MB)", "min_size_label": "Min Size (0=None)", "max_size_label": "Max Size (0=None)",
+                "aesthetic_customizer": "Aesthetic customizer"
             },
             ru: {
                 "core_engine": "Ядро Системы", "toggle_theme": "Сменить тему", "interface_language": "Язык интерфейса",
@@ -552,14 +616,20 @@
                 "single_title": "Одиночный режим", "single_desc": "Сортировка файлов внутри одной директории по категориям.", "workspace_folder": "Рабочая папка", "ph_single_path": "/home/user/Загрузки",
                 "sort_by_date": "Сортировать по дате", "overwrite_conflicts": "Перезаписывать конфликты", "clean_empty": "Удалять пустые папки", "btn_start_single": "Начать сортировку", "btn_reverse": "Обратно (Распаковать)",
                 "multi_title": "Мульти-режим", "multi_desc": "Сбор файлов из разных мест в одну целевую папку.", "target_folder": "Целевая папка (Куда)", "ph_multi_target": "Куда переместить файлы?",
-                "sources_origin": "Источники (Откуда)", "btn_add": "Добавить", "include_target": "Включить целевую (Сортировать файлы уже внутри нее)", "btn_start_multi": "Запустить сборку",
+                "sources_origin": "Источники (Откуда)", "btn_add": "Добавить источник", "include_target": "Включить целевую (Сортировать файлы уже внутри нее)", "btn_start_multi": "Запустить сборку",
                 "dupes_title": "Поиск дубликатов", "dupes_desc": "Глубокое MD5-хеширование для точного поиска копий.", "folder_scan": "Папка для сканирования", "ph_dupe_path": "Выберите директорию...",
                 "auto_dupes_desc": "Автоматически удалять копии без подтверждения", "btn_start_scan": "Начать сканирование", "select_to_delete": "Выберите файлы для удаления", "btn_delete_selected": "УДАЛИТЬ ВЫБРАННЫЕ НАВСЕГДА",
                 "group": "Группа", "files": "файлов", "original_keep": "Оригинал (Оставить)", "duplicate_delete": "Копия (Удалить)",
                 "settings_title": "Конфигурация", "settings_desc": "Глобальные правила и системное поведение.", "global_toggles": "Глобальные параметры", "move_unknown": "Перемещать неизвестные файлы в \"Другое\"",
                 "category_extensions": "Расширения категорий", "btn_save_config": "Сохранить конфигурацию",
                 "logs_title": "Системный терминал", "logs_desc": "Детальный лог операций ядра в реальном времени.", "clear_log": "Очистить лог", "sys_running": "Система работает...",
-                "secret_on": "[СЕКРЕТ] Режим глубокого сканирования: АКТИВИРОВАН", "secret_off": "[СЕКРЕТ] Режим глубокого сканирования: ОТКЛЮЧЕН"
+                "secret_on": "[СЕКРЕТ] Режим глубокого сканирования: АКТИВИРОВАН", "secret_off": "[СЕКРЕТ] Режим глубокого сканирования: ОТКЛЮЧЕН",
+                "active_core": "Активное Ядро", "core_accent": "Цвет интерфейса", "backdrop_pattern": "Паттерн фона",
+                "dynamic_gradient": "Плавный градиент", "cyber_grid": "Сетка киберпанка", "simulation_mode": "Режим симуляции (Dry Run)",
+                "simulation_desc": "Предпросмотр структуры папок без записи на диск", "ignore_hidden": "Пропускать скрытые файлы",
+                "ignore_hidden_desc": "Игнорировать скрытые директории и файлы ОС", "skip_hidden_dupes": "Пропускать скрытые копии",
+                "size_filters": "Фильтрация размера (МБ)", "min_size_label": "Мин. размер (0=выкл)", "max_size_label": "Макс. размер (0=выкл)",
+                "aesthetic_customizer": "Кастомизация дизайна"
             }
         };
 
@@ -674,7 +744,13 @@
             const time = new Date().toLocaleTimeString([], { hour12: false });
             let color = "text-slate-300", icon = "info", iconColor = "text-sky-400";
 
-            if (type === "move") { color = "text-emerald-400"; icon = "check"; iconColor = "text-emerald-500"; }
+            if (type === "move") { 
+                if (msg.includes("[SIMULATION]")) {
+                    color = "text-amber-400 font-medium"; icon = "eye"; iconColor = "text-amber-500";
+                } else {
+                    color = "text-emerald-400"; icon = "check"; iconColor = "text-emerald-500"; 
+                }
+            }
             else if (type === "skip") { color = "text-slate-500 italic"; icon = "slash"; iconColor = "text-slate-600"; }
             else if (type === "error") { color = "text-rose-400 font-bold"; icon = "x"; iconColor = "text-rose-500"; }
             else if (type === "conflict") { color = "text-amber-300"; icon = "alert-triangle"; iconColor = "text-amber-500"; }
@@ -763,6 +839,10 @@
         }
 
         async function silentSaveConfig() {
+            // Синхронизация между чекбоксами экранов
+            const dryRunChecked = document.getElementById('cfg_dry_run_single').checked || document.getElementById('cfg_dry_run_multi').checked;
+            const ignoreHiddenChecked = document.getElementById('cfg_ignore_hidden_single').checked || document.getElementById('cfg_ignore_hidden_multi').checked || document.getElementById('cfg_ignore_hidden_dupes').checked;
+
             const payload = {
                 date_sort: document.getElementById('cfg_date_sort').checked || document.getElementById('cfg_date_sort_m').checked,
                 clean_empty: document.getElementById('cfg_clean_empty').checked || document.getElementById('cfg_clean_empty_m').checked,
@@ -772,7 +852,11 @@
                 move_unknown: document.getElementById('cfg_move_unknown').checked,
                 multi_sources: multiSourcesArray,
                 multi_target: document.getElementById('multiTarget').value,
-                last_path: document.getElementById('singlePath').value
+                last_path: document.getElementById('singlePath').value,
+                dry_run: dryRunChecked,
+                ignore_hidden: ignoreHiddenChecked,
+                min_size_mb: parseFloat(document.getElementById('cfg_min_size').value) || 0,
+                max_size_mb: parseFloat(document.getElementById('cfg_max_size').value) || 0
             };
             const extensions = {};
             document.querySelectorAll('.cat-input').forEach(i => extensions[i.dataset.cat] = i.value);
@@ -880,6 +964,16 @@
             document.getElementById('cfg_auto_dupes').checked = config.auto_dupes;
             document.getElementById('cfg_move_unknown').checked = config.move_unknown;
 
+            // Новые опции ядра
+            document.getElementById('cfg_dry_run_single').checked = config.dry_run || false;
+            document.getElementById('cfg_dry_run_multi').checked = config.dry_run || false;
+            document.getElementById('cfg_ignore_hidden_single').checked = config.ignore_hidden !== false;
+            document.getElementById('cfg_ignore_hidden_multi').checked = config.ignore_hidden !== false;
+            document.getElementById('cfg_ignore_hidden_dupes').checked = config.ignore_hidden !== false;
+
+            document.getElementById('cfg_min_size').value = config.min_size_mb || 0;
+            document.getElementById('cfg_max_size').value = config.max_size_mb || 0;
+
             const sync = (id1, id2) => {
                 const el1 = document.getElementById(id1), el2 = document.getElementById(id2);
                 el1.addEventListener('change', () => el2.checked = el1.checked);
@@ -888,6 +982,15 @@
             sync('cfg_date_sort', 'cfg_date_sort_m');
             sync('cfg_clean_empty', 'cfg_clean_empty_m');
             sync('cfg_overwrite', 'cfg_overwrite_m');
+            sync('cfg_dry_run_single', 'cfg_dry_run_multi');
+
+            // Синхронизация скрытых файлов на трех вкладках
+            const h1 = document.getElementById('cfg_ignore_hidden_single');
+            const h2 = document.getElementById('cfg_ignore_hidden_multi');
+            const h3 = document.getElementById('cfg_ignore_hidden_dupes');
+            h1.addEventListener('change', () => { h2.checked = h1.checked; h3.checked = h1.checked; });
+            h2.addEventListener('change', () => { h1.checked = h2.checked; h3.checked = h2.checked; });
+            h3.addEventListener('change', () => { h1.checked = h3.checked; h2.checked = h3.checked; });
 
             const area = document.getElementById('configArea');
             area.innerHTML = '';
@@ -895,7 +998,7 @@
                 area.innerHTML += `
                     <div class="flex flex-col gap-1 p-3 bg-white/5 rounded-xl border border-white/5">
                         <span class="font-black text-[9px] uppercase text-slate-400 tracking-wider">${cat}</span>
-                        <input type="text" value="${exts}" data-cat="${cat}" class="cat-input cat-input bg-transparent border-none p-0 text-sm font-bold text-accent outline-none focus:ring-0">
+                        <input type="text" value="${exts}" data-cat="${cat}" class="cat-input bg-transparent border-none p-0 text-sm font-bold text-accent outline-none focus:ring-0">
                     </div>`;
             }
 

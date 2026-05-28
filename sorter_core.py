@@ -31,7 +31,11 @@ class FileSorterCore:
             "excluded_files": "sorter_config.json,sorter_log.txt",
             "multi_sources": [],
             "multi_target": "",
-            "last_path": ""
+            "last_path": "",
+            "dry_run": False,
+            "ignore_hidden": True,
+            "min_size_mb": 0,
+            "max_size_mb": 0
         }
         self.config = self.load_config()
 
@@ -73,6 +77,21 @@ class FileSorterCore:
                     if not os.listdir(dp): os.rmdir(dp)
                 except: pass
 
+    def _is_size_allowed(self, filepath):
+        try:
+            sz_bytes = os.path.getsize(filepath)
+            sz_mb = sz_bytes / (1024 * 1024)
+            min_size = float(self.config.get("min_size_mb", 0))
+            max_size = float(self.config.get("max_size_mb", 0))
+
+            if min_size > 0 and sz_mb < min_size:
+                return False
+            if max_size > 0 and sz_mb > max_size:
+                return False
+            return True
+        except:
+            return False
+
     # --- 1. SORTING (Single & Multi) ---
     def sort_directory_generator(self, src_dir, target_dir=None):
         if not target_dir: target_dir = src_dir
@@ -80,7 +99,10 @@ class FileSorterCore:
             yield "error", f"Specified path does not exist: {src_dir}"
             return
             
-        yield "info", f"Analyzing directory: {src_dir}"
+        dry_run_mode = self.config.get("dry_run", False)
+        prefix = "[SIMULATION] " if dry_run_mode else ""
+        
+        yield "info", f"{prefix}Analyzing directory: {src_dir}"
         
         try:
             files = [f for f in os.listdir(src_dir) if os.path.isfile(os.path.join(src_dir, f))]
@@ -91,6 +113,7 @@ class FileSorterCore:
         total = len(files)
         if total == 0:
             yield "skip", f"No files to sort in: {src_dir}"
+            yield "success", f"No files to sort in: {src_dir}"
             return
 
         count = 0
@@ -99,11 +122,20 @@ class FileSorterCore:
         for index, f in enumerate(files):
             yield "progress", {"current": index + 1, "total": total}
             
+            if self.config.get("ignore_hidden", True) and f.startswith('.'):
+                yield "skip", f"Skipped (Hidden file): {f}"
+                continue
+
             if f.lower() in excl or f in ["sorter_config.json", "sorter_log.txt"]:
                 yield "skip", f"Skipped (in exceptions): {f}"
                 continue
                 
             src_path = os.path.join(src_dir, f)
+
+            if not self._is_size_allowed(src_path):
+                yield "skip", f"Skipped (Size out of boundaries): {f}"
+                continue
+
             ext = os.path.splitext(f)[1].lower()
             
             category = None
@@ -124,29 +156,31 @@ class FileSorterCore:
                 m_name = MONTHS_EN.get(dt.month, "Unknown")
                 dest_dir = os.path.join(dest_dir, str(dt.year), m_name)
             
-            os.makedirs(dest_dir, exist_ok=True)
             dest_path = os.path.join(dest_dir, f)
             
             if os.path.exists(dest_path):
                 if self.config["overwrite"]:
-                    try: os.remove(dest_path)
-                    except: pass
+                    if not dry_run_mode:
+                        try: os.remove(dest_path)
+                        except: pass
                 else:
                     n, e = os.path.splitext(f)
                     dest_path = os.path.join(dest_dir, f"{n}_{datetime.now().strftime('%H%M%S')}{e}")
-                    yield "conflict", f"Name conflict. Renamed to {os.path.basename(dest_path)}"
+                    yield "conflict", f"{prefix}Name conflict. Target will be renamed to {os.path.basename(dest_path)}"
 
             try:
-                shutil.move(src_path, dest_path)
+                if not dry_run_mode:
+                    os.makedirs(dest_dir, exist_ok=True)
+                    shutil.move(src_path, dest_path)
                 count += 1
-                yield "move", f"Moved: {f} -> {category}"
+                yield "move", f"{prefix}Processed: {f} -> {category}"
             except Exception as e:
                 yield "error", f"Move error for {f}: {str(e)}"
         
-        if self.config["clean_empty"]:
+        if self.config["clean_empty"] and not dry_run_mode:
             self._clean_empty_folders(src_dir)
             
-        yield "success", f"Processing completed for {src_dir}! Moved: {count} files"
+        yield "success", f"{prefix}Processing completed for {src_dir}! Actions: {count} files"
 
     # --- 2. REVERSE SORTING (Unsort) ---
     def unsort_directory_generator(self, target_dir):
@@ -154,7 +188,10 @@ class FileSorterCore:
             yield "error", "Specified path not found!"
             return
 
-        yield "info", f"Starting reverse sorting (extraction) for: {target_dir}"
+        dry_run_mode = self.config.get("dry_run", False)
+        prefix = "[SIMULATION] " if dry_run_mode else ""
+
+        yield "info", f"{prefix}Starting reverse sorting (extraction) for: {target_dir}"
         all_files = []
         cats = list(self.config["extensions"].keys()) + ["Other"]
         
@@ -163,6 +200,8 @@ class FileSorterCore:
             if os.path.isdir(cp):
                 for r, _, fs in os.walk(cp):
                     for f in fs: 
+                        if self.config.get("ignore_hidden", True) and f.startswith('.'):
+                            continue
                         all_files.append(os.path.join(r, f))
                         
         total = len(all_files)
@@ -180,20 +219,21 @@ class FileSorterCore:
             if os.path.exists(dst):
                 n, e = os.path.splitext(fname)
                 dst = os.path.join(target_dir, f"{n}_old_{datetime.now().strftime('%H%M%S')}{e}")
-                yield "conflict", f"Conflict. Renamed to: {os.path.basename(dst)}"
+                yield "conflict", f"{prefix}Conflict. Target will be renamed to: {os.path.basename(dst)}"
                 
             try:
-                shutil.move(fp, dst)
+                if not dry_run_mode:
+                    shutil.move(fp, dst)
                 count += 1
-                yield "move", f"Extracted: {fname}"
+                yield "move", f"{prefix}Extracted: {fname}"
             except Exception as e:
                 yield "error", f"Extraction error for {fname}: {str(e)}"
 
-        if self.config["clean_empty"]:
+        if self.config["clean_empty"] and not dry_run_mode:
             yield "info", "Cleaning up empty category folders..."
             self._clean_empty_folders(target_dir)
 
-        yield "success", f"Reverse sorting completed! Extracted files: {count}"
+        yield "success", f"{prefix}Reverse sorting completed! Processed files: {count}"
 
     # --- 3. DUPLICATE FINDER ---
     def scan_duplicates_generator(self, path):
@@ -202,28 +242,42 @@ class FileSorterCore:
             return
             
         yield "info", f"Scanning for duplicates in: {path}"
-        all_files = []
+        
+        size_groups = {}
         for root_dir, _, files in os.walk(path):
-            for f in files: 
-                all_files.append(os.path.join(root_dir, f))
+            for f in files:
+                if self.config.get("ignore_hidden", True) and f.startswith('.'):
+                    continue
+                fp = os.path.join(root_dir, f)
+                try:
+                    sz = os.path.getsize(fp)
+                    size_groups.setdefault(sz, []).append(fp)
+                except:
+                    continue
+                    
+        potential_files = []
+        for sz, paths in size_groups.items():
+            if len(paths) > 1:
+                potential_files.extend(paths)
                 
-        total = len(all_files)
-        yield "info", f"Files to analyze: {total}"
+        total = len(potential_files)
+        yield "info", f"Analyzing potential duplicates: {total} candidates matching sizes"
+        
         if total == 0:
-            yield "success", "Directory is empty."
+            yield "success", "No duplicate file sizes found."
             return
 
         hashes = {}
-        for i, fp in enumerate(all_files):
-            if i % max(1, total // 100) == 0:
-                yield "progress", {"current": i + 1, "total": total}
+        for i, fp in enumerate(potential_files):
+            yield "progress", {"current": i + 1, "total": total}
             h = self.get_file_hash(fp)
-            if h: hashes.setdefault(h, []).append(fp)
+            if h: 
+                hashes.setdefault(h, []).append(fp)
 
         groups = [ps for ps in hashes.values() if len(ps) > 1]
         
         if not groups:
-            yield "success", "No duplicates found."
+            yield "success", "No absolute duplicates found."
             return
 
         if self.config.get("auto_dupes", False):
@@ -238,8 +292,7 @@ class FileSorterCore:
                     yield "move", f"Deleted duplicate: {p}"
                 except Exception as e:
                     yield "error", f"Deletion error: {str(e)}"
-                if i % 5 == 0:
-                    yield "progress", {"current": i + 1, "total": len(to_del)}
+                yield "progress", {"current": i + 1, "total": len(to_del)}
             yield "success", f"Auto-deletion completed. Destroyed: {count}"
         else:
             yield "progress", {"current": total, "total": total}
