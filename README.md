@@ -1,38 +1,133 @@
-# MogDop's File Utils
+MD File Utils - File Management Suite
 
-![bg](https://i.ibb.co.com/bw3trPB/Chat-GPT-Image-May-19-2026-04-47-23-PM.png)
+https://i.ibb.co.com/bw3trPB/Chat-GPT-Image-May-19-2026-04-47-23-PM.png
 
-**MogDop's File Utils PRO** is a powerful, feature-rich desktop application designed to eliminate your digital clutter once and for all. If your computer is overflowing with hundreds of unorganized documents, photos, downloads, and archives, this software takes the heavy lifting off your shoulders. With its intuitive interface and intelligent processing algorithms, file management becomes a fast, secure, and fully automated experience.
+MD File Utils is a modern, feature-rich desktop file management application built with a Python backend and a glass-morphism web interface. It transforms chaotic file organization into a streamlined, automated experience with intelligent sorting, duplicate detection, and real-time monitoring.
+Features
+1. Intelligent File Sorting
 
-### Key Features of the Application:
+Automatically categorizes files into logical folders based on extensions:
 
-**1. Intelligent File Sorting**
-The program automatically categorizes files into logical folders (Images, Documents, Video, Music, Archives, Programming, etc.) based on their extensions. It supports two primary operational modes:
-*   **Single Mode:** Sorts files locally within one specific folder.
-*   **Multiple Sources Mode:** Gathers files from several distinct locations and centralizes them into a single target directory.
+    Single Mode - Sort files within a single directory
 
-**2. Deep Metadata Analysis (Smart Sort)**
-The application does more than just read file extensions; it looks inside the files:
-*   For photos, it extracts EXIF data, allowing images to be sorted into folders based on the exact date they were taken.
-*   For music, it reads ID3 tags, automatically grouping tracks into folders named after the respective artists.
+    Multi-Source Mode - Aggregate files from multiple locations into one target directory
 
-**3. Size and Date-Based Organization**
-*   **Size Sorting:** Files are grouped into intuitive size categories—from "Small" (under 10MB) to "Gigantic" (over 500MB)—making it incredibly easy to track down space-hogging files.
-*   **Date Sorting:** Organizes files chronologically by creating nested folders for years and months, perfect for archiving personal photos or financial records.
+2. Metadata Analysis
 
-**4. Real-Time Folder Watcher**
-Set the app to monitor any directory (such as your "Downloads" folder), and it will run silently in the background. As soon as a new file hits the folder, the Watcher service instantly detects and sorts it according to your active rules without any manual intervention.
+    EXIF extraction for photos - sort by capture date
 
-**5. Advanced Duplicate Finder**
-Reclaim valuable disk space with the built-in duplicate scanner. Utilizing a robust MD5 hashing algorithm (optimized with chunk-reading for massive files), the app identifies truly identical files regardless of their filenames. You can review and delete duplicates manually, or use auto-delete with safe integration directly to your system's Recycle Bin.
+    ID3 tag reading for music - organize by artist
 
-**6. Bulk Renamer**
-A handy tool for standardizing your file names instantly. You can perform batch operations to change the case of filenames (all lowercase or all uppercase) and append custom text prefixes to hundreds of files in seconds.
+3. Date & Size Organization
 
-**7. Safety and Preview Controls**
-*   **Preview Mode:** Run a simulation of your sorting settings to see exactly where files *would* go, without making any actual changes to your disk.
-*   **Copy Mode:** Instead of moving files, the program leaves your original directories completely untouched and only distributes copies to the new sorted folders.
-*   **Undo Last Action:** Made a mistake? A dedicated Undo feature tracks your recent operations and seamlessly restores all moved files back to their original locations.
+    Date sorting - Create nested year/month folder structures
 
-**8. Analytics and Customization**
-Keep track of your storage with a built-in Dashboard that visualizes the distribution of your files by extension. The UI is fully bilingual (English and Russian) and supports both Light and Dark themes for comfortable usage. Furthermore, all sorting categories and file extensions are completely customizable to fit your exact workflow requirements.
+    Size filtering - Group files into size tiers (Small <10MB to Gigantic >500MB)
+
+4. Real-Time Folder Watcher
+
+Monitor directories (e.g., Downloads folder) and automatically sort new files as they arrive.
+5. Advanced Duplicate Finder
+
+Uses MD5 hashing with chunk-reading for large files to identify true duplicates regardless of filename.
+6. Bulk Renamer
+
+Batch operations for case conversion and custom text prefixing.
+7. Safety Controls
+
+    Preview Mode (Dry Run) - See what would happen without making changes
+
+    Copy Mode - Leave originals untouched, distribute copies
+
+    Undo Last Action - Restore files to original locations
+
+8. Customization & Analytics
+
+    Fully bilingual (English, Russian, Spanish, Chinese, German)
+
+    Light/Dark themes
+
+    Customizable accent colors and background patterns
+
+    Editable category extension mappings
+
+Installation
+Prerequisites
+
+    Python 3.8+
+
+    pip package manager
+
+Setup
+bash
+
+# Clone or download the application
+cd md-file-utils
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the server
+python start_server.py
+
+Then open your browser to http://localhost:8080
+Dependencies
+
+The application requires the following Python packages:
+
+    watchdog - Real-time filesystem monitoring
+
+    mutagen - Audio metadata (ID3 tags) extraction
+
+    Pillow - Image metadata (EXIF) extraction
+
+Usage
+Quick Start
+
+    Single Mode - Select a folder, choose sorting options, click "Start Sorting"
+
+    Multi-Source Mode - Add source folders, set a target destination, click "Assemble Sources"
+
+    Duplicates - Select a directory to scan for duplicate files
+
+    Settings - Customize category extensions, accent colors, and operation parameters
+
+Keyboard Shortcuts
+Shortcut	Action
+Alt + M	Toggle slow-motion debug mode
+Ctrl + Shift + S	Toggle UI debug delays
+Configuration
+
+Settings are automatically saved to config.json in the application directory, including:
+
+    Sorting preferences (date sort, overwrite, clean empty)
+
+    Size filters (min/max file sizes)
+
+    Hidden file handling
+
+    Dry run mode
+
+    Custom extension mappings for each category
+
+Project Structure
+text
+
+md-file-utils/
+├── start_server.py    # Main entry point
+├── index.html         # Web interface
+├── README.md          # Documentation
+└── requirements.txt   # Python dependencies
+
+API Endpoints
+Endpoint	Method	Description
+/api/config	GET/POST	Load/save application settings
+/api/stream	GET	SSE stream for file operations
+/api/dupes/delete	POST	Delete selected duplicate files
+/api/browse	GET	Open folder selection dialog
+License
+
+MIT License
+Support
+
+For issues or feature requests, please open an issue in the repository.
