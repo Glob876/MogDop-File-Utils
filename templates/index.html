@@ -9,530 +9,522 @@
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { extend: { colors: { darkBg: '#090d16', darkCard: '#131a2a', darkBorder: '#1e293b' } } }
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#05070a',
+                        darkCard: 'rgba(10, 15, 30, 0.7)',
+                        lightCard: 'rgba(255, 255, 255, 0.75)',
+                        darkBorder: 'rgba(255, 255, 255, 0.08)',
+                        lightBorder: 'rgba(0, 0, 0, 0.08)',
+                    },
+                    borderRadius: {
+                        '2xl': '1.25rem',
+                        '3xl': '1.75rem',
+                        '4xl': '2.5rem'
+                    }
+                }
+            }
         }
     </script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --accent-color: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.3);
+            --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.5s, color 0.5s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
 
-        .tab-content {
-            display: none;
+        /* Интерактивные бэкграунды */
+        .bg-mesh {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            transition: all 0.8s ease;
+        }
+        .dark .bg-mesh {
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 60%),
+                #05070a;
+        }
+        .light .bg-mesh {
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.04) 0%, transparent 40%),
+                #f8fafc;
         }
 
-        .tab-content.active {
-            display: block;
-            animation: fadeInUp 0.3s ease-out;
+        /* Сетка бэкграунда */
+        .bg-grid-pattern {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background-size: 40px 40px;
+            opacity: 0.15;
+            transition: opacity 0.5s ease;
+        }
+        .dark .bg-grid-pattern {
+            background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+        }
+        .light .bg-grid-pattern {
+            background-image: linear-gradient(to right, rgba(0,0,0,0.02) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0,0,0,0.02) 1px, transparent 1px);
         }
 
+        /* Glassmorphism */
+        .glass-panel {
+            backdrop-filter: blur(20px) saturate(190%);
+            transition: background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+        .dark .glass-panel {
+            background: rgba(10, 15, 30, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .light .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+
+        /* Акцентные стили через переменные */
+        .bg-accent { background-color: var(--accent-color); }
+        .text-accent { color: var(--accent-color); }
+        .border-accent { border-color: var(--accent-color); }
+        .bg-accent-gradient { background: var(--accent-gradient); }
+        .focus-accent:focus { border-color: var(--accent-color); box-shadow: 0 0 15px var(--accent-glow); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: smoothReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        @keyframes smoothReveal {
+            from { opacity: 0; transform: translateY(15px) scale(0.99); filter: blur(5px); }
+            to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+
+        .sidebar-item {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+        }
         .sidebar-item.active {
-            background-color: rgba(37, 99, 235, 0.1);
-            color: #3b82f6;
-            border-left: 4px solid #3b82f6;
+            color: var(--accent-color);
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .light .sidebar-item.active {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .sidebar-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 15%; bottom: 15%; width: 4px;
+            background: var(--accent-gradient);
+            border-radius: 0 4px 4px 0;
+            box-shadow: 0 0 10px var(--accent-color);
         }
 
-        /* ГЛОБАЛЬНЫЕ ТРАНЗИЦИИ (Плавное перетекание эффектов свечения) */
+        /* Премиум свечения */
         .glow-transition {
-            transition: box-shadow 2.5s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 2.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: box-shadow 1.5s ease, border-color 1.5s ease;
+        }
+        @keyframes rainbowIdle {
+            0% { border-color: rgba(255,255,255,0.07); box-shadow: 0 0 20px rgba(59, 130, 246, 0.02); }
+            50% { border-color: var(--accent-color); box-shadow: 0 0 25px var(--accent-glow); }
+            100% { border-color: rgba(255,255,255,0.07); box-shadow: 0 0 20px rgba(59, 130, 246, 0.02); }
+        }
+        .glow-rainbow-idle { animation: rainbowIdle 8s infinite alternate ease-in-out; }
+
+        @keyframes shimmerGreen {
+            0% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 0 35px rgba(16, 185, 129, 0.4); border-color: rgba(16, 185, 129, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); }
+        }
+        .glow-running-green { animation: shimmerGreen 2s infinite ease-in-out; }
+
+        .glow-success-cyan { border-color: #06b6d4 !important; box-shadow: 0 0 35px rgba(6, 182, 212, 0.4); }
+        .glow-red { border-color: #ef4444 !important; box-shadow: 0 0 35px rgba(239, 68, 68, 0.4); }
+
+        /* Ввод */
+        .input-premium {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .light .input-premium {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            color: #0f172a;
+        }
+        .input-premium:focus {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .light .input-premium:focus {
+            background: rgba(255, 255, 255, 1);
         }
 
-        /* 1. РАДУЖНОЕ ЗАТУХАНИЕ (Режим бездействия) */
-        @keyframes rainbowIdleBreath {
-            0% {
-                box-shadow: 0 0 5px rgba(239, 68, 68, 0.1);
-                border-color: rgba(239, 68, 68, 0.2);
-            }
-
-            10% {
-                box-shadow: 0 0 45px rgba(245, 158, 11, 0.5);
-                border-color: rgba(245, 158, 11, 0.4);
-            }
-
-            20% {
-                box-shadow: 0 0 5px rgba(234, 179, 8, 0.1);
-                border-color: rgba(234, 179, 8, 0.2);
-            }
-
-            30% {
-                box-shadow: 0 0 45px rgba(16, 185, 129, 0.5);
-                border-color: rgba(16, 185, 129, 0.4);
-            }
-
-            40% {
-                box-shadow: 0 0 5px rgba(6, 182, 212, 0.1);
-                border-color: rgba(6, 182, 212, 0.2);
-            }
-
-            50% {
-                box-shadow: 0 0 45px rgba(59, 130, 246, 0.5);
-                border-color: rgba(59, 130, 246, 0.4);
-            }
-
-            60% {
-                box-shadow: 0 0 5px rgba(139, 92, 246, 0.1);
-                border-color: rgba(139, 92, 246, 0.2);
-            }
-
-            70% {
-                box-shadow: 0 0 45px rgba(217, 70, 239, 0.5);
-                border-color: rgba(217, 70, 239, 0.4);
-            }
-
-            80% {
-                box-shadow: 0 0 5px rgba(244, 63, 94, 0.1);
-                border-color: rgba(244, 63, 94, 0.2);
-            }
-
-            90% {
-                box-shadow: 0 0 45px rgba(239, 68, 68, 0.5);
-                border-color: rgba(239, 68, 68, 0.4);
-            }
-
-            100% {
-                box-shadow: 0 0 5px rgba(239, 68, 68, 0.1);
-                border-color: rgba(239, 68, 68, 0.2);
-            }
-        }
-
-        .glow-rainbow-idle {
-            animation: rainbowIdleBreath 16s infinite ease-in-out;
-        }
-
-        /* 2. ЗЕЛЕНОЕ МЕРЦАНИЕ (При сортировке) */
-        @keyframes runningGreenShimmer {
-            0% {
-                box-shadow: 0 0 10px rgba(16, 185, 129, 0.2), inset 0 0 5px rgba(16, 185, 129, 0.1);
-                border-color: rgba(16, 185, 129, 0.3);
-            }
-
-            33% {
-                box-shadow: 0 0 50px rgba(52, 211, 153, 0.7), inset 0 0 20px rgba(52, 211, 153, 0.4);
-                border-color: rgba(52, 211, 153, 0.8);
-            }
-
-            66% {
-                box-shadow: 0 0 15px rgba(4, 120, 87, 0.3), inset 0 0 10px rgba(4, 120, 87, 0.2);
-                border-color: rgba(4, 120, 87, 0.5);
-            }
-
-            100% {
-                box-shadow: 0 0 10px rgba(16, 185, 129, 0.2), inset 0 0 5px rgba(16, 185, 129, 0.1);
-                border-color: rgba(16, 185, 129, 0.3);
-            }
-        }
-
-        .glow-running-green {
-            animation: runningGreenShimmer 2.8s infinite alternate ease-in-out;
-        }
-
-        /* 3. БИРЮЗОВОЕ ДЫХАНИЕ (Успех) */
-        @keyframes successCyanBreath {
-            0% {
-                box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
-                border-color: rgba(6, 182, 212, 0.3);
-            }
-
-            50% {
-                box-shadow: 0 0 60px rgba(6, 182, 212, 0.8), inset 0 0 25px rgba(6, 182, 212, 0.3);
-                border-color: rgba(6, 182, 212, 0.9);
-            }
-
-            100% {
-                box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
-                border-color: rgba(6, 182, 212, 0.3);
-            }
-        }
-
-        .glow-success-cyan {
-            animation: successCyanBreath 3.5s infinite alternate ease-in-out;
-        }
-
-        /* 4. КРАСНАЯ ТРЕВОГА (Ошибка) */
-        @keyframes sharpGlowRed {
-            0% {
-                box-shadow: 0 0 5px rgba(239, 68, 68, 0.2);
-            }
-
-            15% {
-                box-shadow: 0 0 70px rgba(239, 68, 68, 0.9);
-            }
-
-            40% {
-                box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
-            }
-
-            55% {
-                box-shadow: 0 0 80px rgba(239, 68, 68, 1);
-            }
-
-            100% {
-                box-shadow: 0 0 5px rgba(239, 68, 68, 0.2);
-            }
-        }
-
-        .glow-red {
-            animation: sharpGlowRed 1.8s infinite alternate cubic-bezier(0.2, 0.8, 0.2, 1);
-            border-color: rgba(239, 68, 68, 0.6);
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 10px;
-        }
-
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #3b82f6;
-        }
-
-        .toggle-checkbox:checked+.toggle-label {
-            background-color: #3b82f6;
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(150, 150, 150, 0.2); border-radius: 10px; }
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800 dark:bg-darkBg dark:text-slate-100 min-h-screen">
+<body class="bg-slate-50 dark:bg-darkBg text-slate-800 dark:text-slate-100 min-h-screen overflow-hidden flex">
+    <div class="bg-mesh"></div>
+    <div class="bg-grid-pattern" id="bgGrid"></div>
 
-    <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        <aside
-            class="w-64 bg-white dark:bg-darkCard border-r border-slate-200 dark:border-darkBorder flex flex-col justify-between shrink-0">
-            <div>
-                <div class="p-6 flex items-center gap-3">
-                    <div
-                        class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
-                        <i data-lucide="layers" class="w-5 h-5"></i>
+    <!-- Layout Wrapper -->
+    <div class="flex flex-1 p-4 lg:p-6 gap-6 h-screen overflow-hidden relative">
+
+        <!-- Left Sidebar -->
+        <aside class="w-80 glass-panel rounded-3xl flex flex-col shrink-0 z-20">
+            <!-- Brand -->
+            <div class="p-8 pb-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-accent-gradient flex items-center justify-center shadow-lg shadow-blue-500/20 transform rotate-3 hover:rotate-12 transition-transform duration-300">
+                        <i data-lucide="layers" class="w-6 h-6 text-white"></i>
                     </div>
                     <div>
-                        <span class="font-extrabold text-lg tracking-tight">MogDop Utils</span>
-                        <p class="text-[10px] font-semibold uppercase text-blue-500" data-i18n="core_engine">Core Engine
-                        </p>
+                        <h1 class="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-400">
+                            MogDop
+                        </h1>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-accent" data-i18n="core_engine">Premium Suite</p>
                     </div>
                 </div>
-
-                <nav class="px-4 space-y-1.5 mt-2">
-                    <button onclick="showTab('single')" id="nav-single"
-                        class="sidebar-item active w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="layout-grid" class="w-4 h-4"></i> <span data-i18n="nav_single">Single
-                            Mode</span>
-                    </button>
-                    <button onclick="showTab('multi')" id="nav-multi"
-                        class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="git-merge" class="w-4 h-4"></i> <span data-i18n="nav_multi">Multi-Source</span>
-                    </button>
-                    <button onclick="showTab('dupes')" id="nav-dupes"
-                        class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="copy-x" class="w-4 h-4"></i> <span data-i18n="nav_dupes">Find Duplicates</span>
-                    </button>
-                    <button onclick="showTab('settings')" id="nav-settings"
-                        class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> <span
-                            data-i18n="nav_settings">Settings</span>
-                    </button>
-                    <button onclick="showTab('logs')" id="nav-logs"
-                        class="sidebar-item w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500 dark:text-slate-400">
-                        <i data-lucide="terminal" class="w-4 h-4"></i> <span data-i18n="nav_logs">System Logs</span>
-                    </button>
-                </nav>
             </div>
-            <div class="p-4 border-t border-slate-100 dark:border-darkBorder">
-                <button onclick="toggleTheme()"
-                    class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-yellow-400 w-full justify-center hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                    <i data-lucide="moon" id="theme-icon-moon" class="w-4 h-4 hidden dark:block"></i>
-                    <i data-lucide="sun" id="theme-icon-sun" class="w-4 h-4 block dark:hidden"></i>
-                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300"
-                        data-i18n="toggle_theme">Toggle Theme</span>
+
+            <!-- Realtime Clock Widget -->
+            <div class="px-8 py-2">
+                <div class="p-4 rounded-2xl bg-white/5 dark:bg-black/20 border border-white/5 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active Core</span>
+                    </div>
+                    <span id="systemClock" class="text-xs font-mono font-bold text-slate-400">00:00:00</span>
+                </div>
+            </div>
+
+            <!-- Nav -->
+            <nav class="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
+                <button onclick="showTab('single')" id="nav-single" class="sidebar-item active w-full flex items-center gap-4 px-5 py-4 text-sm font-semibold rounded-2xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                    <i data-lucide="layout-grid" class="w-5 h-5"></i> <span data-i18n="nav_single">Single Mode</span>
+                </button>
+                <button onclick="showTab('multi')" id="nav-multi" class="sidebar-item w-full flex items-center gap-4 px-5 py-4 text-sm font-semibold rounded-2xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                    <i data-lucide="git-merge" class="w-5 h-5"></i> <span data-i18n="nav_multi">Multi-Source</span>
+                </button>
+                <button onclick="showTab('dupes')" id="nav-dupes" class="sidebar-item w-full flex items-center gap-4 px-5 py-4 text-sm font-semibold rounded-2xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                    <i data-lucide="copy-x" class="w-5 h-5"></i> <span data-i18n="nav_dupes">Duplicates</span>
+                </button>
+                <div class="border-t border-slate-200 dark:border-white/5 my-4 mx-4"></div>
+                <button onclick="showTab('settings')" id="nav-settings" class="sidebar-item w-full flex items-center gap-4 px-5 py-4 text-sm font-semibold rounded-2xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                    <i data-lucide="sliders" class="w-5 h-5"></i> <span data-i18n="nav_settings">Settings</span>
+                </button>
+                <button onclick="showTab('logs')" id="nav-logs" class="sidebar-item w-full flex items-center gap-4 px-5 py-4 text-sm font-semibold rounded-2xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                    <i data-lucide="terminal" class="w-5 h-5"></i> <span data-i18n="nav_logs">Terminal</span>
+                </button>
+            </nav>
+
+            <!-- Bottom Theme Toggle and Credits -->
+            <div class="p-6 mt-auto border-t border-slate-200 dark:border-white/5 space-y-4">
+                <button onclick="toggleTheme()" class="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition group">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 group-hover:text-slate-950 dark:group-hover:text-white" data-i18n="toggle_theme">Interface Theme</span>
+                    <div class="relative w-10 h-6 bg-slate-300 dark:bg-slate-700 rounded-full p-1 transition-colors duration-300">
+                        <div class="w-4 h-4 bg-white dark:bg-slate-900 rounded-full shadow-md transform translate-x-0 dark:translate-x-4 transition-transform duration-300 flex items-center justify-center">
+                            <i data-lucide="sun" class="w-3 h-3 text-amber-500 dark:hidden"></i>
+                            <i data-lucide="moon" class="w-3 h-3 text-blue-400 hidden dark:block"></i>
+                        </div>
+                    </div>
                 </button>
             </div>
         </aside>
 
-        <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto p-8 lg:p-12 relative" id="mainArea">
+        <!-- Main Workspace -->
+        <main class="flex-1 flex flex-col overflow-hidden relative">
 
-            <!-- Global Progress Bar -->
-            <div id="progressBox"
-                class="hidden fixed top-0 left-0 md:left-64 right-0 bg-slate-900 shadow-xl z-50 p-4 border-b border-emerald-500">
-                <div class="max-w-4xl mx-auto flex flex-col gap-2">
-                    <div class="flex justify-between items-center text-xs font-bold text-white">
-                        <span id="statusLabel" class="text-emerald-400" data-i18n="sys_running">System is
-                            running...</span>
-                        <span id="percentLabel" class="font-mono">0%</span>
+            <!-- Global Action Progress Glass Card -->
+            <div id="progressBox" class="hidden absolute top-4 left-4 right-4 z-50 animate__animated animate__slideInDown">
+                <div class="glass-panel max-w-2xl mx-auto rounded-2xl p-4 shadow-2xl border-emerald-500/20">
+                    <div class="flex justify-between items-center mb-2 px-2">
+                        <span id="statusLabel" class="text-xs font-bold text-emerald-500 flex items-center gap-2">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 animate-spin"></i>
+                            <span data-i18n="sys_running">System Core Active</span>
+                        </span>
+                        <span id="percentLabel" class="text-xs font-mono font-black text-slate-800 dark:text-white">0%</span>
                     </div>
-                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                        <div id="progressBar"
-                            class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-300"
-                            style="width: 0%"></div>
+                    <div class="w-full bg-slate-200 dark:bg-white/5 h-2 rounded-full overflow-hidden">
+                        <div id="progressBar" class="bg-accent-gradient h-full rounded-full transition-all duration-300" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 1: Single Mode -->
-            <section id="tab-single" class="tab-content active max-w-4xl mx-auto mt-4">
-                <header class="mb-8">
-                    <h1 class="text-3xl font-black dark:text-white" data-i18n="single_title">Single Mode</h1>
-                    <p class="text-slate-500 mt-1" data-i18n="single_desc">Sort files within a single directory by
-                        categories.</p>
-                </header>
-                <div
-                    class="glow-transition glow-rainbow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
-                    <label class="block text-sm font-bold text-slate-400 mb-2" data-i18n="workspace_folder">Workspace
-                        Folder</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="singlePath" data-i18n="ph_single_path" placeholder="/home/user/Downloads"
-                            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-                        <button onclick="browseFolder('singlePath')"
-                            class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-700 transition"><i
-                                data-lucide="folder-search" class="w-5 h-5"></i></button>
-                    </div>
+            <!-- Scrollable Page Wrapper -->
+            <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar p-1">
+                <div class="max-w-4xl mx-auto space-y-6 pb-24">
 
-                    <div
-                        class="flex flex-wrap gap-6 mt-5 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="cfg_date_sort"
-                                class="w-4 h-4 text-emerald-600 rounded border-slate-300 dark:border-slate-600 bg-transparent focus:ring-emerald-500">
-                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300"
-                                data-i18n="sort_by_date">Sort by Date</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="cfg_overwrite"
-                                class="w-4 h-4 text-red-600 rounded border-slate-300 dark:border-slate-600 bg-transparent focus:ring-red-500">
-                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300"
-                                data-i18n="overwrite_conflicts">Overwrite Conflicts</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="cfg_clean_empty"
-                                class="w-4 h-4 text-emerald-600 rounded border-slate-300 dark:border-slate-600 bg-transparent focus:ring-emerald-500">
-                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300"
-                                data-i18n="clean_empty">Clean Empty Folders</span>
-                        </label>
-                    </div>
+                    <!-- Tab 1: Single Mode -->
+                    <section id="tab-single" class="tab-content active">
+                        <header class="mb-8">
+                            <h2 class="text-3xl lg:text-4xl font-black tracking-tight" data-i18n="single_title">Single Workspace</h2>
+                            <p class="text-slate-500 mt-2 text-sm lg:text-base" data-i18n="single_desc">Instantly distribute, sort, and categorize directory contents.</p>
+                        </header>
 
-                    <div class="flex gap-4 mt-6">
-                        <button onclick="runEngine('single', 'singlePath')"
-                            class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
-                            <i data-lucide="play" class="w-5 h-5"></i> <span data-i18n="btn_start_single">Start
-                                Sorting</span>
-                        </button>
-                        <button onclick="runEngine('unsort', 'singlePath')"
-                            class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
-                            <i data-lucide="rotate-ccw" class="w-5 h-5"></i> <span data-i18n="btn_reverse">Reverse
-                                (Unsort)</span>
-                        </button>
-                    </div>
+                        <div class="glow-transition glow-rainbow-idle glass-panel rounded-3xl p-8 lg:p-10 space-y-6">
+                            <div>
+                                <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-3" data-i18n="workspace_folder">Workspace Folder</label>
+                                <div class="flex gap-3">
+                                    <input type="text" id="singlePath" data-i18n="ph_single_path" placeholder="/home/user/Downloads"
+                                        class="flex-1 input-premium rounded-2xl px-5 py-4 text-sm outline-none">
+                                    <button onclick="browseFolder('singlePath')" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 p-4 rounded-2xl transition shadow-inner">
+                                        <i data-lucide="folder-search" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                            </div>
 
-                    <div
-                        class="quickLog hidden mt-6 p-4 bg-slate-900 rounded-xl text-xs font-mono text-slate-300 border border-slate-800 h-32 overflow-y-auto space-y-1 shadow-inner">
-                    </div>
-                </div>
-            </section>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-2 bg-slate-100/50 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/5">
+                                <label class="flex items-center gap-3 p-4 rounded-xl cursor-pointer hover:bg-white/50 dark:hover:bg-white/5 transition">
+                                    <input type="checkbox" id="cfg_date_sort" class="w-5 h-5 rounded-lg border-slate-300 dark:border-white/10 bg-transparent text-accent focus:ring-0">
+                                    <span class="text-xs font-bold text-slate-600 dark:text-slate-300" data-i18n="sort_by_date">Sort by Date</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-4 rounded-xl cursor-pointer hover:bg-white/50 dark:hover:bg-white/5 transition">
+                                    <input type="checkbox" id="cfg_overwrite" class="w-5 h-5 rounded-lg border-slate-300 dark:border-white/10 bg-transparent text-accent focus:ring-0">
+                                    <span class="text-xs font-bold text-slate-600 dark:text-slate-300" data-i18n="overwrite_conflicts">Overwrite Conflicts</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-4 rounded-xl cursor-pointer hover:bg-white/50 dark:hover:bg-white/5 transition">
+                                    <input type="checkbox" id="cfg_clean_empty" class="w-5 h-5 rounded-lg border-slate-300 dark:border-white/10 bg-transparent text-accent focus:ring-0">
+                                    <span class="text-xs font-bold text-slate-600 dark:text-slate-300" data-i18n="clean_empty">Clean Empty</span>
+                                </label>
+                            </div>
 
-            <!-- Tab 2: Multi Mode -->
-            <section id="tab-multi" class="tab-content max-w-4xl mx-auto mt-4">
-                <header class="mb-8">
-                    <h1 class="text-3xl font-black dark:text-white" data-i18n="multi_title">Multi-Source Mode</h1>
-                    <p class="text-slate-500 mt-1" data-i18n="multi_desc">Gather and sort files from multiple locations
-                        into one target folder.</p>
-                </header>
-                <div
-                    class="glow-transition glow-rainbow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
-                    <label class="block text-sm font-bold text-slate-400 mb-2" data-i18n="target_folder">Target Folder
-                        (Destination)</label>
-                    <div class="flex gap-2 mb-6">
-                        <input type="text" id="multiTarget" data-i18n="ph_multi_target"
-                            placeholder="Where should files go?"
-                            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none text-emerald-500 dark:text-emerald-400 font-bold focus:ring-2 focus:ring-emerald-500 transition-colors">
-                        <button onclick="browseFolder('multiTarget')"
-                            class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-700 transition"><i
-                                data-lucide="folder-down" class="w-5 h-5"></i></button>
-                    </div>
+                            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                                <button onclick="runEngine('single', 'singlePath')" class="flex-1 bg-accent-gradient hover:opacity-90 text-white py-4 px-6 rounded-2xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-blue-500/10 flex justify-center items-center gap-2 transform active:scale-98 transition">
+                                    <i data-lucide="play" class="w-5 h-5"></i> <span data-i18n="btn_start_single">Start Sorting</span>
+                                </button>
+                                <button onclick="runEngine('unsort', 'singlePath')" class="flex-1 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 py-4 px-6 rounded-2xl font-bold text-sm transform active:scale-98 transition border border-slate-200 dark:border-white/5 flex justify-center items-center gap-2" data-i18n="btn_reverse">
+                                    <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Reverse Action
+                                </button>
+                            </div>
 
-                    <div class="flex justify-between items-end mb-2">
-                        <label class="block text-sm font-bold text-slate-400" data-i18n="sources_origin">Sources
-                            (Origin)</label>
-                        <button onclick="addSourceUI()"
-                            class="text-xs bg-indigo-500/20 text-indigo-500 dark:text-indigo-400 px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-indigo-500/40 transition">
-                            <i data-lucide="plus" class="w-4 h-4"></i> <span data-i18n="btn_add">Add</span>
-                        </button>
-                    </div>
-                    <div id="sourcesListUI"
-                        class="space-y-2 max-h-48 overflow-y-auto pr-2 mb-6 border border-slate-200 dark:border-slate-800 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/50 transition-colors">
-                    </div>
-
-                    <div
-                        class="flex flex-col gap-3 mb-6 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
-                        <label
-                            class="flex items-center gap-2 cursor-pointer border-b border-slate-200 dark:border-slate-700 pb-3">
-                            <input type="checkbox" id="cfg_include_target"
-                                class="w-4 h-4 text-emerald-600 rounded border-slate-300 dark:border-slate-600 focus:ring-emerald-500 bg-transparent">
-                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300"
-                                data-i18n="include_target">Include Target Folder (Sort files already inside
-                                target)</span>
-                        </label>
-                        <div class="flex flex-wrap gap-6 pt-1">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="cfg_date_sort_m"
-                                    class="w-4 h-4 text-emerald-600 rounded border-slate-300 dark:border-slate-600 focus:ring-emerald-500 bg-transparent">
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300"
-                                    data-i18n="sort_by_date">Sort by Date</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="cfg_overwrite_m"
-                                    class="w-4 h-4 text-red-600 rounded border-slate-300 dark:border-slate-600 focus:ring-red-500 bg-transparent">
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300"
-                                    data-i18n="overwrite_conflicts">Overwrite Conflicts</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="cfg_clean_empty_m"
-                                    class="w-4 h-4 text-emerald-600 rounded border-slate-300 dark:border-slate-600 focus:ring-emerald-500 bg-transparent">
-                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300"
-                                    data-i18n="clean_empty">Clean Empty Folders</span>
-                            </label>
+                            <div class="quickLog hidden p-4 bg-slate-900/90 dark:bg-black/40 rounded-2xl border border-slate-200 dark:border-white/5 font-mono text-[11px] h-32 overflow-y-auto space-y-1"></div>
                         </div>
-                    </div>
+                    </section>
 
-                    <button onclick="runEngineMulti()"
-                        class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
-                        <i data-lucide="combine" class="w-5 h-5"></i> <span data-i18n="btn_start_multi">Start
-                            Assembly</span>
-                    </button>
+                    <!-- Tab 2: Multi-Source -->
+                    <section id="tab-multi" class="tab-content">
+                        <header class="mb-8">
+                            <h2 class="text-3xl lg:text-4xl font-black tracking-tight" data-i18n="multi_title">Multi-Source Gatherer</h2>
+                            <p class="text-slate-500 mt-2 text-sm lg:text-base" data-i18n="multi_desc">Aggregate data pipelines from distinct folders into a target pool.</p>
+                        </header>
 
-                    <div
-                        class="quickLog hidden mt-6 p-4 bg-slate-900 rounded-xl text-xs font-mono text-slate-300 border border-slate-800 h-32 overflow-y-auto space-y-1 shadow-inner">
-                    </div>
+                        <div class="glow-transition glow-rainbow-idle glass-panel rounded-3xl p-8 lg:p-10 space-y-6">
+                            <div>
+                                <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-3" data-i18n="target_folder">Target Folder (Destination)</label>
+                                <div class="flex gap-3">
+                                    <input type="text" id="multiTarget" data-i18n="ph_multi_target" placeholder="Where should files go?"
+                                        class="flex-1 input-premium rounded-2xl px-5 py-4 text-sm outline-none font-bold">
+                                    <button onclick="browseFolder('multiTarget')" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 p-4 rounded-2xl transition">
+                                        <i data-lucide="folder-down" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between items-center mb-3">
+                                    <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400" data-i18n="sources_origin">Sources</label>
+                                    <button onclick="addSourceUI()" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-accent-gradient text-white flex items-center gap-1 hover:opacity-95 transition">
+                                        <i data-lucide="plus" class="w-4 h-4"></i> <span data-i18n="btn_add">Add Source</span>
+                                    </button>
+                                </div>
+                                <div id="sourcesListUI" class="space-y-2 max-h-48 overflow-y-auto p-3 bg-slate-100/50 dark:bg-black/25 rounded-2xl border border-slate-200 dark:border-white/5">
+                                    <!-- Dynamic sources -->
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-slate-100/50 dark:bg-black/25 border border-slate-200 dark:border-white/5 rounded-2xl space-y-4">
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" id="cfg_include_target" class="w-5 h-5 rounded-lg border-slate-300 dark:border-white/10 bg-transparent text-accent">
+                                    <span class="text-xs font-bold text-slate-600 dark:text-slate-300" data-i18n="include_target">Include Target Folder (Self-Sort)</span>
+                                </label>
+                                <div class="flex flex-wrap gap-6 pt-3 border-t border-slate-200 dark:border-white/5">
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="cfg_date_sort_m" class="rounded-md text-accent border-slate-300 dark:border-white/10 bg-transparent"><span class="text-xs font-bold text-slate-500" data-i18n="sort_by_date">Sort by Date</span></label>
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="cfg_overwrite_m" class="rounded-md text-accent border-slate-300 dark:border-white/10 bg-transparent"><span class="text-xs font-bold text-slate-500" data-i18n="overwrite_conflicts">Overwrite</span></label>
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="cfg_clean_empty_m" class="rounded-md text-accent border-slate-300 dark:border-white/10 bg-transparent"><span class="text-xs font-bold text-slate-500" data-i18n="clean_empty">Clean Empty</span></label>
+                                </div>
+                            </div>
+
+                            <button onclick="runEngineMulti()" class="w-full bg-accent-gradient text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-wider shadow-lg hover:opacity-95 transition flex justify-center items-center gap-2">
+                                <i data-lucide="combine" class="w-5 h-5"></i> <span data-i18n="btn_start_multi">Assemble Sources</span>
+                            </button>
+
+                            <div class="quickLog hidden p-4 bg-slate-900/90 dark:bg-black/40 rounded-2xl border border-slate-200 dark:border-white/5 font-mono text-[11px] h-32 overflow-y-auto space-y-1"></div>
+                        </div>
+                    </section>
+
+                    <!-- Tab 3: Duplicates -->
+                    <section id="tab-dupes" class="tab-content">
+                        <header class="mb-8">
+                            <h2 class="text-3xl lg:text-4xl font-black tracking-tight" data-i18n="dupes_title">Hash Duplicate Finder</h2>
+                            <p class="text-slate-500 mt-2 text-sm lg:text-base" data-i18n="dupes_desc">Perform hardware-accelerated MD5 scans to locate binary clones.</p>
+                        </header>
+
+                        <div class="glow-transition glow-rainbow-idle glass-panel rounded-3xl p-8 lg:p-10 space-y-6">
+                            <div>
+                                <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-3" data-i18n="folder_scan">Directory to Analyze</label>
+                                <div class="flex gap-3">
+                                    <input type="text" id="dupePath" data-i18n="ph_dupe_path" placeholder="/home/user/Documents"
+                                        class="flex-1 input-premium rounded-2xl px-5 py-4 text-sm outline-none">
+                                    <button onclick="browseFolder('dupePath')" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 p-4 rounded-2xl transition">
+                                        <i data-lucide="search" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <label class="flex items-center gap-3 p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl cursor-pointer">
+                                <input type="checkbox" id="cfg_auto_dupes" class="w-5 h-5 rounded-lg border-amber-500/20 bg-transparent text-amber-500">
+                                <span class="text-xs font-semibold text-amber-700 dark:text-amber-500/80" data-i18n="auto_dupes_desc">Instant Deletion (Bypass manual selection)</span>
+                            </label>
+
+                            <button onclick="runEngine('scan_dupes', 'dupePath')" class="w-full bg-amber-600 hover:bg-amber-500 text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-wider flex justify-center items-center gap-2 transition">
+                                <i data-lucide="scan-line" class="w-5 h-5"></i> <span data-i18n="btn_start_scan">Initialize Deep Scan</span>
+                            </button>
+
+                            <div class="quickLog hidden p-4 bg-slate-900/90 dark:bg-black/40 rounded-2xl border border-slate-200 dark:border-white/5 font-mono text-[11px] h-32 overflow-y-auto space-y-1"></div>
+                        </div>
+
+                        <div id="dupeResultsArea" class="hidden mt-6 animate__animated animate__fadeInUp">
+                            <div class="glass-panel border-amber-500/20 rounded-3xl p-6 lg:p-8">
+                                <h3 class="text-amber-500 font-bold mb-4 flex items-center gap-2">
+                                    <i data-lucide="alert-circle" class="w-5 h-5"></i> <span data-i18n="select_to_delete">Binary Match Groups</span>
+                                </h3>
+                                <div id="dupeGroupsList" class="space-y-4 max-h-[400px] overflow-y-auto pr-2"></div>
+                                <button onclick="deleteSelectedDupes()" class="w-full mt-6 bg-red-600 hover:bg-red-500 text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-wider transition">
+                                    Purge Selected Clones
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Tab 4: Settings & Customizer -->
+                    <section id="tab-settings" class="tab-content">
+                        <header class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                            <div>
+                                <h2 class="text-3xl lg:text-4xl font-black tracking-tight" data-i18n="settings_title">Control Panel</h2>
+                                <p class="text-slate-500 mt-2 text-sm lg:text-base" data-i18n="settings_desc">Adjust aesthetic characteristics, performance and categorization dictionary.</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-bold text-slate-400" data-i18n="interface_language">Language</span>
+                                <select id="langSelect" onchange="setLang(this.value)"
+                                    class="glass-panel text-slate-800 dark:text-slate-100 px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-white/5 outline-none cursor-pointer">
+                                    <option value="en">🇺🇸 English</option>
+                                    <option value="ru">🇷🇺 Русский</option>
+                                </select>
+                            </div>
+                        </header>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <!-- Design and Palette Panel -->
+                            <div class="glass-panel rounded-3xl p-6 lg:p-8 space-y-6">
+                                <h3 class="text-xs font-black uppercase tracking-widest text-accent flex items-center gap-2">
+                                    <i data-lucide="palette" class="w-4 h-4"></i> Aesthetic customizer
+                                </h3>
+
+                                <!-- Accent Selector -->
+                                <div class="space-y-3">
+                                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Core Accent Hue</span>
+                                    <div class="grid grid-cols-4 gap-2">
+                                        <button onclick="setSystemAccent('#3b82f6', 'rgba(59, 130, 246, 0.3)', 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)')" class="h-10 rounded-xl bg-blue-500 hover:scale-105 active:scale-95 transition flex items-center justify-center text-white text-[10px] font-bold">Cyber</button>
+                                        <button onclick="setSystemAccent('#10b981', 'rgba(16, 185, 129, 0.3)', 'linear-gradient(135deg, #10b981 0%, #059669 100%)')" class="h-10 rounded-xl bg-emerald-500 hover:scale-105 active:scale-95 transition flex items-center justify-center text-white text-[10px] font-bold">Eco</button>
+                                        <button onclick="setSystemAccent('#8b5cf6', 'rgba(139, 92, 246, 0.3)', 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)')" class="h-10 rounded-xl bg-purple-500 hover:scale-105 active:scale-95 transition flex items-center justify-center text-white text-[10px] font-bold">Neon</button>
+                                        <button onclick="setSystemAccent('#ec4899', 'rgba(236, 72, 153, 0.3)', 'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)')" class="h-10 rounded-xl bg-pink-500 hover:scale-105 active:scale-95 transition flex items-center justify-center text-white text-[10px] font-bold">Sunset</button>
+                                    </div>
+                                </div>
+
+                                <!-- Background patterns -->
+                                <div class="space-y-3">
+                                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Backdrop Pattern</span>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button onclick="setPattern('mesh')" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition">Dynamic Gradient</button>
+                                        <button onclick="setPattern('grid')" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition">Cyber Grid</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Process rules card -->
+                            <div class="glass-panel rounded-3xl p-6 lg:p-8 space-y-6">
+                                <h3 class="text-xs font-black uppercase tracking-widest text-accent flex items-center gap-2">
+                                    <i data-lucide="shield-check" class="w-4 h-4"></i> Operation Core
+                                </h3>
+                                <div class="space-y-4">
+                                    <label class="flex items-center gap-4 p-4 rounded-2xl bg-slate-100/50 dark:bg-black/20 hover:bg-slate-200/50 dark:hover:bg-white/5 transition cursor-pointer">
+                                        <input type="checkbox" id="cfg_move_unknown" class="w-5 h-5 rounded-lg border-slate-300 dark:border-white/10 bg-transparent text-accent">
+                                        <div>
+                                            <span class="text-xs font-bold block" data-i18n="move_unknown">Isolate Unknowns</span>
+                                            <span class="text-[10px] text-slate-500">Redirect undefined extensions to "Other"</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Dictionary Card -->
+                        <div class="glass-panel rounded-3xl p-8 space-y-6">
+                            <h3 class="text-xs font-black uppercase tracking-widest text-accent flex items-center gap-2">
+                                <i data-lucide="folder-cog" class="w-5 h-5"></i> <span data-i18n="category_extensions">Category Mapping</span>
+                            </h3>
+                            <div id="configArea" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                            <button onclick="saveGlobalSettings()"
+                                class="w-full bg-accent-gradient hover:opacity-95 text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-wider transition"
+                                data-i18n="btn_save_config">Update Dictionary</button>
+                        </div>
+                    </section>
+
+                    <!-- Tab 5: Terminal Logs -->
+                    <section id="tab-logs" class="tab-content h-full">
+                        <header class="mb-8 flex justify-between items-end">
+                            <div>
+                                <h2 class="text-3xl lg:text-4xl font-black tracking-tight" data-i18n="logs_title">System Terminal</h2>
+                                <p class="text-slate-500 mt-2 text-sm lg:text-base" data-i18n="logs_desc">Direct telemetry flow from active indexing and categorization processes.</p>
+                            </div>
+                            <button onclick="document.getElementById('logTerminal').innerHTML=''"
+                                class="text-xs font-bold text-slate-500 hover:text-red-500 flex items-center gap-1.5 transition">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i> <span data-i18n="clear_log">Flush Console</span>
+                            </button>
+                        </header>
+
+                        <!-- Terminal Container -->
+                        <div class="glass-panel rounded-3xl p-1 overflow-hidden h-[550px] flex flex-col border border-slate-200 dark:border-white/5 relative shadow-inner">
+                            <!-- Window Bar -->
+                            <div class="flex items-center justify-between px-6 py-4 bg-slate-100 dark:bg-black/40 border-b border-slate-200 dark:border-white/5 rounded-t-3xl shrink-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-red-500/80"></span>
+                                    <span class="w-3.5 h-3.5 rounded-full bg-amber-500/80"></span>
+                                    <span class="w-3.5 h-3.5 rounded-full bg-emerald-500/80"></span>
+                                </div>
+                                <div class="text-[10px] font-black tracking-wider text-slate-400 font-mono flex items-center gap-1.5 uppercase">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                                    stream://localhost:8080
+                                </div>
+                            </div>
+                            <!-- Logs area -->
+                            <div id="logTerminal" class="flex-1 p-6 overflow-y-auto space-y-2 bg-slate-950 text-slate-300 font-mono text-xs select-all">
+                                <p class="text-slate-600">> Kernel telemetry stream attached. Standing by...</p>
+                            </div>
+                        </div>
+                    </section>
+
                 </div>
-            </section>
-
-            <!-- Tab 3: Duplicates -->
-            <section id="tab-dupes" class="tab-content max-w-4xl mx-auto mt-4">
-                <header class="mb-8">
-                    <h1 class="text-3xl font-black dark:text-white" data-i18n="dupes_title">Duplicate Finder</h1>
-                    <p class="text-slate-500 mt-1" data-i18n="dupes_desc">Deep MD5 hashing to find exact copies of
-                        files.</p>
-                </header>
-                <div
-                    class="glow-transition glow-rainbow-idle bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder">
-                    <label class="block text-sm font-bold text-slate-400 mb-2" data-i18n="folder_scan">Folder to
-                        scan</label>
-                    <div class="flex gap-2 mb-5">
-                        <input type="text" id="dupePath" data-i18n="ph_dupe_path" placeholder="Select directory..."
-                            class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 transition-colors">
-                        <button onclick="browseFolder('dupePath')"
-                            class="bg-slate-200 dark:bg-slate-800 p-3 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-700 transition"><i
-                                data-lucide="search" class="w-5 h-5"></i></button>
-                    </div>
-
-                    <label
-                        class="flex items-center gap-2 cursor-pointer mb-6 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-200 dark:border-amber-900/30 transition-colors">
-                        <input type="checkbox" id="cfg_auto_dupes"
-                            class="w-4 h-4 text-amber-600 rounded border-amber-300 dark:border-amber-700 focus:ring-amber-500 bg-transparent">
-                        <span class="text-xs font-semibold text-amber-800 dark:text-amber-500"
-                            data-i18n="auto_dupes_desc">Auto-delete duplicates without asking</span>
-                    </label>
-
-                    <button onclick="runEngine('scan_dupes', 'dupePath')"
-                        class="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 transition transform active:scale-95">
-                        <i data-lucide="scan-line" class="w-5 h-5"></i> <span data-i18n="btn_start_scan">Start
-                            Scan</span>
-                    </button>
-
-                    <div
-                        class="quickLog hidden mt-6 p-4 bg-slate-900 rounded-xl text-xs font-mono text-slate-300 border border-slate-800 h-32 overflow-y-auto space-y-1 shadow-inner">
-                    </div>
-                </div>
-
-                <div id="dupeResultsArea"
-                    class="hidden mt-6 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-amber-300 dark:border-amber-500/50 shadow-lg transition-colors">
-                    <h3 class="text-amber-600 dark:text-amber-400 font-bold mb-4 flex items-center gap-2"><i
-                            data-lucide="alert-circle" class="w-5 h-5"></i> <span data-i18n="select_to_delete">Select
-                            files to delete</span></h3>
-                    <div id="dupeGroupsList" class="space-y-4 max-h-96 overflow-y-auto pr-2"></div>
-                    <button onclick="deleteSelectedDupes()"
-                        class="w-full mt-6 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold shadow-lg shadow-red-900/50 transition transform active:scale-95"
-                        data-i18n="btn_delete_selected">
-                        DELETE SELECTED PERMANENTLY
-                    </button>
-                </div>
-            </section>
-
-            <!-- Tab: Settings -->
-            <section id="tab-settings" class="tab-content max-w-4xl mx-auto mt-4">
-                <header class="mb-8 flex justify-between items-end">
-                    <div>
-                        <h1 class="text-3xl font-black dark:text-white" data-i18n="settings_title">Configuration</h1>
-                        <p class="text-slate-500 mt-1" data-i18n="settings_desc">Global extension rules and behavior.
-                        </p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="text-sm font-bold text-slate-400" data-i18n="interface_language">Interface
-                            Language</span>
-                        <select id="langSelect" onchange="setLang(this.value)"
-                            class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-2 rounded-lg text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
-                            <option value="en">🇺🇸 English</option>
-                            <option value="ru">🇷🇺 Русский</option>
-                        </select>
-                    </div>
-                </header>
-                <div class="space-y-6">
-                    <div
-                        class="bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder shadow-sm transition-colors">
-                        <h2 class="text-lg font-bold mb-4 text-blue-600 dark:text-blue-500 flex items-center gap-2"><i
-                                data-lucide="toggle-right" class="w-5 h-5"></i> <span data-i18n="global_toggles">Global
-                                Toggles</span></h2>
-                        <label
-                            class="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl cursor-pointer border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-                            <input type="checkbox" id="cfg_move_unknown"
-                                class="w-5 h-5 rounded border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-blue-500 dark:bg-slate-800">
-                            <span class="text-sm font-semibold text-slate-700 dark:text-slate-300"
-                                data-i18n="move_unknown">Move unknown extensions to "Other"</span>
-                        </label>
-                    </div>
-                    <div
-                        class="bg-white dark:bg-darkCard rounded-2xl p-8 border border-slate-200 dark:border-darkBorder shadow-sm transition-colors">
-                        <h2 class="text-lg font-bold mb-4 text-indigo-600 dark:text-indigo-500 flex items-center gap-2">
-                            <i data-lucide="folder-cog" class="w-5 h-5"></i> <span
-                                data-i18n="category_extensions">Category Extensions</span></h2>
-                        <div id="configArea" class="space-y-3"></div>
-                        <button onclick="saveGlobalSettings()"
-                            class="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition transform active:scale-95 shadow-lg shadow-blue-500/30"
-                            data-i18n="btn_save_config">Save Configuration</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Tab: Logs -->
-            <section id="tab-logs" class="tab-content max-w-4xl mx-auto mt-4">
-                <header class="mb-8 flex justify-between items-end">
-                    <div>
-                        <h1 class="text-3xl font-black dark:text-white" data-i18n="logs_title">System Terminal</h1>
-                        <p class="text-slate-500 mt-1" data-i18n="logs_desc">Real-time detailed log of backend
-                            operations.</p>
-                    </div>
-                    <button onclick="document.getElementById('logTerminal').innerHTML=''"
-                        class="text-xs font-medium text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center gap-1 transition">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i> <span data-i18n="clear_log">Clear log</span>
-                    </button>
-                </header>
-                <div id="terminalCard"
-                    class="glow-transition glow-rainbow-idle bg-slate-900 dark:bg-slate-950 rounded-2xl p-6 border border-slate-800 h-[600px] flex flex-col font-mono text-sm shadow-2xl transition-colors">
-                    <div id="logTerminal" class="flex-1 overflow-y-auto space-y-2 pr-2 text-slate-300">
-                        <p class="text-slate-500">> Terminal initialized...</p>
-                    </div>
-                </div>
-            </section>
-
+            </div>
         </main>
     </div>
 
@@ -606,17 +598,67 @@
             }
         });
 
+        // Свежие кастомные настройки интерфейса
+        function setSystemAccent(primary, glow, gradient) {
+            document.documentElement.style.setProperty('--accent-color', primary);
+            document.documentElement.style.setProperty('--accent-glow', glow);
+            document.documentElement.style.setProperty('--accent-gradient', gradient);
+            localStorage.setItem('--accent-color', primary);
+            localStorage.setItem('--accent-glow', glow);
+            localStorage.setItem('--accent-gradient', gradient);
+            addLog("System Core palette accent updated.", "success");
+        }
+
+        function setPattern(style) {
+            const grid = document.getElementById('bgGrid');
+            if (style === 'grid') {
+                grid.style.opacity = '0.15';
+            } else {
+                grid.style.opacity = '0';
+            }
+            localStorage.setItem('bgStyle', style);
+        }
+
+        function restoreCustomStyle() {
+            const p = localStorage.getItem('--accent-color');
+            const g = localStorage.getItem('--accent-glow');
+            const gr = localStorage.getItem('--accent-gradient');
+            const bs = localStorage.getItem('bgStyle') || 'grid';
+            if (p && g && gr) {
+                document.documentElement.style.setProperty('--accent-color', p);
+                document.documentElement.style.setProperty('--accent-glow', g);
+                document.documentElement.style.setProperty('--accent-gradient', gr);
+            }
+            setPattern(bs);
+        }
+
         function showTab(tabId) {
             document.querySelectorAll('.tab-content, .sidebar-item').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.add('active');
             document.getElementById('nav-' + tabId).classList.add('active');
         }
 
+        // --- ИСПРАВЛЕННАЯ СМЕНА ТЕМЫ ---
         function toggleTheme() {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.remove('light');
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
         }
-        if (localStorage.getItem('theme') !== 'light') document.documentElement.classList.add('dark');
+        // Восстановление темы при старте
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+        } else {
+            document.documentElement.classList.remove('light');
+            document.documentElement.classList.add('dark');
+        }
 
         function setGlowState(state) {
             document.querySelectorAll('.glow-transition').forEach(card => {
@@ -629,7 +671,7 @@
         }
 
         function addLog(msg, type = "info") {
-            const time = new Date().toLocaleTimeString();
+            const time = new Date().toLocaleTimeString([], { hour12: false });
             let color = "text-slate-300", icon = "info", iconColor = "text-sky-400";
 
             if (type === "move") { color = "text-emerald-400"; icon = "check"; iconColor = "text-emerald-500"; }
@@ -640,8 +682,8 @@
 
             const term = document.getElementById('logTerminal');
             const el = document.createElement("div");
-            el.className = "flex items-start gap-2 animate__animated animate__fadeInLeft hover:bg-slate-800 p-1 rounded transition-colors";
-            el.innerHTML = `<span class="text-slate-600 text-xs mt-0.5 shrink-0">[${time}]</span><span class="${iconColor} mt-0.5 shrink-0"><i data-lucide="${icon}" class="w-4 h-4"></i></span><span class="${color}">${msg}</span>`;
+            el.className = "flex items-start gap-2 py-0.5 animate__animated animate__fadeInLeft hover:bg-slate-900 px-2 rounded transition-colors";
+            el.innerHTML = `<span class="text-slate-600 text-[10px] mt-0.5 shrink-0">[${time}]</span><span class="${iconColor} mt-0.5 shrink-0"><i data-lucide="${icon}" class="w-3.5 h-3.5"></i></span><span class="${color}">${msg}</span>`;
             term.appendChild(el);
             term.scrollTop = term.scrollHeight;
 
@@ -663,11 +705,8 @@
             while (eventQueue.length > 0) {
                 const data = eventQueue.shift();
                 handleEventData(data);
-
-                // Искусственная случайная задержка для имитации "глубокого сканирования"
-                let delay = Math.random() * 200 + 100; // от 100мс до 300мс на файл
+                let delay = Math.random() * 200 + 100;
                 if (data.type === 'success' || data.type === 'error') delay = 0;
-
                 await new Promise(r => setTimeout(r, delay));
             }
             isProcessingQueue = false;
@@ -684,7 +723,7 @@
             } else if (data.type === 'success' || data.type === 'error') {
                 addLog(data.message, data.type);
                 setGlowState(data.type === 'success' ? 'success' : 'error');
-                setTimeout(() => { pb.classList.add('hidden'); setGlowState('idle'); }, 4000); // 4 sec success glow before going back to rainbow
+                setTimeout(() => { pb.classList.add('hidden'); setGlowState('idle'); }, 4000);
             } else {
                 addLog(data.message, data.type);
             }
@@ -715,9 +754,9 @@
         function renderSources() {
             const list = document.getElementById('sourcesListUI');
             list.innerHTML = multiSourcesArray.map((s, i) => `
-                <div class="flex justify-between items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-lg shadow-sm transition-colors">
-                    <span class="text-xs font-mono text-slate-600 dark:text-slate-300 break-all">${s}</span>
-                    <button onclick="remSourceUI(${i})" class="text-red-500 hover:text-red-600 p-1 transition"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                <div class="flex justify-between items-center bg-white/5 border border-white/5 p-3 rounded-xl hover:bg-white/10 transition group">
+                    <span class="text-xs font-mono text-slate-500 dark:text-slate-300 break-all">${s}</span>
+                    <button onclick="remSourceUI(${i})" class="text-slate-400 hover:text-red-500 p-1 transition"><i data-lucide="trash" class="w-4 h-4"></i></button>
                 </div>
             `).join('');
             lucide.createIcons();
@@ -773,12 +812,9 @@
             eventSource = new EventSource(url);
             eventSource.onmessage = function (e) {
                 const data = JSON.parse(e.data);
-
-                // Закрываем источник событий, если получено событие успеха/ошибки
                 if (data.type === 'success' || data.type === 'error') {
                     eventSource.close();
                 }
-
                 if (isSlowMode) {
                     eventQueue.push(data);
                     if (!isProcessingQueue) processQueue();
@@ -795,15 +831,15 @@
             const loc = i18n[currentLang];
 
             list.innerHTML = groups.map((g, idx) => `
-                <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors">
-                    <div class="text-xs text-amber-600 dark:text-amber-500 font-bold mb-2">${loc.group} ${idx + 1} (${g.length} ${loc.files})</div>
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/5 transition-colors">
+                    <div class="text-xs text-amber-500 font-bold mb-3">${loc.group} ${idx + 1} (${g.length} ${loc.files})</div>
                     ${g.map((f, i) => `
-                        <label class="flex items-center justify-between gap-2 mb-1 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 p-2 rounded transition border ${i === 0 ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-transparent'}">
+                        <label class="flex items-center justify-between gap-2 mb-1.5 cursor-pointer hover:bg-white/10 p-2.5 rounded-xl transition border ${i === 0 ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-transparent'}">
                             <div class="flex items-center gap-2 truncate">
                                 <input type="checkbox" value="${f}" class="dupe-cb w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-500" ${i > 0 ? 'checked' : ''}>
-                                <span class="text-xs font-mono text-slate-700 dark:text-slate-300 truncate" title="${f}">${f}</span>
+                                <span class="text-xs font-mono text-slate-300 truncate" title="${f}">${f}</span>
                             </div>
-                            <span class="shrink-0 text-[10px] font-bold uppercase px-2 py-0.5 rounded ${i === 0 ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/20 text-red-600 dark:text-red-400'}">
+                            <span class="shrink-0 text-[10px] font-bold uppercase px-2 py-0.5 rounded ${i === 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">
                                 ${i === 0 ? loc.original_keep : loc.duplicate_delete}
                             </span>
                         </label>
@@ -857,9 +893,9 @@
             area.innerHTML = '';
             for (const [cat, exts] of Object.entries(config.extensions)) {
                 area.innerHTML += `
-                    <div class="flex items-center gap-4">
-                        <span class="w-40 font-bold text-xs uppercase text-slate-600 dark:text-slate-400">${cat}</span>
-                        <input type="text" value="${exts}" data-cat="${cat}" class="cat-input flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-2.5 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                    <div class="flex flex-col gap-1 p-3 bg-white/5 rounded-xl border border-white/5">
+                        <span class="font-black text-[9px] uppercase text-slate-400 tracking-wider">${cat}</span>
+                        <input type="text" value="${exts}" data-cat="${cat}" class="cat-input cat-input bg-transparent border-none p-0 text-sm font-bold text-accent outline-none focus:ring-0">
                     </div>`;
             }
 
@@ -868,10 +904,23 @@
 
         async function saveGlobalSettings() {
             await silentSaveConfig();
-            addLog("Global configuration saved.", "info");
+            addLog("Global configuration saved.", "success");
         }
 
-        window.onload = () => { lucide.createIcons(); loadConfig(); };
+        // Live Clock Widget Logic
+        function startSystemClock() {
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('systemClock').innerText = now.toLocaleTimeString([], { hour12: false });
+            }, 1000);
+        }
+
+        window.onload = () => {
+            lucide.createIcons();
+            restoreCustomStyle();
+            loadConfig();
+            startSystemClock();
+        };
     </script>
 </body>
 
