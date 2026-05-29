@@ -1,0 +1,30 @@
+# Maintainer: Glob876 <gleb87687@gmail.com>
+pkgname=mdfu-git
+pkgver=r1.0.0
+pkgrel=1
+pkgdesc="MogDop File Utils - CLI File Sorter (Git version)"
+arch=('any')
+url="https://github.com/Glob876/MogDop-File-Utils" # ЗАМЕНИТЕ НА РЕАЛЬНЫЙ URL ВАШЕГО РЕПОЗИТОРИЯ
+license=('MIT')
+depends=('python')
+makedepends=('git')
+provides=('mdfu')
+conflicts=('mdfu')
+source=("git+${url}.git")
+sha256sums=('SKIP')
+
+pkgver() {
+    cd "$srcdir/${pkgname%-git}"
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+package() {
+    cd "$srcdir/${pkgname%-git}"
+    install -dm755 "$pkgdir/usr/share/mdfu"
+    install -dm755 "$pkgdir/usr/bin"
+
+    install -m755 "cli_main.py" "$pkgdir/usr/share/mdfu/cli_main.py"
+    install -m644 "sorter_core.py" "$pkgdir/usr/share/mdfu/sorter_core.py"
+
+    ln -s /usr/share/mdfu/cli_main.py "$pkgdir/usr/bin/mdfu"
+}
