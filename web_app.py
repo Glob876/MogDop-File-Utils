@@ -4,7 +4,7 @@ import sys
 import json
 import tkinter as tk
 from tkinter import filedialog
-from flask import Flask, render_template, request, jsonify, Response, stream_with_context
+from flask import Flask, render_template, request, jsonify, Response, stream_with_context, send_from_directory
 from sorter_core import FileSorterCore
 
 app = Flask(__name__)
@@ -12,6 +12,11 @@ core = FileSorterCore()
 
 if not os.path.exists('templates'):
     os.makedirs('templates')
+
+@app.route('/logo.ico')
+def favicon():
+    """Служебный маршрут для раздачи логотипа из корневой папки проекта"""
+    return send_from_directory(os.path.abspath('.'), 'logo.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/')
 def index():

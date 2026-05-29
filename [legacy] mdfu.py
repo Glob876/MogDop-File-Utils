@@ -480,6 +480,13 @@ class FileSorterApp:
         self.root.geometry("950x950")
         self.root.configure(bg=COLOR_BG)
         
+        # Установка логотипа приложения, если файл logo.ico существует
+        if os.path.exists("logo.ico"):
+            try:
+                self.root.iconbitmap("logo.ico")
+            except Exception:
+                pass
+        
         self.source_path = tk.StringVar(value=self.settings.get("last_path", ""))
         self.multi_target = tk.StringVar(value=self.settings.get("multi_target", ""))
         self.dupe_folder = tk.StringVar(value="")
