@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import sys
 import json
@@ -25,6 +27,11 @@ def main():
     parser.add_argument("--auto-dupes", action="store_true", help="Auto-delete duplicates without confirmation")
     parser.add_argument("--ignore-unknown", action="store_true", help="Do not move files with unknown extensions")
     
+    # Если аргументы не переданы, выводим справку автоматически
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(0)
+        
     args = parser.parse_args()
     
     # Инициализация ядра
@@ -45,7 +52,7 @@ def main():
         
         for e_type, msg in generator:
             if e_type == "progress":
-                percent = int((msg["current"] / msg["total"]) * 100)
+                percent = int((msg["current"] / msg["total"]) * 100) if msg["total"] > 0 else 100
                 sys.stdout.write(f"\r[PROGRESS] {percent}% ({msg['current']}/{msg['total']})     ")
                 sys.stdout.flush()
                 last_was_progress = True

@@ -34,8 +34,8 @@ class FileSorterCore:
             "last_path": "",
             "dry_run": False,
             "ignore_hidden": True,
-            "min_size_mb": 0,
-            "max_size_mb": 0
+            "min_size_mb": 0.0,
+            "max_size_mb": 0.0
         }
         self.config = self.load_config()
 
@@ -44,7 +44,7 @@ class FileSorterCore:
             try:
                 with open(self.config_path, "r", encoding="utf-8") as f:
                     return {**self.defaults, **json.load(f)}
-            except:
+            except Exception:
                 return self.defaults
         return self.defaults
 
@@ -54,19 +54,14 @@ class FileSorterCore:
             json.dump(self.config, f, indent=4, ensure_ascii=False)
 
     def get_file_hash(self, filepath):
+        """Безопасное поблочное вычисление MD5-хеша для файлов любого объема"""
         hasher = hashlib.md5()
         try:
-            if os.path.getsize(filepath) > 100 * 1024 * 1024:
-                with open(filepath, 'rb') as f:
-                    hasher.update(f.read(1024*1024))
-                    f.seek(-1024*1024, 2)
-                    hasher.update(f.read(1024*1024))
-            else:
-                with open(filepath, 'rb') as f:
-                    for chunk in iter(lambda: f.read(4096), b""):
-                        hasher.update(chunk)
+            with open(filepath, 'rb') as f:
+                for chunk in iter(lambda: f.read(65536), b""):
+                    hasher.update(chunk)
             return hasher.hexdigest()
-        except:
+        except (OSError, PermissionError):
             return None
 
     def _clean_empty_folders(self, path):
@@ -74,27 +69,30 @@ class FileSorterCore:
             for d in dirs:
                 dp = os.path.join(root, d)
                 try: 
-                    if not os.listdir(dp): os.rmdir(dp)
-                except: pass
+                    if not os.listdir(dp): 
+                        os.rmdir(dp)
+                except Exception: 
+                    pass
 
     def _is_size_allowed(self, filepath):
         try:
             sz_bytes = os.path.getsize(filepath)
             sz_mb = sz_bytes / (1024 * 1024)
-            min_size = float(self.config.get("min_size_mb", 0))
-            max_size = float(self.config.get("max_size_mb", 0))
+            min_size = float(self.config.get("min_size_mb", 0.0))
+            max_size = float(self.config.get("max_size_mb", 0.0))
 
             if min_size > 0 and sz_mb < min_size:
                 return False
             if max_size > 0 and sz_mb > max_size:
                 return False
             return True
-        except:
+        except (OSError, PermissionError):
             return False
 
     # --- 1. SORTING (Single & Multi) ---
     def sort_directory_generator(self, src_dir, target_dir=None):
-        if not target_dir: target_dir = src_dir
+        if not target_dir: 
+            target_dir = src_dir
         if not os.path.exists(src_dir):
             yield "error", f"Specified path does not exist: {src_dir}"
             return
@@ -116,9 +114,21 @@ class FileSorterCore:
             yield "success", f"No files to sort in: {src_dir}"
             return
 
+        # Оптимизация: компиляция списков исключений и расширений ДО входа в цикл
+        excl = {x.strip().lower() for x in self.config.get("excluded_files", "").split(",") if x.strip()}
+        excl.add("sorter_config.json")
+        excl.add("sorter_log.txt")
+
+        ext_to_category = {}
+        for cat, exts in self.config.get("extensions", {}).items():
+            for e in exts.split(','):
+                clean_ext = e.strip().lower()
+                if clean_ext:
+                    if not clean_ext.startswith('.'):
+                        clean_ext = '.' + clean_ext
+                    ext_to_category[clean_ext] = cat
+
         count = 0
-        excl = [x.strip().lower() for x in self.config.get("excluded_files", "").split(",") if x.strip()]
-        
         for index, f in enumerate(files):
             yield "progress", {"current": index + 1, "total": total}
             
@@ -126,7 +136,7 @@ class FileSorterCore:
                 yield "skip", f"Skipped (Hidden file): {f}"
                 continue
 
-            if f.lower() in excl or f in ["sorter_config.json", "sorter_log.txt"]:
+            if f.lower() in excl:
                 yield "skip", f"Skipped (in exceptions): {f}"
                 continue
                 
@@ -137,13 +147,9 @@ class FileSorterCore:
                 continue
 
             ext = os.path.splitext(f)[1].lower()
+            category = ext_to_category.get(ext)
             
-            category = None
-            for cat, exts in self.config["extensions"].items():
-                if ext in [e.strip().lower() for e in exts.split(',') if e.strip()]:
-                    category = cat; break
-            
-            if not category and self.config["move_unknown"]:
+            if not category and self.config.get("move_unknown", True):
                 category = "Other"
             
             if not category:
@@ -151,21 +157,30 @@ class FileSorterCore:
                 continue
 
             dest_dir = os.path.join(target_dir, category)
-            if self.config["date_sort"]:
-                dt = datetime.fromtimestamp(os.path.getmtime(src_path))
-                m_name = MONTHS_EN.get(dt.month, "Unknown")
-                dest_dir = os.path.join(dest_dir, str(dt.year), m_name)
+            if self.config.get("date_sort", False):
+                try:
+                    dt = datetime.fromtimestamp(os.path.getmtime(src_path))
+                    m_name = MONTHS_EN.get(dt.month, "Unknown")
+                    dest_dir = os.path.join(dest_dir, str(dt.year), m_name)
+                except Exception:
+                    pass
             
             dest_path = os.path.join(dest_dir, f)
             
             if os.path.exists(dest_path):
-                if self.config["overwrite"]:
+                if self.config.get("overwrite", False):
                     if not dry_run_mode:
-                        try: os.remove(dest_path)
-                        except: pass
+                        try: 
+                            os.remove(dest_path)
+                        except Exception: 
+                            pass
                 else:
+                    # Оптимизация: инкрементальное имя во избежание коллизий времени
                     n, e = os.path.splitext(f)
-                    dest_path = os.path.join(dest_dir, f"{n}_{datetime.now().strftime('%H%M%S')}{e}")
+                    counter = 1
+                    while os.path.exists(dest_path):
+                        dest_path = os.path.join(dest_dir, f"{n}_{counter}{e}")
+                        counter += 1
                     yield "conflict", f"{prefix}Name conflict. Target will be renamed to {os.path.basename(dest_path)}"
 
             try:
@@ -177,7 +192,7 @@ class FileSorterCore:
             except Exception as e:
                 yield "error", f"Move error for {f}: {str(e)}"
         
-        if self.config["clean_empty"] and not dry_run_mode:
+        if self.config.get("clean_empty", True) and not dry_run_mode:
             self._clean_empty_folders(src_dir)
             
         yield "success", f"{prefix}Processing completed for {src_dir}! Actions: {count} files"
@@ -193,7 +208,7 @@ class FileSorterCore:
 
         yield "info", f"{prefix}Starting reverse sorting (extraction) for: {target_dir}"
         all_files = []
-        cats = list(self.config["extensions"].keys()) + ["Other"]
+        cats = list(self.config.get("extensions", {}).keys()) + ["Other"]
         
         for c in cats:
             cp = os.path.join(target_dir, c)
@@ -218,7 +233,10 @@ class FileSorterCore:
             
             if os.path.exists(dst):
                 n, e = os.path.splitext(fname)
-                dst = os.path.join(target_dir, f"{n}_old_{datetime.now().strftime('%H%M%S')}{e}")
+                counter = 1
+                while os.path.exists(dst):
+                    dst = os.path.join(target_dir, f"{n}_old_{counter}{e}")
+                    counter += 1
                 yield "conflict", f"{prefix}Conflict. Target will be renamed to: {os.path.basename(dst)}"
                 
             try:
@@ -229,7 +247,7 @@ class FileSorterCore:
             except Exception as e:
                 yield "error", f"Extraction error for {fname}: {str(e)}"
 
-        if self.config["clean_empty"] and not dry_run_mode:
+        if self.config.get("clean_empty", True) and not dry_run_mode:
             yield "info", "Cleaning up empty category folders..."
             self._clean_empty_folders(target_dir)
 
@@ -252,7 +270,7 @@ class FileSorterCore:
                 try:
                     sz = os.path.getsize(fp)
                     size_groups.setdefault(sz, []).append(fp)
-                except:
+                except (OSError, PermissionError):
                     continue
                     
         potential_files = []
@@ -282,7 +300,9 @@ class FileSorterCore:
 
         if self.config.get("auto_dupes", False):
             to_del = []
-            for g in groups: to_del.extend(g[1:])
+            for g in groups: 
+                # Сохраняем первый элемент как оригинал, остальные на удаление
+                to_del.extend(g[1:])
             yield "info", f"Found {len(to_del)} duplicates. Starting auto-deletion..."
             count = 0
             for i, p in enumerate(to_del):
@@ -297,4 +317,4 @@ class FileSorterCore:
         else:
             yield "progress", {"current": total, "total": total}
             yield "dupe_groups", groups
-            yield "info", "Waiting for user selection to delete..."
+            yield "info", "Review the duplicates above. Run with --auto-dupes to automatically delete copies."
