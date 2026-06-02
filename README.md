@@ -1,133 +1,132 @@
-MD File Utils - File Management Suite
+# MD File Utils - Premium Suite
 
-![bg](https://i.ibb.co.com/bw3trPB/Chat-GPT-Image-May-19-2026-04-47-23-PM.png)
+MD File Utils is a modern, feature-rich desktop and CLI file management application built with a Python Core engine and a stunning glass-morphism web interface. It transforms chaotic file organization into a streamlined, automated experience with intelligent sorting, duplicate detection, reverse actions, and real-time monitoring.
 
-MD File Utils is a modern, feature-rich desktop file management application built with a Python backend and a glass-morphism web interface. It transforms chaotic file organization into a streamlined, automated experience with intelligent sorting, duplicate detection, and real-time monitoring.
-Features
-1. Intelligent File Sorting
+## Features
 
-Automatically categorizes files into logical folders based on extensions:
+### 1. Intelligent File Sorting
+Automatically categorizes files into logical folders based on extensions and regex patterns:
+- **Single Mode** - Sort files within a single directory (with recursive support).
+- **Multi-Source Mode** - Aggregate files from multiple source locations into one target directory.
 
-    Single Mode - Sort files within a single directory
+### 2. Reverse & Rollback Actions
+- **Unsort (Reverse)** - Extract all files from categorized subfolders back to the root directory.
+- **Rollback Session** - Undo the exact movements made during the last sorting session using the history log.
 
-    Multi-Source Mode - Aggregate files from multiple locations into one target directory
+### 3. Advanced Duplicate Finder
+Uses pre-filtering by file size and chunk-based MD5 hashing for large files to identify true binary duplicates regardless of their filenames. Includes an option for instant auto-deletion.
 
-2. Metadata Analysis
+### 4. Real-Time Folder Monitor (Beta)
+Runs a background, thread-safe watcher that monitors specified directories (e.g., Downloads folder) and automatically sorts new incoming files in real-time.
 
-    EXIF extraction for photos - sort by capture date
+### 5. Statistics & Analytics
+Generates a detailed breakdown of any directory, showing total size, file counts, top categories, and most heavy extensions.
 
-    ID3 tag reading for music - organize by artist
+### 6. Fine-Grained Controls
+- **Size Filtering** - Ignore files smaller or larger than specified MB thresholds.
+- **Custom Regex Rules** - Assign specific files to categories based on complex Regular Expressions.
+- **Safety Features** - Simulation Mode (Dry Run) and options to handle hidden files or filename conflicts.
 
-3. Date & Size Organization
+### 7. Aesthetic Web UI & Customization
+- Fully bilingual (English, Russian, Spanish, Chinese, German).
+- Custom UI accents, dynamic mesh/grid patterns, and custom background image support with blur/opacity sliders.
+- Real-time terminal telemetry logs using Server-Sent Events (SSE).
 
-    Date sorting - Create nested year/month folder structures
+### 8. Powerful Command-Line Interface (CLI)
+Full access to the Core Engine directly from the terminal for scripting and headless environments.
 
-    Size filtering - Group files into size tiers (Small <10MB to Gigantic >500MB)
+## Installation
 
-4. Real-Time Folder Watcher
+### Prerequisites
+- Python 3.8+
+- `pip` package manager
 
-Monitor directories (e.g., Downloads folder) and automatically sort new files as they arrive.
-5. Advanced Duplicate Finder
+### Setup
 
-Uses MD5 hashing with chunk-reading for large files to identify true duplicates regardless of filename.
-6. Bulk Renamer
-
-Batch operations for case conversion and custom text prefixing.
-7. Safety Controls
-
-    Preview Mode (Dry Run) - See what would happen without making changes
-
-    Copy Mode - Leave originals untouched, distribute copies
-
-    Undo Last Action - Restore files to original locations
-
-8. Customization & Analytics
-
-    Fully bilingual (English, Russian, Spanish, Chinese, German)
-
-    Light/Dark themes
-
-    Customizable accent colors and background patterns
-
-    Editable category extension mappings
-
-Installation
-Prerequisites
-
-    Python 3.8+
-
-    pip package manager
-
-Setup
-bash
-
+```bash
 # Clone or download the application
 cd md-file-utils
 
 # Install dependencies
-pip install -r requirements.txt
+pip install Flask colorama
 
-# Run the server
+# Run the Web UI server
 python start_server.py
+```
+*The server will automatically open your default browser to `http://127.0.0.1:5000`.*
 
-Then open your browser to http://localhost:8080
-Dependencies
-
+## Dependencies
 The application requires the following Python packages:
+- `Flask` - Backend web framework and API server.
+- `colorama` - Terminal color styling for the CLI engine.
 
-    watchdog - Real-time filesystem monitoring
+## Usage
 
-    mutagen - Audio metadata (ID3 tags) extraction
+### Web Interface
+- **Single / Multi** - Select folders, configure sorting options (date sort, clean empty, size limits), and execute.
+- **Duplicates** - Select a directory to deep-scan for duplicate files. View the match groups and purge clones.
+- **Monitor** - Add folders to watch, set the interval, and enable real-time background sorting.
+- **Settings** - Customize category dictionaries, background images, and language.
 
-    Pillow - Image metadata (EXIF) extraction
+### Command-Line Interface (CLI)
+You can run the engine directly from your terminal:
 
-Usage
-Quick Start
+```bash
+# View all available commands
+python cli_main.py --help
 
-    Single Mode - Select a folder, choose sorting options, click "Start Sorting"
+# Sort a single folder
+python cli_main.py single -p /path/to/folder --date-sort
 
-    Multi-Source Mode - Add source folders, set a target destination, click "Assemble Sources"
+# Merge multiple sources into a target folder
+python cli_main.py multi -s /src1 /src2 -t /target_folder
 
-    Duplicates - Select a directory to scan for duplicate files
+# Find and auto-delete duplicates
+python cli_main.py dupes -p /path/to/folder --auto-dupes
 
-    Settings - Customize category extensions, accent colors, and operation parameters
+# Revert the last sorting session
+python cli_main.py rollback
 
-Keyboard Shortcuts
-Shortcut	Action
-Alt + M	Toggle slow-motion debug mode
-Ctrl + Shift + S	Toggle UI debug delays
-Configuration
+# Generate statistics for a directory
+python cli_main.py stats -p /path/to/folder
+```
 
-Settings are automatically saved to config.json in the application directory, including:
+## Keyboard Shortcuts (Web UI)
+| Shortcut | Action |
+| :--- | :--- |
+| `Alt + M` | Toggle secret deep scan mode UI triggers |
+| `Ctrl + Shift + S` | Toggle slow-motion debug UI delays |
 
-    Sorting preferences (date sort, overwrite, clean empty)
+## Configuration
+Settings are automatically saved to `sorter_config.json` in the application directory. It tracks:
+- Category extensions and regex mappings (`extensions`, `custom_rules`).
+- Operation modifiers (`move_unknown`, `date_sort`, `clean_empty`, `overwrite`, `min_size_mb`, `max_size_mb`).
+- Visual preferences (`bg_style`, `bg_image_path`, `bg_blur`).
+- Active monitored paths.
 
-    Size filters (min/max file sizes)
+## Project Structure
 
-    Hidden file handling
-
-    Dry run mode
-
-    Custom extension mappings for each category
-
-Project Structure
-text
-
+```text
 md-file-utils/
-├── start_server.py    # Main entry point
-├── index.html         # Web interface
-├── README.md          # Documentation
-└── requirements.txt   # Python dependencies
+├── start_server.py    # Main entry point (Web UI auto-starter)
+├── web_app.py         # Flask API backend
+├── cli_main.py        # Command-Line Interface application
+├── sorter_core.py     # Core Engine (Sorting, Hashing, Monitoring)
+├── index.html         # Frontend (Tailwind, Glassmorphism)
+└── README.md          # Documentation
+```
 
-API Endpoints
-Endpoint	Method	Description
-/api/config	GET/POST	Load/save application settings
-/api/stream	GET	SSE stream for file operations
-/api/dupes/delete	POST	Delete selected duplicate files
-/api/browse	GET	Open folder selection dialog
-License
+## API Endpoints (Web UI)
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `/api/config` | GET/POST | Load or save application settings |
+| `/api/stream` | GET | Server-Sent Events (SSE) stream for real-time engine telemetry |
+| `/api/dupes/delete` | POST | Delete an array of selected duplicate files |
+| `/api/browse` | GET | Open native OS dialog for folder/file selection |
+| `/api/bg` | GET | Safely serve custom background images |
 
+## License
 MIT License
-Support
 
+## Support
 For issues or feature requests, please open an issue in the repository.
