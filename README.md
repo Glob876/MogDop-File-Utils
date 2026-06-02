@@ -132,5 +132,6 @@ MIT License
 
 ## Support
 For issues or feature requests, please open an issue in the repository.
+Main Dev: Glob876 (telegram)
 
 ![in-programm-bg](https://i.ibb.co/WWHSdw6V/bg.png)
