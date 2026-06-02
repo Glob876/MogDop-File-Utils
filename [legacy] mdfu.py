@@ -52,7 +52,7 @@ DEFAULT_EXTENSIONS = {
 
 LANGUAGES = {
     'RU': {
-        'title': "MogDop's File Utils",
+        'title': "MogDop's File Utils Legacy",
         'header_params': "ПАРАМЕТРЫ И НАСТРОЙКИ",
         'sub_general': "Общие настройки",
         'sub_categories': "Настройка категорий (расширения)",
@@ -105,7 +105,7 @@ LANGUAGES = {
         'beta_warn_msg': "Программа будет автоматически перемещать файлы из папки слежения.\nРекомендуется сначала протестировать работу на папке с копиями файлов, чтобы избежать потери данных."
     },
     'EN': {
-        'title': "MogDop's File Utils",
+        'title': "MogDop's File Utils Legacy",
         'header_params': "PARAMETERS & SETTINGS",
         'sub_general': "General Settings",
         'sub_categories': "Category Settings (extensions)",
