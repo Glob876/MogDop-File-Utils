@@ -20,29 +20,38 @@ def main():
   {Fore.GREEN}1. Простая сортировка файлов в папке:{Style.RESET_ALL}
      python cli_main.py single -p /path/to/folder --date-sort
 
-  {Fore.GREEN}2. Поиск и автоматическое удаление дубликатов:{Style.RESET_ALL}
+  {Fore.GREEN}2. Рекурсивная сортировка файлов (включая подпапки):{Style.RESET_ALL}
+     python cli_main.py single -p /path/to/folder -r
+
+  {Fore.GREEN}3. Поиск и автоматическое удаление дубликатов:{Style.RESET_ALL}
      python cli_main.py dupes -p /path/to/folder --auto-dupes
 
-  {Fore.GREEN}3. Возврат файлов в исходное состояние (рассортировка):{Style.RESET_ALL}
+  {Fore.GREEN}4. Возврат файлов в исходное состояние (рассортировка):{Style.RESET_ALL}
      python cli_main.py unsort -p /path/to/folder --clean-empty
 
-  {Fore.GREEN}4. Сортировка из нескольких папок в одну общую целевую папку:{Style.RESET_ALL}
+  {Fore.GREEN}5. Сортировка из нескольких папок в одну общую целевую папку:{Style.RESET_ALL}
      python cli_main.py multi -s /src1 /src2 -t /target_folder
 
-  {Fore.GREEN}5. Постоянный фоновый мониторинг каталогов в реальном времени (BETA):{Style.RESET_ALL}
+  {Fore.GREEN}6. Вывод подробной статистики по файлам в каталоге:{Style.RESET_ALL}
+     python cli_main.py stats -p /path/to/folder
+
+  {Fore.GREEN}7. Откат (undo) последней операции сортировки:{Style.RESET_ALL}
+     python cli_main.py rollback
+
+  {Fore.GREEN}8. Постоянный фоновый мониторинг каталогов в реальном времени (BETA):{Style.RESET_ALL}
      python cli_main.py monitor -s /src1 /src2 -t /target_folder
 """
     )
     
     # Mode configurations
     mode_group = parser.add_argument_group(f"{Fore.MAGENTA}Режимы работы (выберите один){Style.RESET_ALL}")
-    mode_group.add_argument("mode", choices=["single", "multi", "unsort", "dupes", "monitor"], 
+    mode_group.add_argument("mode", choices=["single", "multi", "unsort", "dupes", "monitor", "rollback", "stats"], 
                         help="Режим работы программы")
     
     # Path configuration group
     path_group = parser.add_argument_group(f"{Fore.MAGENTA}Настройка путей{Style.RESET_ALL}")
     path_group.add_argument("-p", "--path", type=str, metavar="PATH",
-                        help="Путь к целевой папке (для режимов 'single', 'unsort', 'dupes' и 'monitor')")
+                        help="Путь к целевой папке (для режимов 'single', 'unsort', 'dupes', 'monitor' и 'stats')")
     path_group.add_argument("-t", "--target", type=str, metavar="TARGET",
                         help="Путь к результирующей папке (для режимов 'multi' и 'monitor')")
     path_group.add_argument("-s", "--sources", type=str, nargs="+", metavar="SOURCES",
@@ -50,6 +59,8 @@ def main():
     
     # Engine option attributes
     config_group = parser.add_argument_group(f"{Fore.MAGENTA}Параметры сортировки{Style.RESET_ALL}")
+    config_group.add_argument("-r", "--recursive", action="store_true",
+                              help="Рекурсивно искать и перемещать файлы из всех вложенных папок")
     config_group.add_argument("--date-sort", action="store_true", 
                               help="Дополнительно сортировать файлы во вложенные папки Год/Месяц")
     config_group.add_argument("--clean-empty", action="store_true", 
@@ -60,6 +71,8 @@ def main():
                               help="Автоматически удалять найденные дубликаты без подтверждения")
     config_group.add_argument("--ignore-unknown", action="store_true", 
                               help="Не перемещать файлы с неизвестными расширениями (оставлять на месте)")
+    config_group.add_argument("--no-log", action="store_true",
+                              help="Отключить запись операций в файл логов")
     config_group.add_argument("--interval", type=float, default=5.0,
                               help="Интервал проверки в секундах для режима 'monitor' (по умолчанию: 5)")
     
@@ -74,11 +87,13 @@ def main():
     core = FileSorterCore()
     
     # Synchronize script arguments with configuration dictionary
+    if args.recursive: core.config['recursive_sort'] = True
     if args.date_sort: core.config['date_sort'] = True
     if args.clean_empty: core.config['clean_empty'] = True
     if args.overwrite: core.config['overwrite'] = True
     if args.auto_dupes: core.config['auto_dupes'] = True
     if args.ignore_unknown: core.config['move_unknown'] = False
+    if args.no_log: core.config['enable_logging'] = False
 
     print(f"\n{Fore.MAGENTA}{Style.BRIGHT}=== MogDop File Utils CLI ==={Style.RESET_ALL}")
     
@@ -102,6 +117,22 @@ def main():
                     for fp in group:
                         print(f"    - {Fore.WHITE}{fp}{Style.RESET_ALL}")
                 print(f"\nЗапустите с флагом {Fore.GREEN}--auto-dupes{Style.RESET_ALL} для автоматического удаления копий.")
+            elif e_type == "stats_data":
+                if last_was_progress:
+                    print()
+                    last_was_progress = False
+                print(f"\n{Fore.CYAN}{Style.BRIGHT}=== СТАТИСТИКА КАТАЛОГА ==={Style.RESET_ALL}")
+                print(f"Всего файлов:  {Fore.WHITE}{msg['total_files']}{Style.RESET_ALL}")
+                print(f"Общий объем:   {Fore.WHITE}{msg['total_size_mb']} MB{Style.RESET_ALL}")
+                
+                print(f"\n{Fore.YELLOW}{Style.BRIGHT}Распределение по категориям:{Style.RESET_ALL}")
+                for cat, info in msg["categories"].items():
+                    print(f"  - {Fore.GREEN}{cat:<15}{Style.RESET_ALL}: {Fore.WHITE}{info['count']} шт.{Style.RESET_ALL} ({info['size_mb']} MB)")
+                    
+                print(f"\n{Fore.YELLOW}{Style.BRIGHT}Топ расширений по объему:{Style.RESET_ALL}")
+                for ext, info in msg["extensions"].items():
+                    ext_display = ext if ext else "Без расширения"
+                    print(f"  - {Fore.CYAN}{ext_display:<15}{Style.RESET_ALL}: {Fore.WHITE}{info['count']} шт.{Style.RESET_ALL} ({info['size_mb']} MB)")
             else:
                 if last_was_progress:
                     print()  # Reset line output
@@ -151,6 +182,15 @@ def main():
         for src in args.sources:
             print(f"\n{Fore.YELLOW}--- Обработка источника: {src} ---{Style.RESET_ALL}")
             process_generator(core.sort_directory_generator(src, target_dir=args.target))
+
+    elif args.mode == "rollback":
+        process_generator(core.rollback_last_session_generator())
+
+    elif args.mode == "stats":
+        if not args.path:
+            print(f"{Fore.RED}[ERROR] Аргумент --path (-p) обязателен для режима stats.{Style.RESET_ALL}")
+            return
+        process_generator(core.generate_stats_generator(args.path))
             
     elif args.mode == "monitor":
         print(f"\n{Fore.YELLOW}{Style.BRIGHT}[ВНИМАНИЕ] Функция автоматического мониторинга папок запущена в режиме BETA! Пожалуйста, сделайте резервную копию важных файлов.{Style.RESET_ALL}")
