@@ -22,6 +22,22 @@ def favicon():
 def index():
     return render_template('index.html')
 
+@app.route('/api/bg')
+def get_custom_bg():
+    """Route serving the custom background image safely."""
+    path = request.args.get('path', 'bg.png')
+    if not path:
+        path = 'bg.png'
+        
+    abs_path = os.path.abspath(path)
+    if os.path.exists(abs_path) and os.path.isfile(abs_path):
+        return send_from_directory(os.path.dirname(abs_path), os.path.basename(abs_path))
+        
+    if os.path.exists('bg.png'):
+        return send_from_directory(os.path.abspath('.'), 'bg.png')
+        
+    return '', 404
+
 @app.route('/api/stream')
 def stream_action():
     """Main SSE stream route for all functions."""
@@ -84,11 +100,15 @@ def handle_config():
 
 @app.route('/api/browse', methods=['GET'])
 def browse():
+    mode = request.args.get('mode', 'dir')
     selected_path = ""
     if sys.platform.startswith('linux'):
         try:
-            proc = subprocess.run(['zenity', '--file-selection', '--directory', '--title=Select Folder'],
-                                 capture_output=True, text=True)
+            cmd = ['zenity', '--file-selection']
+            if mode == 'dir':
+                cmd.append('--directory')
+            cmd.append('--title=Select File' if mode == 'file' else '--title=Select Folder')
+            proc = subprocess.run(cmd, capture_output=True, text=True)
             if proc.returncode == 0:
                 selected_path = proc.stdout.strip()
         except: pass
@@ -98,7 +118,13 @@ def browse():
             root = tk.Tk()
             root.withdraw()
             root.attributes('-topmost', True)
-            selected_path = filedialog.askdirectory(title="Select Folder")
+            if mode == 'file':
+                selected_path = filedialog.askopenfilename(
+                    title="Select Background Image",
+                    filetypes=[("Image files", "*.png *.jpg *.jpeg *.webp *.gif"), ("All files", "*.*")]
+                )
+            else:
+                selected_path = filedialog.askdirectory(title="Select Folder")
             root.destroy()
         except Exception as e:
             return jsonify({"error": str(e), "path": ""})

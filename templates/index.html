@@ -54,7 +54,7 @@
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            transition: all 0.8s ease;
+            transition: all 0.8s ease, opacity 0.8s ease;
         }
         .dark .bg-mesh {
             background: 
@@ -187,6 +187,9 @@
 </head>
 
 <body class="text-slate-800 dark:text-slate-100 min-h-screen overflow-hidden flex bg-transparent">
+    <!-- Blurred Background Image Layer -->
+    <div id="bgImageLayer" class="fixed inset-0 z-[-1] bg-cover bg-center transition-all duration-300 hidden"></div>
+    
     <div class="bg-mesh"></div>
     <div class="bg-grid-pattern" id="bgGrid"></div>
 
@@ -572,9 +575,47 @@
                                 <!-- Background patterns -->
                                 <div class="space-y-3">
                                     <span class="text-xs font-bold text-slate-500 dark:text-slate-400" data-i18n="backdrop_pattern">Backdrop Pattern</span>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <button onclick="setPattern('mesh')" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition" data-i18n="dynamic_gradient">Dynamic Gradient</button>
-                                        <button onclick="setPattern('grid')" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition" data-i18n="cyber_grid">Cyber Grid</button>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <button onclick="setPattern('mesh')" data-bg-pattern-btn="mesh" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition" data-i18n="dynamic_gradient">Mesh</button>
+                                        <button onclick="setPattern('grid')" data-bg-pattern-btn="grid" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition" data-i18n="cyber_grid">Grid</button>
+                                        <button onclick="setPattern('image')" data-bg-pattern-btn="image" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition" data-i18n="custom_image">Image</button>
+                                    </div>
+                                </div>
+
+                                <!-- Custom Image Configuration -->
+                                <div id="bgImageConfigSection" class="hidden space-y-4 pt-3 border-t border-slate-200 dark:border-white/5 animate__animated animate__fadeIn">
+                                    <div>
+                                        <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-2" data-i18n="bg_image_path">Background Image Path</label>
+                                        <div class="flex gap-2">
+                                            <input type="text" id="cfg_bg_image_path" data-i18n="ph_bg_image_path" placeholder="bg.png"
+                                                class="flex-1 input-premium rounded-xl px-3 py-2 text-xs outline-none" onchange="updateBgImageLayer(); silentSaveConfig();">
+                                            <button onclick="browseBgImage()" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 px-3 py-2 rounded-xl transition shadow-inner">
+                                                <i data-lucide="image" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="space-y-1">
+                                            <div class="flex justify-between items-center text-xs">
+                                                <span class="font-bold text-slate-500 dark:text-slate-400" data-i18n="bg_blur">Blur</span>
+                                                <span id="cfg_bg_blur_val" class="font-mono text-slate-400">20px</span>
+                                            </div>
+                                            <input type="range" id="cfg_bg_blur" min="0" max="100" value="20" 
+                                                class="w-full accent-blue-500 bg-slate-200 dark:bg-white/10 rounded-lg h-1.5 cursor-pointer"
+                                                oninput="document.getElementById('cfg_bg_blur_val').innerText = this.value + 'px'; updateBgImageLayer();"
+                                                onchange="silentSaveConfig();">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <div class="flex justify-between items-center text-xs">
+                                                <span class="font-bold text-slate-500 dark:text-slate-400" data-i18n="bg_opacity">Opacity</span>
+                                                <span id="cfg_bg_opacity_val" class="font-mono text-slate-400">40%</span>
+                                            </div>
+                                            <input type="range" id="cfg_bg_opacity" min="0" max="100" value="40" 
+                                                class="w-full accent-blue-500 bg-slate-200 dark:bg-white/10 rounded-lg h-1.5 cursor-pointer"
+                                                oninput="document.getElementById('cfg_bg_opacity_val').innerText = this.value + '%'; updateBgImageLayer();"
+                                                onchange="silentSaveConfig();">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -691,7 +732,10 @@
                 "beta_warning_title": "BETA FEATURE WARNING", "beta_warning_desc": "Folder monitoring is currently in BETA. It runs as a background process and may consume disk I/O. Please make sure to back up important files.",
                 "btn_start_monitor": "Enable Live Monitoring", "btn_stop_monitor": "Disable Live Monitoring",
                 "monitor_status_active": "Monitoring Active", "monitor_status_inactive": "Monitoring Suspended",
-                "monitor_interval": "Check Interval (seconds)", "monitored_paths": "Monitored Folders"
+                "monitor_interval": "Check Interval (seconds)", "monitored_paths": "Monitored Folders",
+                // Custom background details
+                "custom_image": "Custom Image", "bg_image_path": "Background Image Path", "ph_bg_image_path": "Path to image (e.g. bg.png)",
+                "bg_blur": "Background Blur", "bg_opacity": "Background Opacity"
             },
             ru: {
                 "core_engine": "Sorter", "toggle_theme": "Тема интерфейса", "interface_language": "Язык интерфейса",
@@ -718,7 +762,10 @@
                 "beta_warning_title": "ПРЕДУПРЕЖДЕНИЕ: БЕТА-ВЕРСИЯ", "beta_warning_desc": "Мониторинг папок находится в режиме БЕТА-тестирования. Процесс работает в фоновом режиме и может нагружать диск. Пожалуйста, сделайте бэкап важных файлов перед использованием.",
                 "btn_start_monitor": "Включить мониторинг", "btn_stop_monitor": "Выключить мониторинг",
                 "monitor_status_active": "Мониторинг запущен", "monitor_status_inactive": "Мониторинг приостановлен",
-                "monitor_interval": "Интервал проверки (в секундах)", "monitored_paths": "Отслеживаемые папки"
+                "monitor_interval": "Интервал проверки (в секундах)", "monitored_paths": "Отслеживаемые папки",
+                // Custom background details
+                "custom_image": "Своё изображение", "bg_image_path": "Путь к фону", "ph_bg_image_path": "Путь к картинке (например, bg.png)",
+                "bg_blur": "Размытие фона", "bg_opacity": "Прозрачность фона"
             },
             es: {
                 "core_engine": "Clasificador", "toggle_theme": "Tema de Interfaz", "interface_language": "Idioma",
@@ -745,7 +792,10 @@
                 "beta_warning_title": "ADVERTENCIA DE FUNCIÓN BETA", "beta_warning_desc": "El monitoreo de carpetas está en fase BETA. Se ejecuta como un proceso de fondo. Asegúrese de realizar copias de seguridad de sus archivos importantes.",
                 "btn_start_monitor": "Activar Monitoreo en Vivo", "btn_stop_monitor": "Desactivar Monitoreo",
                 "monitor_status_active": "Monitoreo Activo", "monitor_status_inactive": "Monitoreo Suspendido",
-                "monitor_interval": "Intervalo de comprobación (segundos)", "monitored_paths": "Carpetas Monitoreadas"
+                "monitor_interval": "Intervalo de comprobación (segundos)", "monitored_paths": "Carpetas Monitoreadas",
+                // Custom background details
+                "custom_image": "Imagen Personalizada", "bg_image_path": "Ruta de la Imagen de Fondo", "ph_bg_image_path": "Ruta a la imagen (ej. bg.png)",
+                "bg_blur": "Desenfoque de Fondo", "bg_opacity": "Opacidad del Fondo"
             },
             zh: {
                 "core_engine": "分类器", "toggle_theme": "界面主题", "interface_language": "语言",
@@ -772,7 +822,10 @@
                 "beta_warning_title": "测试版功能警告", "beta_warning_desc": "文件夹监控目前处于测试阶段 (BETA)。它作为后台进程运行，可能会消耗磁盘 I/O。请务必备份重要文件。",
                 "btn_start_monitor": "启用实时监控", "btn_stop_monitor": "禁用实时监控",
                 "monitor_status_active": "监控已激活", "monitor_status_inactive": "监控已挂起",
-                "monitor_interval": "检查间隔（秒）", "monitored_paths": "受监控的文件夹"
+                "monitor_interval": "检查间隔（秒）", "monitored_paths": "受监控的文件夹",
+                // Custom background details
+                "custom_image": "自定义图片", "bg_image_path": "背景图片路径", "ph_bg_image_path": "图片路径 (例如 bg.png)",
+                "bg_blur": "背景模糊", "bg_opacity": "背景透明度"
             },
             de: {
                 "core_engine": "Sortierer", "toggle_theme": "Oberflächendesign", "interface_language": "Sprache",
@@ -799,7 +852,10 @@
                 "beta_warning_title": "WARNUNG: BETA-FUNKTION", "beta_warning_desc": "Die Ordnerüberwachung befindet sich in der BETA-Phase. Sie läuft als Hintergrundprozess. Bitte sichern Sie Ihre wichtigen Dateien ab.",
                 "btn_start_monitor": "Echtzeit-Überwachung aktivieren", "btn_stop_monitor": "Überwachung deaktivieren",
                 "monitor_status_active": "Überwachung aktiv", "monitor_status_inactive": "Überwachung ausgesetzt",
-                "monitor_interval": "Prüfintervall (Sekunden)", "monitored_paths": "Überwachte Ordner"
+                "monitor_interval": "Prüfintervall (Sekunden)", "monitored_paths": "Überwachte Ordner",
+                // Custom background details
+                "custom_image": "Benutzerdefiniertes Bild", "bg_image_path": "Hintergrundbild-Pfad", "ph_bg_image_path": "Pfad zum Bild (z.B. bg.png)",
+                "bg_blur": "Hintergrund-Unschärfe", "bg_opacity": "Hintergrund-Deckkraft"
             }
         };
 
@@ -885,14 +941,48 @@
 
         function setPattern(style) {
             const grid = document.getElementById('bgGrid');
-            if (grid) {
-                if (style === 'grid') {
-                    grid.style.opacity = '0.15';
+            const mesh = document.querySelector('.bg-mesh');
+            const imgLayer = document.getElementById('bgImageLayer');
+            
+            // Hide all by default
+            if (grid) grid.style.opacity = '0';
+            if (mesh) mesh.style.opacity = '0';
+            if (imgLayer) imgLayer.classList.add('hidden');
+
+            if (style === 'grid') {
+                if (grid) grid.style.opacity = '0.15';
+                if (mesh) mesh.style.opacity = '1';
+            } else if (style === 'mesh') {
+                if (mesh) mesh.style.opacity = '1';
+            } else if (style === 'image') {
+                if (imgLayer) imgLayer.classList.remove('hidden');
+                // Retain light overlay on blurred background image
+                if (mesh) mesh.style.opacity = '0.4'; 
+            }
+            
+            localStorage.setItem('bgStyle', style);
+
+            // Update active state in UI
+            document.querySelectorAll('[data-bg-pattern-btn]').forEach(btn => {
+                const btnStyle = btn.getAttribute('data-bg-pattern-btn');
+                if (btnStyle === style) {
+                    btn.classList.add('bg-accent', 'text-white');
+                    btn.classList.remove('bg-white/5');
                 } else {
-                    grid.style.opacity = '0';
+                    btn.classList.remove('bg-accent', 'text-white');
+                    btn.classList.add('bg-white/5');
+                }
+            });
+
+            // Toggle visibility of image configuration section
+            const imgConfigSec = document.getElementById('bgImageConfigSection');
+            if (imgConfigSec) {
+                if (style === 'image') {
+                    imgConfigSec.classList.remove('hidden');
+                } else {
+                    imgConfigSec.classList.add('hidden');
                 }
             }
-            localStorage.setItem('bgStyle', style);
         }
 
         function restoreCustomStyle() {
@@ -1164,6 +1254,32 @@
             input.value = '';
         }
 
+        // Custom Background update helper
+        function updateBgImageLayer() {
+            const imgLayer = document.getElementById('bgImageLayer');
+            if (!imgLayer) return;
+            const path = document.getElementById('cfg_bg_image_path').value || 'bg.png';
+            const blur = document.getElementById('cfg_bg_blur').value || 20;
+            const opacity = (document.getElementById('cfg_bg_opacity').value || 40) / 100;
+
+            imgLayer.style.backgroundImage = `url('/api/bg?path=${encodeURIComponent(path)}&t=${Date.now()}')`;
+            imgLayer.style.filter = `blur(${blur}px)`;
+            imgLayer.style.opacity = opacity;
+            imgLayer.style.transform = 'scale(1.1)'; // Prevents vignette edge artifacts during blur
+        }
+
+        async function browseBgImage() {
+            try {
+                const res = await fetch('/api/browse?mode=file');
+                const data = await res.json();
+                if (data.path) {
+                    document.getElementById('cfg_bg_image_path').value = data.path;
+                    updateBgImageLayer();
+                    await silentSaveConfig();
+                }
+            } catch (e) { addLog("File browse error", "error"); }
+        }
+
         async function silentSaveConfig() {
             const dryRunChecked = document.getElementById('cfg_dry_run_single').checked || document.getElementById('cfg_dry_run_multi').checked;
             const ignoreHiddenChecked = document.getElementById('cfg_ignore_hidden_single').checked || document.getElementById('cfg_ignore_hidden_multi').checked || document.getElementById('cfg_ignore_hidden_dupes').checked;
@@ -1186,7 +1302,12 @@
                 monitor_enabled: monitorEnabled,
                 monitor_folders: monitorFoldersArray,
                 monitor_interval_sec: parseFloat(document.getElementById('cfg_monitor_interval').value) || 5.0,
-                monitor_target: document.getElementById('monitorTarget').value
+                monitor_target: document.getElementById('monitorTarget').value,
+                // Background settings
+                bg_style: localStorage.getItem('bgStyle') || 'grid',
+                bg_image_path: document.getElementById('cfg_bg_image_path').value || 'bg.png',
+                bg_blur: parseInt(document.getElementById('cfg_bg_blur').value) || 20,
+                bg_opacity: parseInt(document.getElementById('cfg_bg_opacity').value) || 40
             };
 
             const extensions = {};
@@ -1307,6 +1428,23 @@
 
             document.getElementById('cfg_min_size').value = config.min_size_mb || 0;
             document.getElementById('cfg_max_size').value = config.max_size_mb || 0;
+
+            // Background settings load
+            const bgImgPath = config.bg_image_path || 'bg.png';
+            document.getElementById('cfg_bg_image_path').value = bgImgPath;
+            
+            const bgBlur = config.bg_blur !== undefined ? config.bg_blur : 20;
+            document.getElementById('cfg_bg_blur').value = bgBlur;
+            document.getElementById('cfg_bg_blur_val').innerText = bgBlur + 'px';
+            
+            const bgOpacity = config.bg_opacity !== undefined ? config.bg_opacity : 40;
+            document.getElementById('cfg_bg_opacity').value = bgOpacity;
+            document.getElementById('cfg_bg_opacity_val').innerText = bgOpacity + '%';
+
+            // Background layout pattern restoration
+            const bgStyle = config.bg_style || localStorage.getItem('bgStyle') || 'grid';
+            setPattern(bgStyle);
+            updateBgImageLayer();
 
             // Monitor state restoration
             monitorEnabled = config.monitor_enabled || false;
