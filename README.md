@@ -132,3 +132,5 @@ MIT License
 
 ## Support
 For issues or feature requests, please open an issue in the repository.
+
+![in-programm-bg](https://i.ibb.co/WWHSdw6V/bg.png)
