@@ -15,7 +15,7 @@ if not os.path.exists('templates'):
 
 @app.route('/logo.ico')
 def favicon():
-    """Служебный маршрут для раздачи логотипа из корневой папки проекта"""
+    """Utility route serving the main dashboard favicon icon."""
     return send_from_directory(os.path.abspath('.'), 'logo.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/')
@@ -24,7 +24,7 @@ def index():
 
 @app.route('/api/stream')
 def stream_action():
-    """Main SSE stream route for all functions"""
+    """Main SSE stream route for all functions."""
     action = request.args.get('action')
     path = request.args.get('path', '')
     

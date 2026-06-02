@@ -49,7 +49,7 @@
             transition: background-color 0.5s ease, color 0.5s ease;
         }
 
-        /* Интерактивные бэкграунды */
+        /* Interactive backgrounds */
         .bg-mesh {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -70,7 +70,7 @@
                 #f8fafc;
         }
 
-        /* Сетка бэкграунда */
+        /* Background grids */
         .bg-grid-pattern {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -88,7 +88,7 @@
                               linear-gradient(to bottom, rgba(0,0,0,0.02) 1px, transparent 1px);
         }
 
-        /* Glassmorphism */
+        /* Glassmorphism panels */
         .glass-panel {
             backdrop-filter: blur(20px) saturate(190%);
             transition: background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
@@ -104,7 +104,7 @@
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
         }
 
-        /* Акцентные стили через переменные */
+        /* Theme adjustments */
         .bg-accent { background-color: var(--accent-color); }
         .text-accent { color: var(--accent-color); }
         .border-accent { border-color: var(--accent-color); }
@@ -139,7 +139,7 @@
             box-shadow: 0 0 10px var(--accent-color);
         }
 
-        /* Премиум свечения */
+        /* Lighting effects */
         .glow-transition {
             transition: box-shadow 1.5s ease, border-color 1.5s ease;
         }
@@ -160,7 +160,7 @@
         .glow-success-cyan { border-color: #06b6d4 !important; box-shadow: 0 0 35px rgba(6, 182, 212, 0.4); }
         .glow-red { border-color: #ef4444 !important; box-shadow: 0 0 35px rgba(239, 68, 68, 0.4); }
 
-        /* Ввод */
+        /* Premium inputs */
         .input-premium {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.06);
@@ -231,6 +231,9 @@
                 </button>
                 <button onclick="showTab('dupes')" id="nav-dupes" class="sidebar-item w-full flex items-center gap-4 px-5 py-4 text-sm font-semibold rounded-2xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                     <i data-lucide="copy-x" class="w-5 h-5"></i> <span data-i18n="nav_dupes">Duplicates</span>
+                </button>
+                <button onclick="showTab('monitor')" id="nav-monitor" class="sidebar-item w-full flex items-center gap-4 px-5 py-4 text-sm font-semibold rounded-2xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                    <i data-lucide="eye" class="w-5 h-5"></i> <span data-i18n="nav_monitor">Folder Monitor</span>
                 </button>
                 <div class="border-t border-slate-200 dark:border-white/5 my-4 mx-4"></div>
                 <button onclick="showTab('settings')" id="nav-settings" class="sidebar-item w-full flex items-center gap-4 px-5 py-4 text-sm font-semibold rounded-2xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
@@ -463,6 +466,71 @@
                         </div>
                     </section>
 
+                    <!-- Tab: Folder Monitor -->
+                    <section id="tab-monitor" class="tab-content">
+                        <header class="mb-8">
+                            <h2 class="text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white" data-i18n="monitor_title">Real-time Folder Monitor</h2>
+                            <p class="text-slate-500 mt-2 text-sm lg:text-base" data-i18n="monitor_desc">Automatically sort incoming files in monitored directories in real-time.</p>
+                        </header>
+
+                        <!-- BETA WARNING BOX -->
+                        <div class="p-6 mb-6 rounded-3xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-500/90 flex gap-4 animate__animated animate__fadeIn">
+                            <div class="shrink-0 mt-1">
+                                <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-500"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-extrabold uppercase tracking-wider mb-1" data-i18n="beta_warning_title">BETA FEATURE WARNING</h4>
+                                <p class="text-xs leading-relaxed" data-i18n="beta_warning_desc">Folder monitoring is currently in BETA. It runs as a background process and may consume disk I/O. Please make sure to back up important files.</p>
+                            </div>
+                        </div>
+
+                        <div class="glow-transition glow-rainbow-idle glass-panel rounded-3xl p-8 lg:p-10 space-y-6">
+                            <!-- Active state indicator -->
+                            <div class="flex items-center justify-between p-4 bg-slate-100/50 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/5">
+                                <div class="flex items-center gap-3">
+                                    <span id="monitorStatusDot" class="w-3 h-3 rounded-full bg-slate-400"></span>
+                                    <span id="monitorStatusText" class="text-xs font-bold text-slate-500 uppercase tracking-widest" data-i18n="monitor_status_inactive">Monitoring Suspended</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-bold text-slate-400" data-i18n="monitor_interval">Check Interval (seconds)</span>
+                                    <input type="number" id="cfg_monitor_interval" class="w-20 input-premium px-3 py-1.5 rounded-xl text-xs font-mono text-center" min="1" max="3600" value="5">
+                                </div>
+                            </div>
+
+                            <!-- Monitored list -->
+                            <div>
+                                <div class="flex justify-between items-center mb-3">
+                                    <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400" data-i18n="monitored_paths">Monitored Folders</label>
+                                    <button onclick="addMonitorFolderUI()" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-accent-gradient text-white flex items-center gap-1 hover:opacity-95 transition">
+                                        <i data-lucide="plus" class="w-4 h-4"></i> <span data-i18n="btn_add">Add Folder</span>
+                                    </button>
+                                </div>
+                                <div id="monitorFoldersListUI" class="space-y-2 max-h-48 overflow-y-auto p-3 bg-slate-100/50 dark:bg-black/25 rounded-2xl border border-slate-200 dark:border-white/5">
+                                    <!-- Dynamic monitored folders -->
+                                </div>
+                            </div>
+
+                            <!-- Monitor Destination Target Folder -->
+                            <div>
+                                <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-3" data-i18n="target_folder">Target Folder (Destination, blank = sort in-place)</label>
+                                <div class="flex gap-3">
+                                    <input type="text" id="monitorTarget" placeholder="Leave blank to sort in-place"
+                                        class="flex-1 input-premium rounded-2xl px-5 py-4 text-sm outline-none">
+                                    <button onclick="browseFolder('monitorTarget')" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 p-4 rounded-2xl transition">
+                                        <i data-lucide="folder-search" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Start / Stop Toggles -->
+                            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                                <button id="btnToggleMonitor" onclick="toggleMonitorState()" class="flex-1 bg-accent-gradient hover:opacity-90 text-white py-4 px-6 rounded-2xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-blue-500/10 flex justify-center items-center gap-2 transform active:scale-98 transition">
+                                    <i id="monitorBtnIcon" data-lucide="play" class="w-5 h-5"></i> <span id="monitorBtnText" data-i18n="btn_start_monitor">Enable Live Monitoring</span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
                     <!-- Tab 4: Settings & Customizer -->
                     <section id="tab-settings" class="tab-content">
                         <header class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -617,7 +685,13 @@
                 "simulation_desc": "Preview changes without writing to disk", "ignore_hidden": "Ignore Hidden Files",
                 "ignore_hidden_desc": "Skip hidden system directories and file paths", "skip_hidden_dupes": "Skip hidden duplicates",
                 "size_filters": "Size Filters (MB)", "min_size_label": "Min Size (0=None)", "max_size_label": "Max Size (0=None)",
-                "aesthetic_customizer": "Aesthetic customizer"
+                "aesthetic_customizer": "Aesthetic customizer",
+                // Folder monitoring details
+                "nav_monitor": "Folder Monitor", "monitor_title": "Real-time Folder Monitor", "monitor_desc": "Automatically sort incoming files in monitored directories in real-time.",
+                "beta_warning_title": "BETA FEATURE WARNING", "beta_warning_desc": "Folder monitoring is currently in BETA. It runs as a background process and may consume disk I/O. Please make sure to back up important files.",
+                "btn_start_monitor": "Enable Live Monitoring", "btn_stop_monitor": "Disable Live Monitoring",
+                "monitor_status_active": "Monitoring Active", "monitor_status_inactive": "Monitoring Suspended",
+                "monitor_interval": "Check Interval (seconds)", "monitored_paths": "Monitored Folders"
             },
             ru: {
                 "core_engine": "Sorter", "toggle_theme": "Тема интерфейса", "interface_language": "Язык интерфейса",
@@ -625,7 +699,7 @@
                 "single_title": "Одиночное пространство", "single_desc": "Мгновенно распределяйте, сортируйте и категоризируйте содержимое папок.", "workspace_folder": "Рабочая папка", "ph_single_path": "/home/user/Загрузки",
                 "sort_by_date": "Сортировать по дате", "overwrite_conflicts": "Перезаписывать конфликты", "clean_empty": "Очищать пустые папки", "btn_start_single": "Начать сортировку", "btn_reverse": "Обратное действие",
                 "multi_title": "Мульти-сборщик", "multi_desc": "Объединяйте потоки данных из разных папок в одну целевую папку.", "target_folder": "Целевая папка (Куда)", "ph_multi_target": "Куда отправить файлы?",
-                "sources_origin": "Источники (Откуда)", "btn_add": "Добавить источник", "include_target": "Включить целевую (Сортировка внутри себя)", "btn_start_multi": "Собрать источники",
+                "sources_origin": "Источники (Откуда)", "btn_add": "Добавить", "include_target": "Включить целевую (Сортировка внутри себя)", "btn_start_multi": "Собрать источники",
                 "dupes_title": "Поиск дубликатов по хешу", "dupes_desc": "Выполняйте MD5-сканирование для поиска точных бинарных копий файлов.", "folder_scan": "Папка для анализа", "ph_dupe_path": "/home/user/Документы",
                 "auto_dupes_desc": "Мгновенное удаление (Без ручного выбора)", "btn_start_scan": "Запустить глубокий анализ", "select_to_delete": "Найденные группы дубликатов", "btn_delete_selected": "УДАЛИТЬ ВЫБРАННЫЕ НАВСЕГДА",
                 "group": "Группа", "files": "файлов", "original_keep": "Оригинал (Оставить)", "duplicate_delete": "Копия (Удалить)",
@@ -638,7 +712,13 @@
                 "simulation_desc": "Предпросмотр структуры папок без записи на диск", "ignore_hidden": "Пропускать скрытые файлы",
                 "ignore_hidden_desc": "Игнорировать скрытые директории и файлы ОС", "skip_hidden_dupes": "Пропускать скрытые дубликаты",
                 "size_filters": "Фильтрация размера (МБ)", "min_size_label": "Мин. размер (0=выкл)", "max_size_label": "Макс. размер (0=выкл)",
-                "aesthetic_customizer": "Кастомизация дизайна"
+                "aesthetic_customizer": "Кастомизация дизайна",
+                // Folder monitoring details
+                "nav_monitor": "Мониторинг папок", "monitor_title": "Мониторинг папок в реальном времени", "monitor_desc": "Автоматически сортируйте файлы по мере их появления в выбранных папках.",
+                "beta_warning_title": "ПРЕДУПРЕЖДЕНИЕ: БЕТА-ВЕРСИЯ", "beta_warning_desc": "Мониторинг папок находится в режиме БЕТА-тестирования. Процесс работает в фоновом режиме и может нагружать диск. Пожалуйста, сделайте бэкап важных файлов перед использованием.",
+                "btn_start_monitor": "Включить мониторинг", "btn_stop_monitor": "Выключить мониторинг",
+                "monitor_status_active": "Мониторинг запущен", "monitor_status_inactive": "Мониторинг приостановлен",
+                "monitor_interval": "Интервал проверки (в секундах)", "monitored_paths": "Отслеживаемые папки"
             },
             es: {
                 "core_engine": "Clasificador", "toggle_theme": "Tema de Interfaz", "interface_language": "Idioma",
@@ -646,7 +726,7 @@
                 "single_title": "Espacio Único", "single_desc": "Distribuye, ordena y categoriza instantáneamente el contenido de carpetas.", "workspace_folder": "Carpeta de Trabajo", "ph_single_path": "/home/user/Descargas",
                 "sort_by_date": "Ordenar por Fecha", "overwrite_conflicts": "Sobrescribir Conflictos", "clean_empty": "Limpiar Vacíos", "btn_start_single": "Iniciar Ordenación", "btn_reverse": "Revertir Acción",
                 "multi_title": "Recolector Multi-Origen", "multi_desc": "Agrega flujos de datos de carpetas distintas a un destino común.", "target_folder": "Carpeta Destino (Destino)", "ph_multi_target": "¿A dónde deben ir los archivos?",
-                "sources_origin": "Orígenes", "btn_add": "Añadir Origen", "include_target": "Incluir Carpeta Destino (Auto-Ordenar)", "btn_start_multi": "Ensamblar Orígenes",
+                "sources_origin": "Orígenes", "btn_add": "Añadir", "include_target": "Incluir Carpeta Destino (Auto-Ordenar)", "btn_start_multi": "Ensamblar Orígenes",
                 "dupes_title": "Buscador de Duplicados Hash", "dupes_desc": "Realiza análisis MD5 acelerados por hardware para localizar clones binarios.", "folder_scan": "Directorio a Analizar", "ph_dupe_path": "/home/user/Documentos",
                 "auto_dupes_desc": "Eliminación Inmediata (Omitir selección manual)", "btn_start_scan": "Iniciar Análisis Profundo", "select_to_delete": "Grupos de Archivos Binarios", "btn_delete_selected": "Eliminar Clones Seleccionados",
                 "group": "Grupo", "files": "archivos", "original_keep": "Original (Conservar)", "duplicate_delete": "Duplicado (Eliminar)",
@@ -659,7 +739,13 @@
                 "simulation_desc": "Previsualizar cambios sin escribir en el disco", "ignore_hidden": "Ignorar Archivos Ocultos",
                 "ignore_hidden_desc": "Omitir directorios y rutas de archivos ocultos del sistema", "skip_hidden_dupes": "Omitir duplicados ocultos",
                 "size_filters": "Filtros de Tamaño (MB)", "min_size_label": "Tamaño Mín (0=Ninguno)", "max_size_label": "Tamaño Máx (0=Ninguno)",
-                "aesthetic_customizer": "Personalizador Estético"
+                "aesthetic_customizer": "Personalizador Estético",
+                // Folder monitoring details
+                "nav_monitor": "Monitoreo", "monitor_title": "Monitoreo de Carpetas en Tiempo Real", "monitor_desc": "Clasifique automáticamente los archivos entrantes en los directorios monitoreados.",
+                "beta_warning_title": "ADVERTENCIA DE FUNCIÓN BETA", "beta_warning_desc": "El monitoreo de carpetas está en fase BETA. Se ejecuta como un proceso de fondo. Asegúrese de realizar copias de seguridad de sus archivos importantes.",
+                "btn_start_monitor": "Activar Monitoreo en Vivo", "btn_stop_monitor": "Desactivar Monitoreo",
+                "monitor_status_active": "Monitoreo Activo", "monitor_status_inactive": "Monitoreo Suspendido",
+                "monitor_interval": "Intervalo de comprobación (segundos)", "monitored_paths": "Carpetas Monitoreadas"
             },
             zh: {
                 "core_engine": "分类器", "toggle_theme": "界面主题", "interface_language": "语言",
@@ -667,7 +753,7 @@
                 "single_title": "单空间工作区", "single_desc": "立即分发、排序和分类目录内容。", "workspace_folder": "工作区文件夹", "ph_single_path": "/home/user/Downloads",
                 "sort_by_date": "按日期排序", "overwrite_conflicts": "覆盖冲突", "clean_empty": "清理空文件夹", "btn_start_single": "开始排序", "btn_reverse": "撤销操作",
                 "multi_title": "多源收集器", "multi_desc": "将不同文件夹的数据流汇总到目标池中。", "target_folder": "目标文件夹（目的地）", "ph_multi_target": "文件应该存放到哪里？",
-                "sources_origin": "源目录", "btn_add": "添加源", "include_target": "包括目标文件夹（自排序）", "btn_start_multi": "汇聚源文件",
+                "sources_origin": "源目录", "btn_add": "添加", "include_target": "包括目标文件夹（自排序）", "btn_start_multi": "汇聚源文件",
                 "dupes_title": "哈希重复文件查找器", "dupes_desc": "执行硬件加速的 MD5 扫描以定位二进制克隆文件。", "folder_scan": "要分析的目录", "ph_dupe_path": "/home/user/Documents",
                 "auto_dupes_desc": "立即删除（跳过手动选择）", "btn_start_scan": "初始化深度扫描", "select_to_delete": "二进制匹配组", "btn_delete_selected": "清除选中的克隆",
                 "group": "分组", "files": "个文件", "original_keep": "原始文件（保留）", "duplicate_delete": "重复副本（删除）",
@@ -680,7 +766,13 @@
                 "simulation_desc": "预览更改而不写入磁盘", "ignore_hidden": "忽略隐藏文件",
                 "ignore_hidden_desc": "跳过隐藏的系统目录和文件路径", "skip_hidden_dupes": "跳过隐藏的重复文件",
                 "size_filters": "大小过滤器 (MB)", "min_size_label": "最小大小 (0=无限制)", "max_size_label": "最大大小 (0=无限制)",
-                "aesthetic_customizer": "美学定制器"
+                "aesthetic_customizer": "美学定制器",
+                // Folder monitoring details
+                "nav_monitor": "文件夹监控", "monitor_title": "实时文件夹监控", "monitor_desc": "实时自动整理监控目录中新传入的文件。",
+                "beta_warning_title": "测试版功能警告", "beta_warning_desc": "文件夹监控目前处于测试阶段 (BETA)。它作为后台进程运行，可能会消耗磁盘 I/O。请务必备份重要文件。",
+                "btn_start_monitor": "启用实时监控", "btn_stop_monitor": "禁用实时监控",
+                "monitor_status_active": "监控已激活", "monitor_status_inactive": "监控已挂起",
+                "monitor_interval": "检查间隔（秒）", "monitored_paths": "受监控的文件夹"
             },
             de: {
                 "core_engine": "Sortierer", "toggle_theme": "Oberflächendesign", "interface_language": "Sprache",
@@ -688,7 +780,7 @@
                 "single_title": "Einzelner Arbeitsbereich", "single_desc": "Inhalte sofort verteilen, sortieren und kategorisieren.", "workspace_folder": "Arbeitsverzeichnis", "ph_single_path": "/home/user/Downloads",
                 "sort_by_date": "Nach Datum sortieren", "overwrite_conflicts": "Konflikte überschreiben", "clean_empty": "Leere Ordner bereinigen", "btn_start_single": "Sortierung starten", "btn_reverse": "Aktion rückgängig machen",
                 "multi_title": "Multi-Quellen-Sammler", "multi_desc": "Datenströme aus verschiedenen Ordnern in einem Ziel-Pool zusammenführen.", "target_folder": "Zielordner (Ziel)", "ph_multi_target": "Wohin sollen die Dateien verschoben werden?",
-                "sources_origin": "Quellen", "btn_add": "Quelle hinzufügen", "include_target": "Zielordner einbeziehen (Selbstsortierung)", "btn_start_multi": "Quellen zusammenführen",
+                "sources_origin": "Quellen", "btn_add": "Hinzufügen", "include_target": "Zielordner einbeziehen (Selbstsortierung)", "btn_start_multi": "Quellen zusammenführen",
                 "dupes_title": "Hash-Duplikatsuche", "dupes_desc": "Führen Sie hardwarebeschleunigte MD5-Scans durch, um binäre Klone zu finden.", "folder_scan": "Zu analysierendes Verzeichnis", "ph_dupe_path": "/home/user/Dokumente",
                 "auto_dupes_desc": "Sofortige Löschung (Manuelle Auswahl überspringen)", "btn_start_scan": "Tiefenscan initialisieren", "select_to_delete": "Binäre Übereinstimmungsgruppen", "btn_delete_selected": "Ausgewählte Klone bereinigen",
                 "group": "Gruppe", "files": "Dateien", "original_keep": "Original (Behalten)", "duplicate_delete": "Duplikat (Löschen)",
@@ -701,7 +793,13 @@
                 "simulation_desc": "Änderungen vorschauen, ohne auf die Festplatte zu schreiben", "ignore_hidden": "Versteckte Dateien ignorieren",
                 "ignore_hidden_desc": "Versteckte Systemverzeichnisse und Dateipfade überspringen", "skip_hidden_dupes": "Versteckte Duplikate überspringen",
                 "size_filters": "Größenfilter (MB)", "min_size_label": "Min. Größe (0=Keine)", "max_size_label": "Max. Größe (0=Keine)",
-                "aesthetic_customizer": "Ästhetische Anpassung"
+                "aesthetic_customizer": "Ästhetische Anpassung",
+                // Folder monitoring details
+                "nav_monitor": "Überwachung", "monitor_title": "Echtzeit-Ordnerüberwachung", "monitor_desc": "Eingehende Dateien in überwachten Verzeichnissen automatisch in Echtzeit sortieren.",
+                "beta_warning_title": "WARNUNG: BETA-FUNKTION", "beta_warning_desc": "Die Ordnerüberwachung befindet sich in der BETA-Phase. Sie läuft als Hintergrundprozess. Bitte sichern Sie Ihre wichtigen Dateien ab.",
+                "btn_start_monitor": "Echtzeit-Überwachung aktivieren", "btn_stop_monitor": "Überwachung deaktivieren",
+                "monitor_status_active": "Überwachung aktiv", "monitor_status_inactive": "Überwachung ausgesetzt",
+                "monitor_interval": "Prüfintervall (Sekunden)", "monitored_paths": "Überwachte Ordner"
             }
         };
 
@@ -711,7 +809,7 @@
             currentLang = lang;
             localStorage.setItem('lang', lang);
 
-            // Обновление стилей кнопок языкового селектора
+            // Update language selector active attributes
             document.querySelectorAll('[data-lang-btn]').forEach(btn => {
                 const btnLang = btn.getAttribute('data-lang-btn');
                 if (btnLang === lang) {
@@ -738,18 +836,22 @@
                 }
             });
             if (multiSourcesArray.length > 0) renderSources();
+            if (monitorFoldersArray.length > 0) renderMonitorFolders();
             renderCategoryExtensions();
+            updateMonitorUIState();
         }
 
         // --- CORE APP LOGIC ---
         let eventSource = null;
         let multiSourcesArray = [];
+        let monitorFoldersArray = [];
+        let monitorEnabled = false;
         let isSlowMode = false;
         let eventQueue = [];
         let isProcessingQueue = false;
-        let categoryExtensionsState = {}; // Глобальное состояние расширений
+        let categoryExtensionsState = {}; // Global extension status tracking
 
-        // СЕКРЕТНАЯ ФУНКЦИЯ (ALT + M)
+        // SPECIAL COMBO (ALT + M)
         document.addEventListener('keydown', (e) => {
             if (e.altKey && e.key.toLowerCase() === 'm') {
                 isSlowMode = !isSlowMode;
@@ -757,7 +859,7 @@
             }
         });
 
-        // ВТОРАЯ СЕКРЕТНАЯ КОМБИНАЦИЯ (CTRL + SHIFT + S) - Эмуляция задержки рендеринга для отладки эффектов
+        // SECOND SPECIAL COMBO (CTRL + SHIFT + S) - Slow-mo layout updates
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's') {
                 isSlowMode = !isSlowMode;
@@ -768,7 +870,7 @@
             }
         });
 
-        // Свежие кастомные настройки интерфейса
+        // Set palette accent
         function setSystemAccent(primary, glow, gradient) {
             document.documentElement.style.setProperty('--accent-color', primary);
             document.documentElement.style.setProperty('--accent-glow', glow);
@@ -777,7 +879,7 @@
             localStorage.setItem('--accent-glow', glow);
             localStorage.setItem('--accent-gradient', gradient);
             addLog("System Core palette accent updated.", "success");
-            setLang(currentLang); // Обновить подсветку кнопок языка с новым акцентным цветом
+            setLang(currentLang); // Update lang selections
             renderCategoryExtensions();
         }
 
@@ -812,7 +914,7 @@
             document.getElementById('nav-' + tabId).classList.add('active');
         }
 
-        // --- ИСПРАВЛЕННАЯ СМЕНА ТЕМЫ ---
+        // Toggle theme layout
         function toggleTheme() {
             const isDark = document.documentElement.classList.contains('dark');
             if (isDark) {
@@ -825,7 +927,8 @@
                 localStorage.setItem('theme', 'dark');
             }
         }
-        // Восстановление темы при старте
+        
+        // Restore active theme
         if (localStorage.getItem('theme') === 'light') {
             document.documentElement.classList.remove('dark');
             document.documentElement.classList.add('light');
@@ -887,7 +990,7 @@
             while (eventQueue.length > 0) {
                 const data = eventQueue.shift();
                 handleEventData(data);
-                // Задержка 500мс в режиме отладки/замедления
+                // Delay updates by 500ms
                 await new Promise(r => setTimeout(r, 500));
             }
             isProcessingQueue = false;
@@ -943,7 +1046,71 @@
             lucide.createIcons();
         }
 
-        // --- КРАСИВЫЙ РЕДАКТОР СЛОВАРЯ РАСШИРЕНИЙ ---
+        // --- BACKGROUND MONITOR INTERFACE LOGIC ---
+        async function addMonitorFolderUI() {
+            try {
+                const res = await fetch('/api/browse');
+                const data = await res.json();
+                if (data.path && !monitorFoldersArray.includes(data.path)) {
+                    monitorFoldersArray.push(data.path);
+                    renderMonitorFolders();
+                    if (monitorEnabled) {
+                        await silentSaveConfig();
+                    }
+                }
+            } catch (e) {}
+        }
+        function remMonitorFolderUI(idx) {
+            monitorFoldersArray.splice(idx, 1);
+            renderMonitorFolders();
+            if (monitorEnabled) {
+                silentSaveConfig();
+            }
+        }
+        function renderMonitorFolders() {
+            const list = document.getElementById('monitorFoldersListUI');
+            if (!list) return;
+            list.innerHTML = monitorFoldersArray.map((s, i) => `
+                <div class="flex justify-between items-center bg-white/5 border border-white/5 p-3 rounded-xl hover:bg-white/10 transition group">
+                    <span class="text-xs font-mono text-slate-500 dark:text-slate-300 break-all">${s}</span>
+                    <button onclick="remMonitorFolderUI(${i})" class="text-slate-400 hover:text-red-500 p-1 transition"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        async function toggleMonitorState() {
+            monitorEnabled = !monitorEnabled;
+            if (monitorEnabled) {
+                addLog("Beta Feature: Folder monitoring enabled.", "conflict");
+            } else {
+                addLog("Folder monitoring suspended.", "info");
+            }
+            updateMonitorUIState();
+            await silentSaveConfig();
+        }
+
+        function updateMonitorUIState() {
+            const dot = document.getElementById('monitorStatusDot');
+            const text = document.getElementById('monitorStatusText');
+            const btnText = document.getElementById('monitorBtnText');
+            const btnIcon = document.getElementById('monitorBtnIcon');
+            
+            if (monitorEnabled) {
+                if (dot) { dot.className = 'w-3 h-3 rounded-full bg-emerald-500 animate-pulse'; }
+                if (text) { text.setAttribute('data-i18n', 'monitor_status_active'); text.innerText = i18n[currentLang].monitor_status_active; }
+                if (btnText) { btnText.setAttribute('data-i18n', 'btn_stop_monitor'); btnText.innerText = i18n[currentLang].btn_stop_monitor; }
+                if (btnIcon) { btnIcon.setAttribute('data-lucide', 'square'); }
+            } else {
+                if (dot) { dot.className = 'w-3 h-3 rounded-full bg-slate-400'; }
+                if (text) { text.setAttribute('data-i18n', 'monitor_status_inactive'); text.innerText = i18n[currentLang].monitor_status_inactive; }
+                if (btnText) { btnText.setAttribute('data-i18n', 'btn_start_monitor'); btnText.innerText = i18n[currentLang].btn_start_monitor; }
+                if (btnIcon) { btnIcon.setAttribute('data-lucide', 'play'); }
+            }
+            lucide.createIcons();
+        }
+
+        // --- DICTIONARY MAPPING ---
         function renderCategoryExtensions() {
             const area = document.getElementById('configArea');
             if (!area) return;
@@ -998,7 +1165,6 @@
         }
 
         async function silentSaveConfig() {
-            // Синхронизация между чекбоксами экранов
             const dryRunChecked = document.getElementById('cfg_dry_run_single').checked || document.getElementById('cfg_dry_run_multi').checked;
             const ignoreHiddenChecked = document.getElementById('cfg_ignore_hidden_single').checked || document.getElementById('cfg_ignore_hidden_multi').checked || document.getElementById('cfg_ignore_hidden_dupes').checked;
 
@@ -1015,10 +1181,14 @@
                 dry_run: dryRunChecked,
                 ignore_hidden: ignoreHiddenChecked,
                 min_size_mb: parseFloat(document.getElementById('cfg_min_size').value) || 0,
-                max_size_mb: parseFloat(document.getElementById('cfg_max_size').value) || 0
+                max_size_mb: parseFloat(document.getElementById('cfg_max_size').value) || 0,
+                // Monitoring options
+                monitor_enabled: monitorEnabled,
+                monitor_folders: monitorFoldersArray,
+                monitor_interval_sec: parseFloat(document.getElementById('cfg_monitor_interval').value) || 5.0,
+                monitor_target: document.getElementById('monitorTarget').value
             };
 
-            // Сериализуем интерактивное состояние расширений обратно в плоские строки для Python
             const extensions = {};
             for (const [cat, arr] of Object.entries(categoryExtensionsState)) {
                 extensions[cat] = arr.join(',');
@@ -1128,7 +1298,7 @@
             document.getElementById('cfg_auto_dupes').checked = config.auto_dupes;
             document.getElementById('cfg_move_unknown').checked = config.move_unknown;
 
-            // Новые опции ядра
+            // Engine settings sync
             document.getElementById('cfg_dry_run_single').checked = config.dry_run || false;
             document.getElementById('cfg_dry_run_multi').checked = config.dry_run || false;
             document.getElementById('cfg_ignore_hidden_single').checked = config.ignore_hidden !== false;
@@ -1137,6 +1307,14 @@
 
             document.getElementById('cfg_min_size').value = config.min_size_mb || 0;
             document.getElementById('cfg_max_size').value = config.max_size_mb || 0;
+
+            // Monitor state restoration
+            monitorEnabled = config.monitor_enabled || false;
+            monitorFoldersArray = config.monitor_folders || [];
+            document.getElementById('cfg_monitor_interval').value = config.monitor_interval_sec || 5.0;
+            document.getElementById('monitorTarget').value = config.monitor_target || "";
+            renderMonitorFolders();
+            updateMonitorUIState();
 
             const sync = (id1, id2) => {
                 const el1 = document.getElementById(id1), el2 = document.getElementById(id2);
@@ -1150,7 +1328,7 @@
             sync('cfg_overwrite', 'cfg_overwrite_m');
             sync('cfg_dry_run_single', 'cfg_dry_run_multi');
 
-            // Синхронизация скрытых файлов на трех вкладках
+            // Sync ignored statuses across tabs
             const h1 = document.getElementById('cfg_ignore_hidden_single');
             const h2 = document.getElementById('cfg_ignore_hidden_multi');
             const h3 = document.getElementById('cfg_ignore_hidden_dupes');
@@ -1160,7 +1338,7 @@
                 h3.addEventListener('change', () => { h1.checked = h3.checked; h2.checked = h3.checked; });
             }
 
-            // Парсим список расширений во внутреннее состояние массивов
+            // Bind dictionary arrays
             categoryExtensionsState = {};
             for (const [cat, extsString] of Object.entries(config.extensions)) {
                 categoryExtensionsState[cat] = extsString
@@ -1177,7 +1355,6 @@
             addLog("Global configuration saved.", "success");
         }
 
-        // Live Clock Widget Logic
         function startSystemClock() {
             const clock = document.getElementById('systemClock');
             if (clock) {

@@ -3,6 +3,8 @@ import shutil
 import json
 import hashlib
 from datetime import datetime
+import threading
+import time
 
 MONTHS_EN = {
     1: "January", 2: "February", 3: "March", 4: "April", 5: "May", 6: "June", 
@@ -35,9 +37,22 @@ class FileSorterCore:
             "dry_run": False,
             "ignore_hidden": True,
             "min_size_mb": 0.0,
-            "max_size_mb": 0.0
+            "max_size_mb": 0.0,
+            # Background monitoring configurations
+            "monitor_enabled": False,
+            "monitor_folders": [],
+            "monitor_interval_sec": 5.0,
+            "monitor_target": ""
         }
         self.config = self.load_config()
+
+        # Monitoring daemon assets
+        self.monitor_thread = None
+        self.monitor_stop_event = threading.Event()
+
+        # Safely trigger background monitoring if enabled on init
+        if self.config.get("monitor_enabled", False):
+            self.start_monitoring()
 
     def load_config(self):
         if os.path.exists(self.config_path):
@@ -49,9 +64,64 @@ class FileSorterCore:
         return self.defaults
 
     def save_config(self, new_config):
+        old_enabled = self.config.get("monitor_enabled", False)
         self.config.update(new_config)
         with open(self.config_path, "w", encoding="utf-8") as f:
             json.dump(self.config, f, indent=4, ensure_ascii=False)
+        
+        new_enabled = self.config.get("monitor_enabled", False)
+        # Handle state transitions for background processes
+        if new_enabled and not old_enabled:
+            self.start_monitoring()
+        elif not new_enabled and old_enabled:
+            self.stop_monitoring()
+
+    def start_monitoring(self):
+        """Launches thread-safe background process monitoring."""
+        if self.monitor_thread and self.monitor_thread.is_alive():
+            return
+        self.monitor_stop_event.clear()
+        self.monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
+        self.monitor_thread.start()
+
+    def stop_monitoring(self):
+        """Requests graceful shutdown of background process thread."""
+        self.monitor_stop_event.set()
+        if self.monitor_thread:
+            self.monitor_thread.join(timeout=2.0)
+            self.monitor_thread = None
+
+    def _monitor_loop(self):
+        """Infinite loop designed for background task monitoring execution."""
+        while not self.monitor_stop_event.is_set():
+            enabled = self.config.get("monitor_enabled", False)
+            if not enabled:
+                time.sleep(1.0)
+                continue
+
+            folders = self.config.get("monitor_folders", [])
+            target = self.config.get("monitor_target", "")
+            interval = float(self.config.get("monitor_interval_sec", 5.0))
+            if interval < 1.0:
+                interval = 1.0
+
+            if folders:
+                for folder in folders:
+                    if os.path.exists(folder):
+                        dest = target if target else folder
+                        try:
+                            # Silently deplete generator results during background work
+                            for _ in self.sort_directory_generator(folder, target_dir=dest):
+                                pass
+                        except Exception:
+                            pass
+
+            # Segment sleeping checks to remain responsive to stop signals
+            steps = max(1, int(interval))
+            for _ in range(steps):
+                if self.monitor_stop_event.is_set():
+                    break
+                time.sleep(interval / steps)
 
     def get_file_hash(self, filepath):
         """Safe block-by-block MD5 hash calculation for files of any size."""
