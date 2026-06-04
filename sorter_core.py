@@ -15,6 +15,7 @@ MONTHS_EN = {
 class FileSorterCore:
     def __init__(self, config_path="sorter_config.json"):
         self.config_path = config_path
+        self.config_lock = threading.Lock()
         self.defaults = {
             "extensions": {
                 'Images': '.jpg,.jpeg,.png,.gif,.bmp,.svg,.webp,.tiff,.ico',
@@ -39,52 +40,52 @@ class FileSorterCore:
             "ignore_hidden": True,
             "min_size_mb": 0.0,
             "max_size_mb": 0.0,
-            # Background monitoring configurations
             "monitor_enabled": False,
             "monitor_folders": [],
             "monitor_interval_sec": 5.0,
             "monitor_target": "",
-            # New features configuration defaults
             "recursive_sort": False,
-            "custom_rules": {}, # format: {"regex_pattern": "CategoryName"}
+            "custom_rules": {},
             "enable_logging": True,
             "log_file_path": "sorter_log.txt",
-            "history_file": "sorter_history.json"
+            "history_file": "sorter_history.json",
+            "fast_hash_large_files": True
         }
         self.config = self.load_config()
 
-        # Monitoring daemon assets
         self.monitor_thread = None
         self.monitor_stop_event = threading.Event()
 
-        # Safely trigger background monitoring if enabled on init
         if self.config.get("monitor_enabled", False):
             self.start_monitoring()
 
     def load_config(self):
-        if os.path.exists(self.config_path):
-            try:
-                with open(self.config_path, "r", encoding="utf-8") as f:
-                    return {**self.defaults, **json.load(f)}
-            except Exception:
-                return self.defaults
-        return self.defaults
+        with self.config_lock:
+            if os.path.exists(self.config_path):
+                try:
+                    with open(self.config_path, "r", encoding="utf-8") as f:
+                        return {**self.defaults, **json.load(f)}
+                except Exception:
+                    return self.defaults.copy()
+            return self.defaults.copy()
 
     def save_config(self, new_config):
-        old_enabled = self.config.get("monitor_enabled", False)
-        self.config.update(new_config)
-        with open(self.config_path, "w", encoding="utf-8") as f:
-            json.dump(self.config, f, indent=4, ensure_ascii=False)
+        with self.config_lock:
+            old_enabled = self.config.get("monitor_enabled", False)
+            self.config.update(new_config)
+            try:
+                with open(self.config_path, "w", encoding="utf-8") as f:
+                    json.dump(self.config, f, indent=4, ensure_ascii=False)
+            except Exception:
+                pass
         
-        new_enabled = self.config.get("monitor_enabled", False)
-        # Handle state transitions for background processes
+        new_enabled = new_config.get("monitor_enabled", False)
         if new_enabled and not old_enabled:
             self.start_monitoring()
         elif not new_enabled and old_enabled:
             self.stop_monitoring()
 
     def start_monitoring(self):
-        """Launches thread-safe background process monitoring."""
         if self.monitor_thread and self.monitor_thread.is_alive():
             return
         self.monitor_stop_event.clear()
@@ -92,23 +93,23 @@ class FileSorterCore:
         self.monitor_thread.start()
 
     def stop_monitoring(self):
-        """Requests graceful shutdown of background process thread."""
         self.monitor_stop_event.set()
         if self.monitor_thread:
             self.monitor_thread.join(timeout=2.0)
             self.monitor_thread = None
 
     def _monitor_loop(self):
-        """Infinite loop designed for background task monitoring execution."""
         while not self.monitor_stop_event.is_set():
-            enabled = self.config.get("monitor_enabled", False)
+            with self.config_lock:
+                enabled = self.config.get("monitor_enabled", False)
+                folders = list(self.config.get("monitor_folders", []))
+                target = self.config.get("monitor_target", "")
+                interval = float(self.config.get("monitor_interval_sec", 5.0))
+
             if not enabled:
                 time.sleep(1.0)
                 continue
 
-            folders = self.config.get("monitor_folders", [])
-            target = self.config.get("monitor_target", "")
-            interval = float(self.config.get("monitor_interval_sec", 5.0))
             if interval < 1.0:
                 interval = 1.0
 
@@ -117,13 +118,11 @@ class FileSorterCore:
                     if os.path.exists(folder):
                         dest = target if target else folder
                         try:
-                            # Silently deplete generator results during background work
                             for _ in self.sort_directory_generator(folder, target_dir=dest):
                                 pass
                         except Exception:
                             pass
 
-            # Segment sleeping checks to remain responsive to stop signals
             steps = max(1, int(interval))
             for _ in range(steps):
                 if self.monitor_stop_event.is_set():
@@ -131,20 +130,30 @@ class FileSorterCore:
                 time.sleep(interval / steps)
 
     def get_file_hash(self, filepath):
-        """Safe block-by-block MD5 hash calculation for files of any size."""
         hasher = hashlib.md5()
         try:
-            # Using 128KB chunk sizes for optimal read buffering
-            with open(filepath, 'rb') as f:
-                for chunk in iter(lambda: f.read(131072), b""):
-                    hasher.update(chunk)
-            return hasher.hexdigest()
+            size = os.path.getsize(filepath)
+            with self.config_lock:
+                fast_hash = self.config.get("fast_hash_large_files", True)
+
+            if fast_hash and size > 100 * 1024 * 1024:
+                with open(filepath, 'rb') as f:
+                    hasher.update(f.read(1024 * 1024))
+                    f.seek(-1024 * 1024, 2)
+                    hasher.update(f.read(1024 * 1024))
+                hasher.update(str(size).encode())
+                return hasher.hexdigest()
+            else:
+                with open(filepath, 'rb') as f:
+                    for chunk in iter(lambda: f.read(131072), b""):
+                        hasher.update(chunk)
+                return hasher.hexdigest()
         except (OSError, PermissionError):
             return None
 
     def _clean_empty_folders(self, path):
-        """Recursively search for and delete empty directories."""
-        ignore_hidden = self.config.get("ignore_hidden", True)
+        with self.config_lock:
+            ignore_hidden = self.config.get("ignore_hidden", True)
         for root, dirs, _ in os.walk(path, topdown=False):
             for d in dirs:
                 if ignore_hidden and d.startswith('.'):
@@ -157,17 +166,16 @@ class FileSorterCore:
                     pass
 
     def _is_size_allowed(self, filepath):
-        """Verify if file size falls within the configured min/max boundaries."""
         try:
-            min_size = float(self.config.get("min_size_mb", 0.0))
-            max_size = float(self.config.get("max_size_mb", 0.0))
+            with self.config_lock:
+                min_size = float(self.config.get("min_size_mb", 0.0))
+                max_size = float(self.config.get("max_size_mb", 0.0))
 
-            # Optimisation: skip system stats call if constraints are disabled
             if min_size <= 0.0 and max_size <= 0.0:
                 return True
 
             sz_bytes = os.path.getsize(filepath)
-            sz_mb = sz_bytes / 1048576.0 # 1024 * 1024
+            sz_mb = sz_bytes / 1048576.0
 
             if min_size > 0.0 and sz_mb < min_size:
                 return False
@@ -178,10 +186,11 @@ class FileSorterCore:
             return False
 
     def _write_log(self, message):
-        """Append runtime activity logs to the specified file."""
-        if not self.config.get("enable_logging", True):
+        with self.config_lock:
+            enabled = self.config.get("enable_logging", True)
+            log_path = self.config.get("log_file_path", "sorter_log.txt")
+        if not enabled:
             return
-        log_path = self.config.get("log_file_path", "sorter_log.txt")
         try:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             with open(log_path, "a", encoding="utf-8") as f:
@@ -190,8 +199,8 @@ class FileSorterCore:
             pass
 
     def _save_history(self, history_data):
-        """Write current session history of file movements to JSON file."""
-        h_file = self.config.get("history_file", "sorter_history.json")
+        with self.config_lock:
+            h_file = self.config.get("history_file", "sorter_history.json")
         try:
             with open(h_file, "w", encoding="utf-8") as f:
                 json.dump(history_data, f, indent=4, ensure_ascii=False)
@@ -199,8 +208,8 @@ class FileSorterCore:
             pass
 
     def _load_history(self):
-        """Load history list from last sorting operations."""
-        h_file = self.config.get("history_file", "sorter_history.json")
+        with self.config_lock:
+            h_file = self.config.get("history_file", "sorter_history.json")
         if os.path.exists(h_file):
             try:
                 with open(h_file, "r", encoding="utf-8") as f:
@@ -209,7 +218,6 @@ class FileSorterCore:
                 return []
         return []
 
-    # --- 1. SORTING (Single & Multi) ---
     def sort_directory_generator(self, src_dir, target_dir=None):
         if not target_dir: 
             target_dir = src_dir
@@ -217,26 +225,30 @@ class FileSorterCore:
             yield "error", f"Specified path does not exist: {src_dir}"
             return
             
-        dry_run_mode = self.config.get("dry_run", False)
-        ignore_hidden = self.config.get("ignore_hidden", True)
-        overwrite = self.config.get("overwrite", False)
-        date_sort = self.config.get("date_sort", False)
-        move_unknown = self.config.get("move_unknown", True)
-        clean_empty = self.config.get("clean_empty", True)
-        recursive_sort = self.config.get("recursive_sort", False)
+        with self.config_lock:
+            dry_run_mode = self.config.get("dry_run", False)
+            ignore_hidden = self.config.get("ignore_hidden", True)
+            overwrite = self.config.get("overwrite", False)
+            date_sort = self.config.get("date_sort", False)
+            move_unknown = self.config.get("move_unknown", True)
+            clean_empty = self.config.get("clean_empty", True)
+            recursive_sort = self.config.get("recursive_sort", False)
+            excluded_files_raw = self.config.get("excluded_files", "")
+            extensions_config = self.config.get("extensions", {}).copy()
+            custom_rules_config = self.config.get("custom_rules", {}).copy()
+            
         prefix = "[SIMULATION] " if dry_run_mode else ""
         
         yield "info", f"{prefix}Analyzing directory: {src_dir}"
         self._write_log(f"Starting sort process in {src_dir} (recursive: {recursive_sort})")
         
-        # Precompile exclusions and category mapping once
-        excl = {x.strip().lower() for x in self.config.get("excluded_files", "").split(",") if x.strip()}
+        excl = {x.strip().lower() for x in excluded_files_raw.split(",") if x.strip()}
         excl.add("sorter_config.json")
         excl.add("sorter_log.txt")
         excl.add("sorter_history.json")
 
         ext_to_category = {}
-        for cat, exts in self.config.get("extensions", {}).items():
+        for cat, exts in extensions_config.items():
             for e in exts.split(','):
                 clean_ext = e.strip().lower()
                 if clean_ext:
@@ -244,15 +256,13 @@ class FileSorterCore:
                         clean_ext = '.' + clean_ext
                     ext_to_category[clean_ext] = cat
 
-        # Precompile custom regex rules
         custom_rules = []
-        for pattern, cat in self.config.get("custom_rules", {}).items():
+        for pattern, cat in custom_rules_config.items():
             try:
                 custom_rules.append((re.compile(pattern, re.IGNORECASE), cat))
             except Exception as e:
                 yield "info", f"Skipping invalid custom regex pattern '{pattern}': {str(e)}"
 
-        # Gather target files to process
         files_to_process = []
         abs_target_dir = os.path.abspath(target_dir)
         abs_src_dir = os.path.abspath(src_dir)
@@ -260,7 +270,6 @@ class FileSorterCore:
         if recursive_sort:
             for root, dirs, files in os.walk(src_dir):
                 abs_root = os.path.abspath(root)
-                # Avoid infinite recursion if target resides inside source folder
                 if abs_root.startswith(abs_target_dir) and abs_root != abs_src_dir:
                     continue
                 if ignore_hidden:
@@ -307,8 +316,6 @@ class FileSorterCore:
             yield "progress", {"current": index + 1, "total": total}
 
             ext = os.path.splitext(f)[1].lower()
-            
-            # Apply custom regex matches first
             category = None
             for regex, cat in custom_rules:
                 if regex.search(f):
@@ -344,7 +351,6 @@ class FileSorterCore:
                         except Exception: 
                             pass
                 else:
-                    # Rename collision handler
                     n, e = os.path.splitext(f)
                     counter = 1
                     while os.path.exists(dest_path):
@@ -373,28 +379,29 @@ class FileSorterCore:
         yield "success", f"{prefix}Processing completed for {src_dir}! Actions: {count} files"
         self._write_log(f"{prefix}Sort process completed for {src_dir}. Moved {count} files.")
 
-    # --- 2. REVERSE SORTING (Unsort) ---
     def unsort_directory_generator(self, target_dir):
         if not target_dir or not os.path.exists(target_dir):
             yield "error", "Specified path not found!"
             return
 
-        dry_run_mode = self.config.get("dry_run", False)
-        ignore_hidden = self.config.get("ignore_hidden", True)
-        clean_empty = self.config.get("clean_empty", True)
+        with self.config_lock:
+            dry_run_mode = self.config.get("dry_run", False)
+            ignore_hidden = self.config.get("ignore_hidden", True)
+            clean_empty = self.config.get("clean_empty", True)
+            extensions_config = self.config.get("extensions", {}).copy()
+            
         prefix = "[SIMULATION] " if dry_run_mode else ""
 
         yield "info", f"{prefix}Starting reverse sorting (extraction) for: {target_dir}"
         self._write_log(f"Starting unsort process in {target_dir}")
         all_files = []
-        cats = list(self.config.get("extensions", {}).keys()) + ["Other"]
+        cats = list(extensions_config.keys()) + ["Other"]
         
         for c in cats:
             cp = os.path.join(target_dir, c)
             if os.path.isdir(cp):
                 for r, dirs, fs in os.walk(cp):
                     if ignore_hidden:
-                        # Prune hidden subdirectories from the walk trajectory
                         dirs[:] = [d for d in dirs if not d.startswith('.')]
                     for f in fs: 
                         if ignore_hidden and f.startswith('.'):
@@ -439,7 +446,6 @@ class FileSorterCore:
         yield "success", f"{prefix}Reverse sorting completed! Processed files: {count}"
         self._write_log(f"{prefix}Unsort completed. Extracted {count} files.")
 
-    # --- 3. DUPLICATE FINDER ---
     def scan_duplicates_generator(self, path):
         if not path or not os.path.exists(path):
             yield "error", "Specified path not found!"
@@ -447,13 +453,13 @@ class FileSorterCore:
             
         yield "info", f"Scanning for duplicates in: {path}"
         self._write_log(f"Starting duplicate scan in {path}")
-        ignore_hidden = self.config.get("ignore_hidden", True)
-        auto_dupes = self.config.get("auto_dupes", False)
+        with self.config_lock:
+            ignore_hidden = self.config.get("ignore_hidden", True)
+            auto_dupes = self.config.get("auto_dupes", False)
         
         size_groups = {}
         for root_dir, dirs, files in os.walk(path):
             if ignore_hidden:
-                # Prune hidden subdirectories to speed up disk scanning dramatically
                 dirs[:] = [d for d in dirs if not d.startswith('.')]
             for f in files:
                 if ignore_hidden and f.startswith('.'):
@@ -495,7 +501,6 @@ class FileSorterCore:
         if auto_dupes:
             to_del = []
             for g in groups: 
-                # Retain the first copy as original and queue other copies for deletion
                 to_del.extend(g[1:])
             yield "info", f"Found {len(to_del)} duplicates. Starting auto-deletion..."
             count = 0
@@ -517,15 +522,14 @@ class FileSorterCore:
             yield "info", "Review the duplicates above. Run with --auto-dupes to automatically delete copies."
             self._write_log(f"Duplicate scan completed. Found {len(groups)} duplicate groups.")
 
-    # --- 4. ROLLBACK OPERATION ---
     def rollback_last_session_generator(self):
-        """Revert the operations executed during the last successful directory sorting session."""
         history = self._load_history()
         if not history:
             yield "error", "No sorting history found to roll back."
             return
 
-        dry_run_mode = self.config.get("dry_run", False)
+        with self.config_lock:
+            dry_run_mode = self.config.get("dry_run", False)
         prefix = "[SIMULATION] " if dry_run_mode else ""
         yield "info", f"{prefix}Starting rollback of the last session ({len(history)} operations)..."
         self._write_log(f"Starting rollback session of {len(history)} operations.")
@@ -535,7 +539,6 @@ class FileSorterCore:
         successful_reversals = []
         unsuccessful_reversals = []
 
-        # Process in reverse chronological order to prevent conflicts
         for i, op in enumerate(reversed(history)):
             yield "progress", {"current": i + 1, "total": total}
             src = op.get("src")
@@ -549,7 +552,6 @@ class FileSorterCore:
                 unsuccessful_reversals.append(op)
                 continue
 
-            # Check if source path is already occupied by another file
             final_src = src
             if os.path.exists(final_src):
                 n, e = os.path.splitext(os.path.basename(src))
@@ -573,24 +575,23 @@ class FileSorterCore:
                 unsuccessful_reversals.append(op)
 
         if not dry_run_mode:
-            # Maintain only elements we were unable to revert
             self._save_history(unsuccessful_reversals)
             
         yield "success", f"{prefix}Rollback session completed! Successfully restored: {count}/{total} files."
         self._write_log(f"{prefix}Rollback session completed. Restored {count}/{total} files.")
 
-    # --- 5. STATISTICS ENGINE ---
     def generate_stats_generator(self, path):
-        """Analyze files in a directory to provide a detailed breakdown of sizes and types."""
         if not path or not os.path.exists(path):
             yield "error", "Specified path not found!"
             return
 
         yield "info", f"Analyzing directory statistics for: {path}"
-        ignore_hidden = self.config.get("ignore_hidden", True)
+        with self.config_lock:
+            ignore_hidden = self.config.get("ignore_hidden", True)
+            extensions_config = self.config.get("extensions", {}).copy()
 
         ext_to_category = {}
-        for cat, exts in self.config.get("extensions", {}).items():
+        for cat, exts in extensions_config.items():
             for e in exts.split(','):
                 clean_ext = e.strip().lower()
                 if clean_ext:
@@ -603,7 +604,6 @@ class FileSorterCore:
         category_stats = {}
         ext_stats = {}
 
-        # Collect files sequentially
         temp_files_list = []
         for root, dirs, files in os.walk(path):
             if ignore_hidden:
@@ -629,13 +629,11 @@ class FileSorterCore:
                 total_files += 1
                 total_size += sz
 
-                # Track categories
                 if cat not in category_stats:
                     category_stats[cat] = {"count": 0, "size_bytes": 0}
                 category_stats[cat]["count"] += 1
                 category_stats[cat]["size_bytes"] += sz
 
-                # Track extensions
                 if ext not in ext_stats:
                     ext_stats[ext] = {"count": 0, "size_bytes": 0}
                 ext_stats[ext]["count"] += 1

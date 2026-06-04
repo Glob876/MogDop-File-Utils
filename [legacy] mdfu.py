@@ -1,27 +1,15 @@
 import os
 import shutil
 import json
-import hashlib
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk, simpledialog
 from datetime import datetime
 import subprocess
 import sys
 import threading
-import time
 from typing import Dict, List, Optional, Tuple, Any
+from sorter_core import FileSorterCore
 
-# Попытка импорта watchdog для эффективного фонового мониторинга
-try:
-    from watchdog.observers import Observer
-    from watchdog.events import FileSystemEventHandler
-    WATCHDOG_AVAILABLE = True
-except ImportError:
-    WATCHDOG_AVAILABLE = False
-    Observer = None
-    FileSystemEventHandler = object  # Заглушка, чтобы классы не падали
-
-# --- Стили оформления ---
 COLOR_BG = "#ececec"
 COLOR_CARD = "#ffffff"
 COLOR_TEXT = "#2d3436"
@@ -34,12 +22,10 @@ COLOR_BORDER = "#dfe6e9"
 COLOR_DANGER = "#ff7675"
 COLOR_DANGER_HOVER = "#d63031"
 COLOR_SUCCESS = "#00b894"
-COLOR_HELP = "#636e72"
 
 CONFIG_FILE = "sorter_config.json"
 LOG_FILE = "sorter_log.txt"
 
-# --- Данные ---
 DEFAULT_EXTENSIONS = {
     'Image': '.jpg,.jpeg,.png,.gif,.bmp,.svg,.webp,.tiff,.ico',
     'Documents': '.pdf,.doc,.docx,.txt,.xlsx,.pptx,.csv,.odt,.rtf',
@@ -95,14 +81,14 @@ LANGUAGES = {
         'add_category': "Добавить новую категорию",
         'restore_cats': "Восстановить категории",
         'success': "Успех",
-        'done': "Готово! Файлов обработано: ",
+        'done': "Готово! Обработка завершена.",
         'err_path': "Путь не найден!",
         'dupe_win': "Выбор дубликатов",
         'confirm_reverse': "Вы уверены, что хотите вернуть все файлы из категорий в общую папку?",
         'preview_mode': "Режим предпросмотра (без перемещения)",
-        'no_watchdog': "Библиотека 'watchdog' не установлена. Будет использован метод интервального опроса (менее эффективно).\nДля лучшей работы выполните: pip install watchdog",
+        'no_watchdog': "Режим отслеживания запущен.",
         'beta_warn_title': "Фоновый мониторинг",
-        'beta_warn_msg': "Программа будет автоматически перемещать файлы из папки слежения.\nРекомендуется сначала протестировать работу на папке с копиями файлов, чтобы избежать потери данных."
+        'beta_warn_msg': "Программа автоматически перемещает новые файлы. Проверьте настройки папок."
     },
     'EN': {
         'title': "MogDop's File Utils Legacy",
@@ -148,106 +134,16 @@ LANGUAGES = {
         'add_category': "Add new category",
         'restore_cats': "Restore categories",
         'success': "Success",
-        'done': "Done! Files processed: ",
+        'done': "Done! Operations completed.",
         'err_path': "Path not found!",
         'dupe_win': "Duplicate Selector",
         'confirm_reverse': "Are you sure you want to return all files from categories to the root folder?",
         'preview_mode': "Preview mode (no moving)",
-        'no_watchdog': "'watchdog' library is not installed. Falling back to basic interval polling.\nFor best performance run: pip install watchdog",
+        'no_watchdog': "Monitoring mode is active.",
         'beta_warn_title': "Background Monitoring",
-        'beta_warn_msg': "The program will automatically move files from the watched folder.\nIt is highly recommended to test this feature on dummy files first to avoid data loss."
+        'beta_warn_msg': "The program will automatically sort files. Please check paths."
     }
 }
-
-HELP_TEXTS = {
-    'RU': {
-        'single': "Одиночный режим: Файлы в выбранной папке будут распределены по категориям прямо внутри неё.",
-        'multi_target': "Целевая папка: Место, куда будут перемещены файлы из всех папок-источников.",
-        'multi_src': "Источники: Список папок, из которых программа будет забирать файлы для сортировки.",
-        'dupe_scan': "Дубликаты: Программа сравнит файлы по их содержимому (хешу) и предложит удалить копии.",
-        'auto_watch': "Фоновый мониторинг: Программа будет работать в фоне и автоматически сортировать новые файлы в папке слежения.",
-        'preview': "Режим предпросмотра: Программа запишет в лог, что она собирается сделать, не перемещая файлы реально.",
-        'lang': "Язык: Смена языка интерфейса (требуется переоткрытие окон).",
-        'excluded': "Исключения: Файлы с этими именами или расширениями будут проигнорированы программой.",
-        'unknown': "Папка 'Другое': Если расширение файла неизвестно, он попадет в папку 'Другое' вместо того, чтобы остаться на месте.",
-        'overwrite': "Перезапись: Если в папке назначения уже есть файл с таким именем, он будет заменен новым без уведомления.",
-        'auto_dupe': "Авто-удаление: Программа сама удалит все копии, оставив только один оригинальный файл.",
-        'date_sort': "Сортировка по дате: Внутри каждой категории (например, Изображения) будут созданы папки Год -> Месяц.",
-        'clean': "Очистка: Удалять папки, которые стали пустыми после перемещения файлов из них.",
-        'incl_target': "Включая цель: Сортировать файлы не только из источников, но и те, что уже лежат в целевой папке.",
-        'reverse': "Обратная сортировка: Выносит все файлы из папок-категорий обратно в корень выбранной папки."
-    },
-    'EN': {
-        'single': "Single Mode: Files in the selected folder will be sorted into categories inside that same folder.",
-        'multi_target': "Target Folder: The destination where files from all source folders will be moved.",
-        'multi_src': "Sources: A list of folders from which the program will take files to sort.",
-        'dupe_scan': "Duplicates: The program compares file contents (hashes) and offers to delete copies.",
-        'auto_watch': "Background Monitor: The program runs in the background and automatically sorts new files in the watched folder.",
-        'preview': "Preview Mode: The program logs intended actions without actually moving any files.",
-        'lang': "Language: Change interface language (requires reopening windows).",
-        'excluded': "Excluded: Files with these names or extensions will be ignored by the program.",
-        'unknown': "Other Folder: If a file extension is unknown, it will be moved to 'Other' instead of staying put.",
-        'overwrite': "Overwrite: If a file exists in the destination, it will be replaced without prompt.",
-        'auto_dupe': "Auto-delete: The program will automatically remove copies, keeping only one original.",
-        'date_sort': "Date Sorting: Inside each category, subfolders Year -> Month will be created.",
-        'clean': "Cleaning: Delete folders that become empty after files are moved out.",
-        'incl_target': "Include Target: Sort files not only from sources but also those already in the target folder.",
-        'reverse': "Reverse Sort: Moves all files out of category folders back into the root of the selected folder."
-    }
-}
-
-MONTHS_RU = {
-    1: "Январь", 2: "Февраль", 3: "Март", 4: "Апрель",
-    5: "Май", 6: "Июнь", 7: "Июль", 8: "Август",
-    9: "Сентябрь", 10: "Октябрь", 11: "Ноябрь", 12: "Декабрь"
-}
-
-# --- Вспомогательные функции ---
-
-def log_message(msg: str) -> None:
-    try:
-        with open(LOG_FILE, "a", encoding="utf-8") as f:
-            f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {msg}\n")
-    except Exception as e:
-        print(f"Failed to write log: {e}")
-
-def get_file_hash(filepath: str) -> Optional[str]:
-    hasher = hashlib.md5()
-    try:
-        size = os.path.getsize(filepath)
-        # Если файл больше 100 МБ, читаем только начало и конец для скорости
-        if size > 100 * 1024 * 1024:
-            with open(filepath, 'rb') as f:
-                hasher.update(f.read(1024 * 1024))
-                f.seek(-1024 * 1024, 2)
-                hasher.update(f.read(1024 * 1024))
-        else:
-            with open(filepath, 'rb') as f:
-                for chunk in iter(lambda: f.read(4096), b""):
-                    hasher.update(chunk)
-        return hasher.hexdigest()
-    except Exception as e:
-        log_message(f"[Error] get_file_hash failed for {filepath}: {e}")
-        return None
-
-# --- UI Компоненты ---
-
-class HelpMarker(tk.Label):
-    def __init__(self, master: tk.Widget, help_key: str, lang: str, status_label: tk.Label):
-        super().__init__(
-            master, text=" [?] ", fg=COLOR_ACCENT, bg=master["bg"],
-            cursor="question_arrow", font=("Segoe UI", 9, "bold")
-        )
-        self.help_text = HELP_TEXTS.get(lang, {}).get(help_key, "")
-        self.status_label = status_label
-        self.bind("<Enter>", self._show)
-        self.bind("<Leave>", self._hide)
-
-    def _show(self, e: tk.Event) -> None:
-        self.status_label.config(text=self.help_text, fg=COLOR_ACCENT)
-
-    def _hide(self, e: tk.Event) -> None:
-        self.status_label.config(text="")
 
 class StyledButton(tk.Button):
     def __init__(self, master: tk.Widget, text: str, command: callable, bg_color: str = COLOR_ACCENT, hover_color: str = COLOR_ACCENT_HOVER, fg_color: str = "white", **kwargs):
@@ -260,41 +156,6 @@ class StyledButton(tk.Button):
         self.hover_color = hover_color
         self.bind("<Enter>", lambda e: self.config(bg=self.hover_color))
         self.bind("<Leave>", lambda e: self.config(bg=self.bg_color))
-
-# --- Диалоговые окна ---
-
-class ConflictDialog(tk.Toplevel):
-    def __init__(self, parent: tk.Widget, filename: str, lang: str):
-        super().__init__(parent)
-        self.result = None
-        self.apply_to_all = False
-        self.title(LANGUAGES[lang]['conflict_title'])
-        self.geometry("480x250")
-        self.configure(bg=COLOR_CARD)
-        self.grab_set()
-
-        msg = LANGUAGES[lang]['conflict_msg'].format(file=filename)
-        tk.Label(self, text=msg, bg=COLOR_CARD, pady=20, wraplength=440, font=("Segoe UI", 10)).pack()
-
-        # Фрейм для кнопок
-        f_btns = tk.Frame(self, bg=COLOR_CARD)
-        f_btns.pack(pady=10)
-
-        StyledButton(f_btns, text=LANGUAGES[lang]['opt_replace'], command=lambda: self.end('replace'), bg_color=COLOR_DANGER, hover_color=COLOR_DANGER_HOVER, width=15).pack(side="left", padx=10)
-        StyledButton(f_btns, text=LANGUAGES[lang]['opt_rename'], command=lambda: self.end('rename'), width=15).pack(side="left", padx=10)
-
-        # Чекбокс применить ко всем
-        self.apply_all_var = tk.BooleanVar(value=False)
-        cb = tk.Checkbutton(
-            self, text=LANGUAGES[lang]['apply_all'], variable=self.apply_all_var,
-            bg=COLOR_CARD, font=("Segoe UI", 9)
-        )
-        cb.pack(pady=15)
-
-    def end(self, mode: str) -> None:
-        self.result = mode
-        self.apply_to_all = self.apply_all_var.get()
-        self.destroy()
 
 class DuplicateSelector(tk.Toplevel):
     def __init__(self, parent: tk.Widget, dupe_groups: List[List[str]], lang: str):
@@ -325,7 +186,6 @@ class DuplicateSelector(tk.Toplevel):
             frame = tk.LabelFrame(self.scroll_f, text=f"Группа ({len(group)})", bg=COLOR_CARD, pady=10)
             frame.pack(fill="x", pady=10, padx=5)
             for i, path in enumerate(group):
-                # Оставляем первый файл, остальные помечаем на удаление
                 var = tk.BooleanVar(value=(i > 0))
                 self.checks.append((var, path))
                 cb = tk.Checkbutton(frame, text=path, variable=var, bg=COLOR_CARD, wraplength=600, justify="left")
@@ -364,47 +224,41 @@ class SettingsWindow(tk.Toplevel):
         self.p_card.pack(fill="x", padx=15, pady=15)
         self.p_card.columnconfigure(1, weight=1)
 
-        # Общие настройки
         tk.Label(self.p_card, text=LANGUAGES[self.lang]['sub_general'], bg=COLOR_CARD, font=("Segoe UI", 10, "bold")).grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 10))
         
-        # Язык
         f_l = tk.Frame(self.p_card, bg=COLOR_CARD)
         f_l.grid(row=1, column=0, sticky="w", pady=5)
         tk.Label(f_l, text=LANGUAGES[self.lang]['set_lang'], bg=COLOR_CARD).pack(side="left")
-        HelpMarker(f_l, 'lang', self.lang, self.status_label).pack(side="left")
+        
         self.l_cb = ttk.Combobox(self.p_card, values=["RU", "EN"], state="readonly")
-        self.l_cb.set(self.app.settings.get("language", "RU"))
+        self.l_cb.set(self.app.core.config.get("language", "RU"))
         self.l_cb.grid(row=1, column=1, sticky="ew", padx=10)
 
-        # Исключения
         f_e = tk.Frame(self.p_card, bg=COLOR_CARD)
         f_e.grid(row=2, column=0, sticky="w", pady=5)
         tk.Label(f_e, text=LANGUAGES[self.lang]['set_excluded'], bg=COLOR_CARD).pack(side="left")
-        HelpMarker(f_e, 'excluded', self.lang, self.status_label).pack(side="left")
+        
         self.e_ex = ttk.Entry(self.p_card)
-        self.e_ex.insert(0, self.app.settings.get("excluded_files", ""))
+        self.e_ex.insert(0, self.app.core.config.get("excluded_files", ""))
         self.e_ex.grid(row=2, column=1, sticky="ew", padx=10)
 
-        # Чекбоксы
         chk_row = 3
         chk_data = [
-            ('move_unknown', 'set_unknown', 'unknown', "move_unknown"),
-            ('overwrite', 'set_overwrite', 'overwrite', "overwrite"),
-            ('auto_dupes', 'set_auto_dupes', 'auto_dupe', "auto_dupes"),
-            ('date_sort', 'set_date_sort', 'date_sort', "date_sort"),
-            ('clean_empty', 'set_clean_empty', 'clean', "clean_empty"),
-            ('include_target_root', 'include_target', 'incl_target', "include_target_root")
+            ('move_unknown', 'set_unknown', "move_unknown"),
+            ('overwrite', 'set_overwrite', "overwrite"),
+            ('auto_dupes', 'set_auto_dupes', "auto_dupes"),
+            ('date_sort', 'set_date_sort', "date_sort"),
+            ('clean_empty', 'set_clean_empty', "clean_empty"),
+            ('include_target_root', 'include_target', "include_target_root")
         ]
         self.vars: Dict[str, tk.BooleanVar] = {}
-        for key_sett, lang_key, help_key, var_name in chk_data:
+        for key_sett, lang_key, var_name in chk_data:
             f = tk.Frame(self.p_card, bg=COLOR_CARD)
             f.grid(row=chk_row, column=0, columnspan=2, sticky="w", pady=2)
-            self.vars[var_name] = tk.BooleanVar(value=self.app.settings.get(var_name, False))
+            self.vars[var_name] = tk.BooleanVar(value=self.app.core.config.get(var_name, False))
             tk.Checkbutton(f, text=LANGUAGES[self.lang][lang_key], variable=self.vars[var_name], bg=COLOR_CARD).pack(side="left")
-            HelpMarker(f, help_key, self.lang, self.status_label).pack(side="left")
             chk_row += 1
 
-        # Настройки категорий
         tk.Label(self.p_card, text=LANGUAGES[self.lang]['sub_categories'], bg=COLOR_CARD, font=("Segoe UI", 10, "bold")).grid(row=chk_row, column=0, columnspan=2, sticky="w", pady=(15, 5))
         self.e_map: Dict[str, ttk.Entry] = {}
         self.cat_row = chk_row + 1
@@ -415,7 +269,7 @@ class SettingsWindow(tk.Toplevel):
             widget.destroy()
         curr = self.cat_row
         
-        extensions_dict = self.app.settings.get("extensions", DEFAULT_EXTENSIONS)
+        extensions_dict = self.app.core.config.get("extensions", DEFAULT_EXTENSIONS)
         for cat, exts in extensions_dict.items():
             lbl = tk.Label(self.p_card, text=cat, bg=COLOR_CARD)
             lbl.grid(row=curr, column=0, sticky="w", pady=2)
@@ -439,144 +293,53 @@ class SettingsWindow(tk.Toplevel):
             "clean_empty": self.vars["clean_empty"].get(),
             "include_target_root": self.vars["include_target_root"].get()
         }
-        self.app.settings.update(new_settings)
+        self.app.core.save_config(new_settings)
         self.app.lang = new_settings["language"]
-        self.app.save_settings()
         self.app.create_main_ui()
         messagebox.showinfo(LANGUAGES[self.app.lang]['success'], "Settings Saved!")
         self.destroy()
 
-# --- Фоновый мониторинг (Watchdog Handler) ---
-
-class SorterWatchdogHandler(FileSystemEventHandler):
-    def __init__(self, sorter_method: callable, src_dir: str, dst_root: str):
-        self.sorter_method = sorter_method
-        self.src_dir = src_dir
-        self.dst_root = dst_root
-        self.timer = None
-
-    def on_any_event(self, event: Any) -> None:
-        # Игнорируем события с директориями
-        if getattr(event, 'is_directory', False):
-            return
-        
-        # Debounce механизм: ждем 2 секунды после последнего события файловой системы,
-        # чтобы дать файлам докачаться и не дергать сортировщик каждую миллисекунду.
-        if self.timer:
-            self.timer.cancel()
-            
-        self.timer = threading.Timer(2.0, self.sorter_method, args=(self.src_dir, self.dst_root))
-        self.timer.start()
-
-# --- Главный класс приложения ---
-
 class FileSorterApp:
     def __init__(self, root: tk.Tk):
         self.root = root
-        self.settings = self.load_settings()
-        self.lang = self.settings.get("language", "RU")
+        self.core = FileSorterCore()
+        self.lang = self.core.config.get("language", "RU")
         
         self.root.title(LANGUAGES[self.lang]['title'])
         self.root.geometry("950x950")
         self.root.configure(bg=COLOR_BG)
         
-        # Установка логотипа приложения, если файл logo.ico существует
         if os.path.exists("logo.ico"):
             try:
                 self.root.iconbitmap("logo.ico")
             except Exception:
                 pass
         
-        self.source_path = tk.StringVar(value=self.settings.get("last_path", ""))
-        self.multi_target = tk.StringVar(value=self.settings.get("multi_target", ""))
+        self.source_path = tk.StringVar(value=self.core.config.get("last_path", ""))
+        self.multi_target = tk.StringVar(value=self.core.config.get("multi_target", ""))
         self.dupe_folder = tk.StringVar(value="")
-        self.multi_sources: List[str] = self.settings.get("multi_sources", [])
-        self.include_target_var = tk.BooleanVar(value=self.settings.get("include_target_root", False))
-        self.preview_mode = tk.BooleanVar(value=False)
+        self.multi_sources: List[str] = self.core.config.get("multi_sources", [])
+        self.include_target_var = tk.BooleanVar(value=self.core.config.get("include_target_root", False))
+        self.preview_mode = tk.BooleanVar(value=self.core.config.get("dry_run", False))
 
-        # Фоновые переменные
-        self.auto_src = tk.StringVar(value=self.settings.get("auto_src", ""))
-        self.auto_dst = tk.StringVar(value=self.settings.get("auto_dst", ""))
-        self.auto_interval = tk.IntVar(value=self.settings.get("auto_interval", 10))
-        self.auto_enabled = tk.BooleanVar(value=self.settings.get("auto_enabled", False))
-        
-        self.watch_thread: Optional[threading.Thread] = None
-        self.observer: Optional[Any] = None
-        
-        self.global_conflict_action: Optional[str] = None
+        self.auto_src = tk.StringVar(value=self.core.config.get("monitor_folders", [""])[0] if self.core.config.get("monitor_folders") else "")
+        self.auto_dst = tk.StringVar(value=self.core.config.get("monitor_target", ""))
+        self.auto_interval = tk.IntVar(value=int(self.core.config.get("monitor_interval_sec", 10)))
+        self.auto_enabled = tk.BooleanVar(value=self.core.config.get("monitor_enabled", False))
 
         self.create_menu()
         self.create_main_ui()
 
-        if self.auto_enabled.get():
-            self.start_watcher()
-
-    def load_settings(self) -> dict:
-        defaults = {
-            "extensions": DEFAULT_EXTENSIONS,
-            "auto_dupes": False,
-            "include_target_root": False, 
-            "multi_sources": [],
-            "excluded_files": "",
-            "move_unknown": True,
-            "overwrite": False, 
-            "language": "RU",
-            "date_sort": False,
-            "clean_empty": True,
-            "last_path": "",
-            "multi_target": "",
-            "auto_src": "",
-            "auto_dst": "",
-            "auto_interval": 10,
-            "auto_enabled": False
-        }
-        if os.path.exists(CONFIG_FILE):
-            try:
-                with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-                    d = json.load(f)
-                    for k, v in defaults.items():
-                        d.setdefault(k, v)
-                    return d
-            except Exception as e:
-                log_message(f"[Error] Failed to load config: {e}")
-                
-        return defaults
-
-    def save_settings(self) -> None:
-        self.settings["auto_src"] = self.auto_src.get()
-        self.settings["auto_dst"] = self.auto_dst.get()
-        self.settings["auto_interval"] = self.auto_interval.get()
-        self.settings["auto_enabled"] = self.auto_enabled.get()
-        
-        try:
-            with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-                json.dump(self.settings, f, ensure_ascii=False, indent=4)
-        except Exception as e:
-            log_message(f"[Error] Failed to save config: {e}")
-
     def get_directory_path(self, title: str = "Select Directory") -> str:
-        if sys.platform.startswith('linux'):
-            try:
-                proc = subprocess.run(['zenity', '--file-selection', '--directory', f'--title={title}'], capture_output=True, text=True)
-                if proc.returncode == 0:
-                    return proc.stdout.strip()
-            except Exception:
-                pass
-            try:
-                proc = subprocess.run(['kdialog', '--getexistingdirectory', '--title', title], capture_output=True, text=True)
-                if proc.returncode == 0:
-                    return proc.stdout.strip()
-            except Exception:
-                pass
         return filedialog.askdirectory(title=title)
 
     def create_menu(self) -> None:
         m = tk.Menu(self.root)
         
         f_m = tk.Menu(m, tearoff=0)
-        f_m.add_command(label=LANGUAGES[self.lang]['view_logs'], command=lambda: self.universal_open(LOG_FILE))
+        f_m.add_command(label=LANGUAGES[self.lang]['view_logs'], command=self.open_logs)
         f_m.add_command(label=LANGUAGES[self.lang]['clear_logs'], command=self.clear_logs)
-        f_m.add_command(label=LANGUAGES[self.lang]['open_dir'], command=lambda: self.universal_open(os.getcwd()))
+        f_m.add_command(label=LANGUAGES[self.lang]['open_dir'], command=self.open_app_dir)
         f_m.add_separator()
         f_m.add_command(label="Exit", command=self.root.quit)
         m.add_cascade(label=LANGUAGES[self.lang]['file_menu'], menu=f_m)
@@ -584,13 +347,26 @@ class FileSorterApp:
         e_m = tk.Menu(m, tearoff=0)
         e_m.add_command(label=LANGUAGES[self.lang]['settings'], command=self.open_settings)
         e_m.add_separator()
-        e_m.add_command(label=LANGUAGES[self.lang]['add_category'], command=self.add_new_category_dialog)
         e_m.add_command(label=LANGUAGES[self.lang]['restore_cats'], command=self.restore_categories)
         e_m.add_separator()
         e_m.add_command(label=LANGUAGES[self.lang]['reset_config'], command=self.reset_all_settings)
         m.add_cascade(label=LANGUAGES[self.lang]['edit_menu'], menu=e_m)
         
         self.root.config(menu=m)
+
+    def open_logs(self):
+        if os.path.exists(LOG_FILE):
+            if sys.platform == 'win32':
+                os.startfile(LOG_FILE)
+            else:
+                subprocess.Popen(['xdg-open', LOG_FILE])
+
+    def open_app_dir(self):
+        cwd = os.getcwd()
+        if sys.platform == 'win32':
+            os.startfile(cwd)
+        else:
+            subprocess.Popen(['xdg-open', cwd])
 
     def clear_logs(self) -> None:
         try:
@@ -601,41 +377,21 @@ class FileSorterApp:
             messagebox.showerror("Error", str(e))
 
     def reset_all_settings(self) -> None:
-        if messagebox.askyesno("Reset", "Сбросить все настройки до заводских? / Reset all settings?"):
+        if messagebox.askyesno("Reset", "Сбросить все настройки? / Reset all settings?"):
             if os.path.exists(CONFIG_FILE):
                 try:
                     os.remove(CONFIG_FILE)
-                except Exception as e:
-                    log_message(f"[Error] Failed to remove config: {e}")
-            self.settings = self.load_settings()
-            self.lang = self.settings["language"]
+                except Exception:
+                    pass
+            self.core = FileSorterCore()
+            self.lang = self.core.config["language"]
             self.create_main_ui()
 
     def restore_categories(self) -> None:
-        self.settings["extensions"] = DEFAULT_EXTENSIONS.copy()
-        self.save_settings()
+        self.core.config["extensions"] = DEFAULT_EXTENSIONS.copy()
+        self.core.save_config(self.core.config)
         self.create_main_ui()
         messagebox.showinfo("Edit", LANGUAGES[self.lang]['success'])
-
-    def add_new_category_dialog(self) -> None:
-        name = simpledialog.askstring("Category", LANGUAGES[self.lang]['add_category'])
-        if name:
-            self.settings["extensions"][name] = ""
-            self.save_settings()
-            self.open_settings()
-
-    def universal_open(self, path: str) -> None:
-        if not path or not os.path.exists(path):
-            return
-        try:
-            if sys.platform == 'win32':
-                os.startfile(path)
-            elif sys.platform == 'darwin':
-                subprocess.Popen(['open', path])
-            else:
-                subprocess.Popen(['xdg-open', path])
-        except Exception as e:
-            log_message(f"[Error] Failed to open path {path}: {e}")
 
     def open_settings(self) -> None:
         SettingsWindow(self.root, self)
@@ -644,7 +400,6 @@ class FileSorterApp:
         self.root.title(LANGUAGES[self.lang]['title'])
         self.create_menu()
         
-        # Очистка текущих виджетов, кроме меню
         for w in self.root.winfo_children():
             if not isinstance(w, tk.Menu):
                 w.destroy()
@@ -677,7 +432,6 @@ class FileSorterApp:
         h_s = tk.Frame(single_f, bg=COLOR_CARD)
         h_s.pack(anchor="w", pady=(0, 10))
         tk.Label(h_s, text=LANGUAGES[self.lang]['single_mode'], bg=COLOR_CARD, font=("Segoe UI", 11, "bold")).pack(side="left")
-        HelpMarker(h_s, 'single', self.lang, self.status_label).pack(side="left")
         
         f_p = tk.Frame(single_f, bg=COLOR_CARD)
         f_p.pack(fill="x", pady=5)
@@ -689,7 +443,6 @@ class FileSorterApp:
         f_rev = tk.Frame(single_f, bg=COLOR_CARD)
         f_rev.pack(fill="x")
         StyledButton(f_rev, text=LANGUAGES[self.lang]['btn_reverse'], command=self.run_unsorting_single, bg_color=COLOR_SECONDARY, hover_color=COLOR_SECONDARY_HOVER).pack(fill="x", side="left", expand=True)
-        HelpMarker(f_rev, 'reverse', self.lang, self.status_label).pack(side="right", padx=5)
 
         # 2. Мульти режим
         multi_f = tk.Frame(scroll_f, bg=COLOR_CARD, padx=20, pady=15, highlightbackground=COLOR_BORDER, highlightthickness=1)
@@ -700,7 +453,6 @@ class FileSorterApp:
         f_mt = tk.Frame(multi_f, bg=COLOR_CARD)
         f_mt.pack(anchor="w")
         tk.Label(f_mt, text=LANGUAGES[self.lang]['select_target'], bg=COLOR_CARD).pack(side="left")
-        HelpMarker(f_mt, 'multi_target', self.lang, self.status_label).pack(side="left")
         
         f_t = tk.Frame(multi_f, bg=COLOR_CARD)
         f_t.pack(fill="x", pady=2)
@@ -710,7 +462,6 @@ class FileSorterApp:
         f_ms = tk.Frame(multi_f, bg=COLOR_CARD)
         f_ms.pack(anchor="w", pady=(5,0))
         tk.Label(f_ms, text=LANGUAGES[self.lang]['sources_list'], bg=COLOR_CARD).pack(side="left")
-        HelpMarker(f_ms, 'multi_src', self.lang, self.status_label).pack(side="left")
         
         f_list = tk.Frame(multi_f, bg=COLOR_CARD)
         f_list.pack(fill="x", pady=5)
@@ -734,7 +485,6 @@ class FileSorterApp:
         h_d = tk.Frame(dupe_f, bg=COLOR_CARD)
         h_d.pack(anchor="w", pady=(0, 10))
         tk.Label(h_d, text=LANGUAGES[self.lang]['dupe_mode'], bg=COLOR_CARD, font=("Segoe UI", 11, "bold")).pack(side="left")
-        HelpMarker(h_d, 'dupe_scan', self.lang, self.status_label).pack(side="left")
         
         f_d = tk.Frame(dupe_f, bg=COLOR_CARD)
         f_d.pack(fill="x", pady=5)
@@ -750,7 +500,6 @@ class FileSorterApp:
         h_a = tk.Frame(auto_f, bg=COLOR_CARD)
         h_a.pack(anchor="w", pady=(0, 10))
         tk.Label(h_a, text=LANGUAGES[self.lang]['auto_mode'], bg=COLOR_CARD, font=("Segoe UI", 11, "bold"), fg="#e17055").pack(side="left")
-        HelpMarker(h_a, 'auto_watch', self.lang, self.status_label).pack(side="left")
 
         f_a1 = tk.Frame(auto_f, bg=COLOR_CARD)
         f_a1.pack(fill="x", pady=2)
@@ -772,153 +521,42 @@ class FileSorterApp:
         cb_auto = tk.Checkbutton(f_a3, text=LANGUAGES[self.lang]['auto_enable'], variable=self.auto_enabled, bg=COLOR_CARD, font=("Segoe UI", 9, "bold"), fg=COLOR_SUCCESS, command=self.toggle_auto_watcher)
         cb_auto.pack(side="right")
 
-        self.auto_src.trace_add("write", lambda *args: self.save_settings())
-        self.auto_dst.trace_add("write", lambda *args: self.save_settings())
-        self.auto_interval.trace_add("write", lambda *args: self.save_settings())
-
         # Режим предпросмотра
         f_pre = tk.Frame(scroll_f, bg=COLOR_BG)
         f_pre.pack(pady=10)
-        tk.Checkbutton(f_pre, text=LANGUAGES[self.lang]['preview_mode'], variable=self.preview_mode, bg=COLOR_BG, fg=COLOR_ACCENT, font=("Segoe UI", 9, "bold")).pack(side="left")
-        HelpMarker(f_pre, 'preview', self.lang, self.status_label).pack(side="left")
+        tk.Checkbutton(f_pre, text=LANGUAGES[self.lang]['preview_mode'], variable=self.preview_mode, bg=COLOR_BG, fg=COLOR_ACCENT, font=("Segoe UI", 9, "bold"), command=self.update_preview_mode).pack(side="left")
+
+    def update_preview_mode(self):
+        self.core.config["dry_run"] = self.preview_mode.get()
+        self.core.save_config(self.core.config)
 
     def toggle_auto_watcher(self) -> None:
-        self.save_settings()
+        self.core.config["monitor_enabled"] = self.auto_enabled.get()
+        self.core.config["monitor_folders"] = [self.auto_src.get()] if self.auto_src.get() else []
+        self.core.config["monitor_target"] = self.auto_dst.get()
+        self.core.config["monitor_interval_sec"] = float(self.auto_interval.get())
+        self.core.save_config(self.core.config)
+        
         if self.auto_enabled.get():
             messagebox.showwarning(LANGUAGES[self.lang]['beta_warn_title'], LANGUAGES[self.lang]['beta_warn_msg'])
-            if not WATCHDOG_AVAILABLE:
-                messagebox.showinfo("Info", LANGUAGES[self.lang]['no_watchdog'])
-            self.start_watcher()
-        else:
-            self.stop_watcher()
-
-    def start_watcher(self) -> None:
-        src = self.auto_src.get()
-        dst = self.auto_dst.get()
-        
-        if not src or not dst or not os.path.exists(src) or not os.path.exists(dst):
-            log_message("[Warning] Watcher failed to start: Invalid directories.")
-            return
-
-        # Если доступна современная библиотека watchdog - используем её
-        if WATCHDOG_AVAILABLE:
-            if self.observer and self.observer.is_alive():
-                return
-            log_message("Background Watchdog (Events) started.")
-            self.observer = Observer()
-            handler = SorterWatchdogHandler(self._silent_sort, src, dst)
-            self.observer.schedule(handler, src, recursive=False)
-            self.observer.start()
-        else:
-            # Иначе используем потоковый таймер из старой версии
-            if self.watch_thread and self.watch_thread.is_alive():
-                return
-            log_message("Background Watchdog (Polling) started.")
-            self.watch_thread = threading.Thread(target=self._watcher_loop, daemon=True)
-            self.watch_thread.start()
-
-    def stop_watcher(self) -> None:
-        if self.observer:
-            self.observer.stop()
-            self.observer.join(timeout=2)
-            self.observer = None
-        log_message("Background watcher stopped.")
-
-    def _watcher_loop(self) -> None:
-        while self.auto_enabled.get():
-            interval = max(5, self.auto_interval.get())
-            src = self.auto_src.get()
-            dst = self.auto_dst.get()
-            
-            if os.path.exists(src) and os.path.exists(dst):
-                self._silent_sort(src, dst)
-                
-            time.sleep(interval)
-
-    def _silent_sort(self, src_dir: str, dst_root: str) -> None:
-        excl = [x.strip().lower() for x in self.settings.get("excluded_files", "").split(",") if x.strip()]
-        try:
-            files = [f for f in os.listdir(src_dir) if os.path.isfile(os.path.join(src_dir, f))]
-            for f in files:
-                if f not in [CONFIG_FILE, LOG_FILE] and f.lower() not in excl:
-                    fp = os.path.join(src_dir, f)
-                    self._silent_process_move(fp, dst_root, f)
-        except Exception as e:
-            log_message(f"[Auto-Watch Error] {str(e)}")
-
-    def _silent_process_move(self, src: str, target_root: str, fname: str) -> bool:
-        ext = os.path.splitext(fname)[1].lower()
-        cat = None
-        
-        for c, exts in self.settings.get("extensions", {}).items():
-            if ext in [e.strip().lower() for e in exts.split(',')]:
-                cat = c
-                break
-        
-        if not cat and self.settings.get("move_unknown", True):
-            cat = "Other" if self.lang == "EN" else "Другое"
-            
-        if not cat:
-            return False
-        
-        d_dir = os.path.join(target_root, cat)
-        if self.settings.get("date_sort", False):
-            try:
-                dt = datetime.fromtimestamp(os.path.getmtime(src))
-                m_name = MONTHS_RU[dt.month] if self.lang == "RU" else dt.strftime('%B')
-                d_dir = os.path.join(d_dir, str(dt.year), m_name)
-            except Exception:
-                pass
-
-        if self.preview_mode.get(): 
-            log_message(f"[AUTO-PREVIEW] {fname} -> {d_dir}")
-            return True
-            
-        os.makedirs(d_dir, exist_ok=True)
-        dst = os.path.join(d_dir, fname)
-        
-        # Если файл занят другим процессом (например, еще скачивается) - пропускаем до следующего цикла
-        try:
-            with open(src, 'a'):
-                pass
-        except IOError:
-            return False
-
-        if os.path.exists(dst):
-            if self.settings.get("overwrite", False):
-                try:
-                    os.remove(dst)
-                except Exception:
-                    return False
-            else:
-                n, e = os.path.splitext(fname)
-                dst = os.path.join(d_dir, f"{n}_auto_{datetime.now().strftime('%H%M%S')}{e}")
-                
-        try: 
-            shutil.move(src, dst)
-            log_message(f"[AUTO] Moved: {fname} -> {dst}")
-            return True
-        except Exception as e: 
-            log_message(f"[AUTO Error] Failed to move {fname}: {e}")
-            return False
 
     def browse(self, var: tk.StringVar, multi: bool = False) -> None:
         f = self.get_directory_path("Select Directory")
         if f:
             var.set(f)
             if multi:
-                self.settings["multi_target"] = f
+                self.core.config["multi_target"] = f
             else:
-                self.settings["last_path"] = f
-            self.save_settings()
+                self.core.config["last_path"] = f
+            self.core.save_config(self.core.config)
 
     def add_src(self) -> None:
         f = self.get_directory_path("Select Source Directory")
         if f and f not in self.multi_sources:
             self.multi_sources.append(f)
             self.src_lb.insert(tk.END, f)
-            self.settings["multi_sources"] = self.multi_sources
-            self.save_settings()
+            self.core.config["multi_sources"] = self.multi_sources
+            self.core.save_config(self.core.config)
 
     def rem_src(self) -> None:
         s = self.src_lb.curselection()
@@ -926,8 +564,8 @@ class FileSorterApp:
             val = self.src_lb.get(s[0])
             self.multi_sources.remove(val)
             self.src_lb.delete(s[0])
-            self.settings["multi_sources"] = self.multi_sources
-            self.save_settings()
+            self.core.config["multi_sources"] = self.multi_sources
+            self.core.save_config(self.core.config)
 
     def run_dupe_finder(self) -> None:
         p = self.dupe_folder.get()
@@ -936,236 +574,93 @@ class FileSorterApp:
             return
             
         self.p_var.set(0)
-        all_files: List[str] = []
         
-        # Сбор всех файлов
-        for root_dir, _, files in os.walk(p):
-            for f in files:
-                all_files.append(os.path.join(root_dir, f))
-                
-        total = len(all_files)
-        if total == 0:
-            return
-            
-        # Оптимизация: сначала группируем файлы по размеру в байтах.
-        # Хеш-сумму считаем только для тех файлов, у которых размер совпал!
-        size_groups: Dict[int, List[str]] = {}
-        for i, fp in enumerate(all_files):
-            try:
-                sz = os.path.getsize(fp)
-                size_groups.setdefault(sz, []).append(fp)
-            except Exception:
-                pass
-            if i % 100 == 0:
-                self.p_var.set((i / total) * 50)  # Первая половина прогресса
+        def run():
+            groups = []
+            for event_type, msg in self.core.scan_duplicates_generator(p):
+                if event_type == "progress":
+                    self.p_var.set(int((msg["current"] / msg["total"]) * 100))
+                elif event_type == "dupe_groups":
+                    groups = msg
                 self.root.update_idletasks()
-
-        potential_dupes = [paths for paths in size_groups.values() if len(paths) > 1]
-        hashes: Dict[str, List[str]] = {}
-        
-        # Вычисляем хеш только для потенциальных дубликатов
-        total_potential = sum(len(group) for group in potential_dupes)
-        processed = 0
-        
-        for group in potential_dupes:
-            for fp in group:
-                h = get_file_hash(fp)
-                if h:
-                    hashes.setdefault(h, []).append(fp)
-                processed += 1
-                if processed % 10 == 0:
-                    self.p_var.set(50 + (processed / total_potential) * 50)
-                    self.root.update_idletasks()
-                    
-        self.p_var.set(100)
-        
-        final_groups = [ps for ps in hashes.values() if len(ps) > 1]
-        
-        if not final_groups:
-            messagebox.showinfo("Info", "Дубликаты не найдены / No duplicates found.")
-            self.p_var.set(0)
-            return
             
-        to_del: List[str] = []
-        if self.settings.get("auto_dupes", False):
-            for g in final_groups:
-                to_del.extend(g[1:])
-        else:
-            sel = DuplicateSelector(self.root, final_groups, self.lang)
-            self.root.wait_window(sel)
-            to_del = sel.to_delete
-            
-        count = 0
-        for path in to_del:
-            try: 
-                if not self.preview_mode.get():
-                    os.remove(path)
-                log_message(f"Deleted dupe: {path}")
-                count += 1
-            except Exception as e:
-                log_message(f"[Error] Failed to delete {path}: {e}")
+            self.p_var.set(100)
+            if not groups:
+                messagebox.showinfo("Info", "Дубликаты не найдены / No duplicates found.")
+                self.p_var.set(0)
+                return
                 
-        messagebox.showinfo(LANGUAGES[self.lang]['success'], f"Processed: {count}")
+            if self.core.config.get("auto_dupes", False):
+                messagebox.showinfo(LANGUAGES[self.lang]['success'], LANGUAGES[self.lang]['done'])
+                self.p_var.set(0)
+                return
+
+            self.root.after(0, lambda: self.show_dupe_selector(groups))
+
+        threading.Thread(target=run, daemon=True).start()
+
+    def show_dupe_selector(self, groups):
+        sel = DuplicateSelector(self.root, groups, self.lang)
+        self.root.wait_window(sel)
+        if sel.to_delete:
+            count = 0
+            for path in sel.to_delete:
+                try:
+                    os.remove(path)
+                    count += 1
+                except Exception:
+                    pass
+            messagebox.showinfo(LANGUAGES[self.lang]['success'], f"Удалено файлов: {count}")
         self.p_var.set(0)
 
     def run_single_sorting(self) -> None:
         p = self.source_path.get()
         if os.path.exists(p):
-            self.global_conflict_action = None
-            self._sort_engine(p, p)
+            self.p_var.set(0)
+            def run():
+                for event_type, msg in self.core.sort_directory_generator(p):
+                    if event_type == "progress":
+                        self.p_var.set(int((msg["current"] / msg["total"]) * 100))
+                    self.root.update_idletasks()
+                self.p_var.set(100)
+                messagebox.showinfo(LANGUAGES[self.lang]['success'], LANGUAGES[self.lang]['done'])
+                self.p_var.set(0)
+            threading.Thread(target=run, daemon=True).start()
 
     def run_multi_sorting(self) -> None:
         t = self.multi_target.get()
         if os.path.exists(t):
-            srcs = list(self.multi_sources)
-            if self.include_target_var.get():
-                srcs.append(t)
-            self.global_conflict_action = None
-            for s in srcs:
-                if os.path.exists(s):
-                    self._sort_engine(s, t)
-
-    def _sort_engine(self, src_dir: str, dst_root: str) -> None:
-        excl = [x.strip().lower() for x in self.settings.get("excluded_files", "").split(",") if x.strip()]
-        files = [f for f in os.listdir(src_dir) if os.path.isfile(os.path.join(src_dir, f))]
-        
-        total = len(files)
-        if total == 0:
-            return
-            
-        count = 0
-        for i, f in enumerate(files):
-            fp = os.path.join(src_dir, f)
-            if f not in [CONFIG_FILE, LOG_FILE] and f.lower() not in excl:
-                if self.process_move(fp, dst_root, f):
-                    count += 1
-            self.p_var.set((i / total) * 100)
-            self.root.update_idletasks()
-            
-        if self.settings.get("clean_empty", False) and not self.preview_mode.get():
-            self._clean_empty_folders(src_dir)
-            
-        self.p_var.set(100)
-        messagebox.showinfo(LANGUAGES[self.lang]['success'], LANGUAGES[self.lang]['done'] + str(count))
-        self.p_var.set(0)
-
-    def _clean_empty_folders(self, path: str) -> None:
-        for root, dirs, _ in os.walk(path, topdown=False):
-            for d in dirs:
-                dp = os.path.join(root, d)
-                try: 
-                    if not os.listdir(dp):
-                        os.rmdir(dp)
-                except Exception:
-                    pass
-
-    def process_move(self, src: str, target_root: str, fname: str) -> bool:
-        ext = os.path.splitext(fname)[1].lower()
-        cat = None
-        
-        for c, exts in self.settings.get("extensions", {}).items():
-            if ext in [e.strip().lower() for e in exts.split(',')]:
-                cat = c
-                break
-                
-        if not cat and self.settings.get("move_unknown", True):
-            cat = "Other" if self.lang == "EN" else "Другое"
-            
-        if not cat:
-            return False
-            
-        d_dir = os.path.join(target_root, cat)
-        if self.settings.get("date_sort", False):
-            try:
-                dt = datetime.fromtimestamp(os.path.getmtime(src))
-                m_name = MONTHS_RU[dt.month] if self.lang == "RU" else dt.strftime('%B')
-                d_dir = os.path.join(d_dir, str(dt.year), m_name)
-            except Exception:
-                pass
-                
-        if self.preview_mode.get():
-            log_message(f"[PREVIEW] {fname} -> {d_dir}")
-            return True
-            
-        os.makedirs(d_dir, exist_ok=True)
-        dst = os.path.join(d_dir, fname)
-        
-        if os.path.exists(dst):
-            # Проверка, не выбрал ли пользователь "Применить ко всем" ранее
-            action = "replace" if self.settings.get("overwrite", False) else self.global_conflict_action
-            
-            if not action:
-                diag = ConflictDialog(self.root, fname, self.lang)
-                self.root.wait_window(diag)
-                
-                if not diag.result:
-                    return False
-                    
-                action = diag.result
-                if diag.apply_to_all:
-                    self.global_conflict_action = action
-                    
-            if action == 'replace':
-                try:
-                    os.remove(dst)
-                except Exception as e:
-                    log_message(f"[Error] Failed to remove for replace {dst}: {e}")
-                    return False
-            elif action == 'rename':
-                n, e = os.path.splitext(fname)
-                dst = os.path.join(d_dir, f"{n}_{datetime.now().strftime('%H%M%S')}{e}")
-                
-        try:
-            shutil.move(src, dst)
-            return True
-        except Exception as e:
-            log_message(f"[Error] Failed to move {fname}: {e}")
-            return False
+            self.p_var.set(0)
+            def run():
+                srcs = list(self.multi_sources)
+                if self.include_target_var.get():
+                    srcs.append(t)
+                for s in srcs:
+                    if os.path.exists(s):
+                        for event_type, msg in self.core.sort_directory_generator(s, target_dir=t):
+                            if event_type == "progress":
+                                self.p_var.set(int((msg["current"] / msg["total"]) * 100))
+                            self.root.update_idletasks()
+                self.p_var.set(100)
+                messagebox.showinfo(LANGUAGES[self.lang]['success'], LANGUAGES[self.lang]['done'])
+                self.p_var.set(0)
+            threading.Thread(target=run, daemon=True).start()
 
     def run_unsorting_single(self) -> None:
         p = self.source_path.get()
         if p and os.path.exists(p):
-            self._unsort(p)
-
-    def _unsort(self, p: str) -> None:
-        if not messagebox.askyesno("?", LANGUAGES[self.lang]['confirm_reverse']):
-            return
-            
-        self.p_var.set(0)
-        all_files: List[str] = []
-        cats = list(self.settings.get("extensions", {}).keys()) + ["Other", "Другое"]
-        
-        for c in cats:
-            cp = os.path.join(p, c)
-            if os.path.isdir(cp):
-                for r, _, fs in os.walk(cp):
-                    for f in fs:
-                        all_files.append(os.path.join(r, f))
-                        
-        count = 0
-        total = len(all_files)
-        
-        for i, fp in enumerate(all_files):
-            dst = os.path.join(p, os.path.basename(fp))
-            if os.path.exists(dst):
-                n, e = os.path.splitext(os.path.basename(fp))
-                dst = os.path.join(p, f"{n}_old_{datetime.now().strftime('%H%M%S')}{e}")
-                
-            try:
-                shutil.move(fp, dst)
-                count += 1
-            except Exception as e:
-                log_message(f"[Error] Failed to reverse move {fp}: {e}")
-                
-            self.p_var.set((i / max(1, total)) * 100)
-            self.root.update_idletasks()
-            
-        if self.settings.get("clean_empty", False):
-            self._clean_empty_folders(p)
-            
-        self.p_var.set(100)
-        messagebox.showinfo(LANGUAGES[self.lang]['success'], LANGUAGES[self.lang]['done'] + str(count))
-        self.p_var.set(0)
+            if not messagebox.askyesno("?", LANGUAGES[self.lang]['confirm_reverse']):
+                return
+            self.p_var.set(0)
+            def run():
+                for event_type, msg in self.core.unsort_directory_generator(p):
+                    if event_type == "progress":
+                        self.p_var.set(int((msg["current"] / msg["total"]) * 100))
+                    self.root.update_idletasks()
+                self.p_var.set(100)
+                messagebox.showinfo(LANGUAGES[self.lang]['success'], LANGUAGES[self.lang]['done'])
+                self.p_var.set(0)
+            threading.Thread(target=run, daemon=True).start()
 
 if __name__ == "__main__":
     root = tk.Tk()

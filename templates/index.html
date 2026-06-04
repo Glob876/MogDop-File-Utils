@@ -29,7 +29,7 @@
     </script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&family=JetBrains+Mono:wght=400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --accent-color: #3b82f6;
@@ -49,7 +49,6 @@
             transition: background-color 0.5s ease, color 0.5s ease;
         }
 
-        /* Interactive backgrounds */
         .bg-mesh {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -70,7 +69,6 @@
                 #f8fafc;
         }
 
-        /* Background grids */
         .bg-grid-pattern {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -88,7 +86,6 @@
                               linear-gradient(to bottom, rgba(0,0,0,0.02) 1px, transparent 1px);
         }
 
-        /* Glassmorphism panels */
         .glass-panel {
             backdrop-filter: blur(20px) saturate(190%);
             transition: background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
@@ -104,7 +101,6 @@
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
         }
 
-        /* Theme adjustments */
         .bg-accent { background-color: var(--accent-color); }
         .text-accent { color: var(--accent-color); }
         .border-accent { border-color: var(--accent-color); }
@@ -139,7 +135,6 @@
             box-shadow: 0 0 10px var(--accent-color);
         }
 
-        /* Lighting effects */
         .glow-transition {
             transition: box-shadow 1.5s ease, border-color 1.5s ease;
         }
@@ -160,7 +155,6 @@
         .glow-success-cyan { border-color: #06b6d4 !important; box-shadow: 0 0 35px rgba(6, 182, 212, 0.4); }
         .glow-red { border-color: #ef4444 !important; box-shadow: 0 0 35px rgba(239, 68, 68, 0.4); }
 
-        /* Premium inputs */
         .input-premium {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.06);
@@ -187,18 +181,13 @@
 </head>
 
 <body class="text-slate-800 dark:text-slate-100 min-h-screen overflow-hidden flex bg-transparent">
-    <!-- Blurred Background Image Layer -->
     <div id="bgImageLayer" class="fixed inset-0 z-[-1] bg-cover bg-center transition-all duration-300 hidden"></div>
-    
     <div class="bg-mesh"></div>
     <div class="bg-grid-pattern" id="bgGrid"></div>
 
-    <!-- Layout Wrapper -->
     <div class="flex flex-1 p-4 lg:p-6 gap-6 h-screen overflow-hidden relative">
 
-        <!-- Left Sidebar -->
         <aside class="w-80 glass-panel rounded-3xl flex flex-col shrink-0 z-20">
-            <!-- Brand -->
             <div class="p-8 pb-4">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-accent-gradient flex items-center justify-center shadow-lg shadow-blue-500/20 transform rotate-3 hover:rotate-12 transition-transform duration-300">
@@ -213,7 +202,6 @@
                 </div>
             </div>
 
-            <!-- Realtime Clock Widget -->
             <div class="px-8 py-2">
                 <div class="p-4 rounded-2xl bg-white/5 dark:bg-black/20 border border-white/5 flex items-center justify-between">
                     <div class="flex items-center gap-2">
@@ -224,7 +212,6 @@
                 </div>
             </div>
 
-            <!-- Nav -->
             <nav class="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
                 <button onclick="showTab('single')" id="nav-single" class="sidebar-item active w-full flex items-center gap-4 px-5 py-4 text-sm font-semibold rounded-2xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                     <i data-lucide="layout-grid" class="w-5 h-5"></i> <span data-i18n="nav_single">Single Mode</span>
@@ -247,7 +234,6 @@
                 </button>
             </nav>
 
-            <!-- Bottom Theme Toggle and Credits -->
             <div class="p-6 mt-auto border-t border-slate-200 dark:border-white/5 space-y-4">
                 <button onclick="toggleTheme()" class="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition group">
                     <span class="text-xs font-bold text-slate-500 dark:text-slate-400 group-hover:text-slate-950 dark:group-hover:text-white" data-i18n="toggle_theme">Interface Theme</span>
@@ -261,10 +247,8 @@
             </div>
         </aside>
 
-        <!-- Main Workspace -->
         <main class="flex-1 flex flex-col overflow-hidden relative">
 
-            <!-- Global Action Progress Glass Card -->
             <div id="progressBox" class="hidden absolute top-4 left-4 right-4 z-50 animate__animated animate__slideInDown">
                 <div class="glass-panel max-w-2xl mx-auto rounded-2xl p-4 shadow-2xl border-emerald-500/20">
                     <div class="flex justify-between items-center mb-2 px-2">
@@ -280,11 +264,9 @@
                 </div>
             </div>
 
-            <!-- Scrollable Page Wrapper -->
             <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar p-1">
                 <div class="max-w-4xl mx-auto space-y-6 pb-24">
 
-                    <!-- Tab 1: Single Mode -->
                     <section id="tab-single" class="tab-content active">
                         <header class="mb-8">
                             <h2 class="text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white" data-i18n="single_title">Single Workspace</h2>
@@ -297,13 +279,12 @@
                                 <div class="flex gap-3">
                                     <input type="text" id="singlePath" data-i18n="ph_single_path" placeholder="/home/user/Downloads"
                                         class="flex-1 input-premium rounded-2xl px-5 py-4 text-sm outline-none">
-                                    <button onclick="browseFolder('singlePath')" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 p-4 rounded-2xl transition shadow-inner">
+                                    <button onclick="openWebBrowserModal('singlePath')" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 p-4 rounded-2xl transition shadow-inner">
                                         <i data-lucide="folder-search" class="w-5 h-5"></i>
                                     </button>
                                 </div>
                             </div>
 
-                            <!-- Engine Options Grid -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-2 bg-slate-100/50 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/5">
                                 <label class="flex items-center gap-3 p-4 rounded-xl cursor-pointer hover:bg-white/50 dark:hover:bg-white/5 transition">
                                     <input type="checkbox" id="cfg_date_sort" class="w-5 h-5 rounded-lg border-slate-300 dark:border-white/10 bg-transparent text-accent focus:ring-0">
@@ -319,7 +300,6 @@
                                 </label>
                             </div>
 
-                            <!-- Simulation and Exclusions toggles inside single mode -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-100/30 dark:bg-black/10 rounded-2xl border border-slate-200 dark:border-white/5">
                                 <label class="flex items-center gap-3 cursor-pointer">
                                     <input type="checkbox" id="cfg_dry_run_single" class="w-5 h-5 rounded-lg text-amber-500 border-slate-300 dark:border-white/10 bg-transparent">
@@ -338,7 +318,7 @@
                             </div>
 
                             <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                                <button onclick="runEngine('single', 'singlePath')" class="flex-1 bg-accent-gradient hover:opacity-90 text-white py-4 px-6 rounded-2xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-blue-500/10 flex justify-center items-center gap-2 transform active:scale-98 transition">
+                                <button onclick="runEngine('single', 'singlePath')" class="flex-1 bg-accent-gradient hover:opacity-90 text-white py-4 px-6 rounded-2xl font-bold text-sm uppercase tracking-wider flex justify-center items-center gap-2 transform active:scale-98 transition">
                                     <i data-lucide="play" class="w-5 h-5"></i> <span data-i18n="btn_start_single">Start Sorting</span>
                                 </button>
                                 <button onclick="runEngine('unsort', 'singlePath')" class="flex-1 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 py-4 px-6 rounded-2xl font-bold text-sm transform active:scale-98 transition border border-slate-200 dark:border-white/5 flex justify-center items-center gap-2" data-i18n="btn_reverse">
@@ -350,7 +330,6 @@
                         </div>
                     </section>
 
-                    <!-- Tab 2: Multi-Source -->
                     <section id="tab-multi" class="tab-content">
                         <header class="mb-8">
                             <h2 class="text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white" data-i18n="multi_title">Multi-Source Gatherer</h2>
@@ -363,7 +342,7 @@
                                 <div class="flex gap-3">
                                     <input type="text" id="multiTarget" data-i18n="ph_multi_target" placeholder="Where should files go?"
                                         class="flex-1 input-premium rounded-2xl px-5 py-4 text-sm outline-none font-bold">
-                                    <button onclick="browseFolder('multiTarget')" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 p-4 rounded-2xl transition">
+                                    <button onclick="openWebBrowserModal('multiTarget')" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 p-4 rounded-2xl transition">
                                         <i data-lucide="folder-down" class="w-5 h-5"></i>
                                     </button>
                                 </div>
@@ -372,13 +351,11 @@
                             <div>
                                 <div class="flex justify-between items-center mb-3">
                                     <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400" data-i18n="sources_origin">Sources</label>
-                                    <button onclick="addSourceUI()" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-accent-gradient text-white flex items-center gap-1 hover:opacity-95 transition">
+                                    <button onclick="addSourceUIWeb()" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-accent-gradient text-white flex items-center gap-1 hover:opacity-95 transition">
                                         <i data-lucide="plus" class="w-4 h-4"></i> <span data-i18n="btn_add">Add Source</span>
                                     </button>
                                 </div>
-                                <div id="sourcesListUI" class="space-y-2 max-h-48 overflow-y-auto p-3 bg-slate-100/50 dark:bg-black/25 rounded-2xl border border-slate-200 dark:border-white/5">
-                                    <!-- Dynamic sources -->
-                                </div>
+                                <div id="sourcesListUI" class="space-y-2 max-h-48 overflow-y-auto p-3 bg-slate-100/50 dark:bg-black/25 rounded-2xl border border-slate-200 dark:border-white/5"></div>
                             </div>
 
                             <div class="p-4 bg-slate-100/50 dark:bg-black/25 border border-slate-200 dark:border-white/5 rounded-2xl space-y-4">
@@ -393,7 +370,6 @@
                                 </div>
                             </div>
 
-                            <!-- Simulation/Ignore checkboxes in multi mode -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-100/30 dark:bg-black/10 rounded-2xl border border-slate-200 dark:border-white/5">
                                 <label class="flex items-center gap-3 cursor-pointer">
                                     <input type="checkbox" id="cfg_dry_run_multi" class="w-5 h-5 rounded-lg text-amber-500 border-slate-300 dark:border-white/10 bg-transparent">
@@ -419,7 +395,6 @@
                         </div>
                     </section>
 
-                    <!-- Tab 3: Duplicates -->
                     <section id="tab-dupes" class="tab-content">
                         <header class="mb-8">
                             <h2 class="text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white" data-i18n="dupes_title">Hash Duplicate Finder</h2>
@@ -432,7 +407,7 @@
                                 <div class="flex gap-3">
                                     <input type="text" id="dupePath" data-i18n="ph_dupe_path" placeholder="/home/user/Documents"
                                         class="flex-1 input-premium rounded-2xl px-5 py-4 text-sm outline-none">
-                                    <button onclick="browseFolder('dupePath')" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 p-4 rounded-2xl transition">
+                                    <button onclick="openWebBrowserModal('dupePath')" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 p-4 rounded-2xl transition">
                                         <i data-lucide="search" class="w-5 h-5"></i>
                                     </button>
                                 </div>
@@ -469,14 +444,12 @@
                         </div>
                     </section>
 
-                    <!-- Tab: Folder Monitor -->
                     <section id="tab-monitor" class="tab-content">
                         <header class="mb-8">
                             <h2 class="text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white" data-i18n="monitor_title">Real-time Folder Monitor</h2>
                             <p class="text-slate-500 mt-2 text-sm lg:text-base" data-i18n="monitor_desc">Automatically sort incoming files in monitored directories in real-time.</p>
                         </header>
 
-                        <!-- BETA WARNING BOX -->
                         <div class="p-6 mb-6 rounded-3xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-500/90 flex gap-4 animate__animated animate__fadeIn">
                             <div class="shrink-0 mt-1">
                                 <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-500"></i>
@@ -488,7 +461,6 @@
                         </div>
 
                         <div class="glow-transition glow-rainbow-idle glass-panel rounded-3xl p-8 lg:p-10 space-y-6">
-                            <!-- Active state indicator -->
                             <div class="flex items-center justify-between p-4 bg-slate-100/50 dark:bg-black/20 rounded-2xl border border-slate-200 dark:border-white/5">
                                 <div class="flex items-center gap-3">
                                     <span id="monitorStatusDot" class="w-3 h-3 rounded-full bg-slate-400"></span>
@@ -500,41 +472,35 @@
                                 </div>
                             </div>
 
-                            <!-- Monitored list -->
                             <div>
                                 <div class="flex justify-between items-center mb-3">
                                     <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400" data-i18n="monitored_paths">Monitored Folders</label>
-                                    <button onclick="addMonitorFolderUI()" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-accent-gradient text-white flex items-center gap-1 hover:opacity-95 transition">
+                                    <button onclick="addMonitorFolderUIWeb()" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-accent-gradient text-white flex items-center gap-1 hover:opacity-95 transition">
                                         <i data-lucide="plus" class="w-4 h-4"></i> <span data-i18n="btn_add">Add Folder</span>
                                     </button>
                                 </div>
-                                <div id="monitorFoldersListUI" class="space-y-2 max-h-48 overflow-y-auto p-3 bg-slate-100/50 dark:bg-black/25 rounded-2xl border border-slate-200 dark:border-white/5">
-                                    <!-- Dynamic monitored folders -->
-                                </div>
+                                <div id="monitorFoldersListUI" class="space-y-2 max-h-48 overflow-y-auto p-3 bg-slate-100/50 dark:bg-black/25 rounded-2xl border border-slate-200 dark:border-white/5"></div>
                             </div>
 
-                            <!-- Monitor Destination Target Folder -->
                             <div>
                                 <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-3" data-i18n="target_folder">Target Folder (Destination, blank = sort in-place)</label>
                                 <div class="flex gap-3">
                                     <input type="text" id="monitorTarget" placeholder="Leave blank to sort in-place"
                                         class="flex-1 input-premium rounded-2xl px-5 py-4 text-sm outline-none">
-                                    <button onclick="browseFolder('monitorTarget')" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 p-4 rounded-2xl transition">
+                                    <button onclick="openWebBrowserModal('monitorTarget')" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 p-4 rounded-2xl transition">
                                         <i data-lucide="folder-search" class="w-5 h-5"></i>
                                     </button>
                                 </div>
                             </div>
 
-                            <!-- Start / Stop Toggles -->
                             <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                                <button id="btnToggleMonitor" onclick="toggleMonitorState()" class="flex-1 bg-accent-gradient hover:opacity-90 text-white py-4 px-6 rounded-2xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-blue-500/10 flex justify-center items-center gap-2 transform active:scale-98 transition">
+                                <button id="btnToggleMonitor" onclick="toggleMonitorState()" class="flex-1 bg-accent-gradient hover:opacity-90 text-white py-4 px-6 rounded-2xl font-bold text-sm uppercase tracking-wider shadow-lg flex justify-center items-center gap-2 transform active:scale-98 transition">
                                     <i id="monitorBtnIcon" data-lucide="play" class="w-5 h-5"></i> <span id="monitorBtnText" data-i18n="btn_start_monitor">Enable Live Monitoring</span>
                                 </button>
                             </div>
                         </div>
                     </section>
 
-                    <!-- Tab 4: Settings & Customizer -->
                     <section id="tab-settings" class="tab-content">
                         <header class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                             <div>
@@ -544,54 +510,47 @@
                             <div class="flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-100/50 dark:bg-black/25 p-3 rounded-2xl border border-slate-200 dark:border-white/5">
                                 <span class="text-xs font-bold text-slate-400" data-i18n="interface_language">Language</span>
                                 <div id="langSelectorList" class="flex flex-wrap gap-1.5">
-                                    <button onclick="setLang('en')" data-lang-btn="en" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300">🇺🇸 EN</button>
-                                    <button onclick="setLang('ru')" data-lang-btn="ru" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300">🇷🇺 RU</button>
-                                    <button onclick="setLang('es')" data-lang-btn="es" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300">🇪🇸 ES</button>
-                                    <button onclick="setLang('zh')" data-lang-btn="zh" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300">🇨🇳 ZH</button>
-                                    <button onclick="setLang('de')" data-lang-btn="de" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300">🇩🇪 DE</button>
+                                    <button onclick="setLang('en')" data-lang-btn="en" class="px-3 py-1.5 rounded-xl text-xs font-bold transition">🇺🇸 EN</button>
+                                    <button onclick="setLang('ru')" data-lang-btn="ru" class="px-3 py-1.5 rounded-xl text-xs font-bold transition">🇷🇺 RU</button>
+                                    <button onclick="setLang('es')" data-lang-btn="es" class="px-3 py-1.5 rounded-xl text-xs font-bold transition">🇪🇸 ES</button>
+                                    <button onclick="setLang('zh')" data-lang-btn="zh" class="px-3 py-1.5 rounded-xl text-xs font-bold transition">🇨🇳 ZH</button>
+                                    <button onclick="setLang('de')" data-lang-btn="de" class="px-3 py-1.5 rounded-xl text-xs font-bold transition">🇩🇪 DE</button>
                                 </div>
                             </div>
                         </header>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             
-                            <!-- Design and Palette Panel -->
                             <div class="glass-panel rounded-3xl p-6 lg:p-8 space-y-6">
                                 <h3 class="text-xs font-black uppercase tracking-widest text-accent flex items-center gap-2" data-i18n="aesthetic_customizer">
                                     <i data-lucide="palette" class="w-4 h-4"></i> Aesthetic customizer
                                 </h3>
 
-                                <!-- Accent Selector -->
                                 <div class="space-y-3">
                                     <span class="text-xs font-bold text-slate-500 dark:text-slate-400" data-i18n="core_accent">Core Accent Hue</span>
                                     <div class="grid grid-cols-4 gap-2">
-                                        <button onclick="setSystemAccent('#3b82f6', 'rgba(59, 130, 246, 0.3)', 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)')" class="h-10 rounded-xl bg-blue-500 hover:scale-105 active:scale-95 transition flex items-center justify-center text-white text-[10px] font-bold">Cyber</button>
-                                        <button onclick="setSystemAccent('#10b981', 'rgba(16, 185, 129, 0.3)', 'linear-gradient(135deg, #10b981 0%, #059669 100%)')" class="h-10 rounded-xl bg-emerald-500 hover:scale-105 active:scale-95 transition flex items-center justify-center text-white text-[10px] font-bold">Eco</button>
-                                        <button onclick="setSystemAccent('#8b5cf6', 'rgba(139, 92, 246, 0.3)', 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)')" class="h-10 rounded-xl bg-purple-500 hover:scale-105 active:scale-95 transition flex items-center justify-center text-white text-[10px] font-bold">Neon</button>
-                                        <button onclick="setSystemAccent('#ec4899', 'rgba(236, 72, 153, 0.3)', 'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)')" class="h-10 rounded-xl bg-pink-500 hover:scale-105 active:scale-95 transition flex items-center justify-center text-white text-[10px] font-bold">Sunset</button>
+                                        <button onclick="setSystemAccent('#3b82f6', 'rgba(59, 130, 246, 0.3)', 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)')" class="h-10 rounded-xl bg-blue-500 hover:scale-105 transition text-white text-[10px] font-bold">Cyber</button>
+                                        <button onclick="setSystemAccent('#10b981', 'rgba(16, 185, 129, 0.3)', 'linear-gradient(135deg, #10b981 0%, #059669 100%)')" class="h-10 rounded-xl bg-emerald-500 hover:scale-105 transition text-white text-[10px] font-bold">Eco</button>
+                                        <button onclick="setSystemAccent('#8b5cf6', 'rgba(139, 92, 246, 0.3)', 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)')" class="h-10 rounded-xl bg-purple-500 hover:scale-105 transition text-white text-[10px] font-bold">Neon</button>
+                                        <button onclick="setSystemAccent('#ec4899', 'rgba(236, 72, 153, 0.3)', 'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)')" class="h-10 rounded-xl bg-pink-500 hover:scale-105 transition text-white text-[10px] font-bold">Sunset</button>
                                     </div>
                                 </div>
 
-                                <!-- Background patterns -->
                                 <div class="space-y-3">
                                     <span class="text-xs font-bold text-slate-500 dark:text-slate-400" data-i18n="backdrop_pattern">Backdrop Pattern</span>
                                     <div class="grid grid-cols-3 gap-2">
-                                        <button onclick="setPattern('mesh')" data-bg-pattern-btn="mesh" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition" data-i18n="dynamic_gradient">Mesh</button>
-                                        <button onclick="setPattern('grid')" data-bg-pattern-btn="grid" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition" data-i18n="cyber_grid">Grid</button>
-                                        <button onclick="setPattern('image')" data-bg-pattern-btn="image" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition" data-i18n="custom_image">Image</button>
+                                        <button onclick="setPattern('mesh')" data-bg-pattern-btn="mesh" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition">Mesh</button>
+                                        <button onclick="setPattern('grid')" data-bg-pattern-btn="grid" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition">Grid</button>
+                                        <button onclick="setPattern('image')" data-bg-pattern-btn="image" class="py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-xs font-bold transition">Image</button>
                                     </div>
                                 </div>
 
-                                <!-- Custom Image Configuration -->
                                 <div id="bgImageConfigSection" class="hidden space-y-4 pt-3 border-t border-slate-200 dark:border-white/5 animate__animated animate__fadeIn">
                                     <div>
                                         <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-2" data-i18n="bg_image_path">Background Image Path</label>
                                         <div class="flex gap-2">
-                                            <input type="text" id="cfg_bg_image_path" data-i18n="ph_bg_image_path" placeholder="bg.png"
+                                            <input type="text" id="cfg_bg_image_path" placeholder="bg.png"
                                                 class="flex-1 input-premium rounded-xl px-3 py-2 text-xs outline-none" onchange="updateBgImageLayer(); silentSaveConfig();">
-                                            <button onclick="browseBgImage()" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 px-3 py-2 rounded-xl transition shadow-inner">
-                                                <i data-lucide="image" class="w-4 h-4"></i>
-                                            </button>
                                         </div>
                                     </div>
                                     
@@ -620,13 +579,12 @@
                                 </div>
                             </div>
 
-                            <!-- Process rules card -->
                             <div class="glass-panel rounded-3xl p-6 lg:p-8 space-y-6">
                                 <h3 class="text-xs font-black uppercase tracking-widest text-accent flex items-center gap-2" data-i18n="global_toggles">
                                     <i data-lucide="shield-check" class="w-4 h-4"></i> Operation Core & Filters
                                 </h3>
                                 <div class="space-y-4">
-                                    <label class="flex items-center gap-4 p-4 rounded-2xl bg-slate-100/50 dark:bg-black/20 hover:bg-slate-200/50 dark:hover:bg-white/5 transition cursor-pointer">
+                                    <label class="flex items-center gap-4 p-4 rounded-2xl bg-slate-100/50 dark:bg-black/20 hover:bg-slate-200/50 transition cursor-pointer">
                                         <input type="checkbox" id="cfg_move_unknown" class="w-6 h-6 rounded-lg text-blue-600 border-white/10 bg-white/5">
                                         <div>
                                             <span class="text-xs font-bold block" data-i18n="move_unknown">Isolate Unknowns</span>
@@ -634,7 +592,6 @@
                                         </div>
                                     </label>
 
-                                    <!-- Size Filtering Threshold UI -->
                                     <div class="p-4 rounded-2xl bg-slate-100/30 dark:bg-black/15 border border-slate-200 dark:border-white/5 space-y-3">
                                         <span class="text-[10px] font-black uppercase text-slate-500 tracking-wider" data-i18n="size_filters">Size Filters (MB)</span>
                                         <div class="grid grid-cols-2 gap-2">
@@ -653,7 +610,6 @@
 
                         </div>
 
-                        <!-- Dictionary Card -->
                         <div class="glass-panel rounded-3xl p-8 space-y-6">
                             <h3 class="text-xs font-black uppercase tracking-widest text-accent flex items-center gap-2">
                                 <i data-lucide="folder-cog" class="w-5 h-5"></i> <span data-i18n="category_extensions">Category Mapping</span>
@@ -665,7 +621,6 @@
                         </div>
                     </section>
 
-                    <!-- Tab 5: Terminal Logs -->
                     <section id="tab-logs" class="tab-content h-full">
                         <header class="mb-8 flex justify-between items-end">
                             <div>
@@ -678,9 +633,7 @@
                             </button>
                         </header>
 
-                        <!-- Terminal Container -->
                         <div class="glass-panel rounded-3xl p-1 overflow-hidden h-[550px] flex flex-col border border-slate-200 dark:border-white/5 relative shadow-inner">
-                            <!-- Window Bar -->
                             <div class="flex items-center justify-between px-6 py-4 bg-slate-100 dark:bg-black/40 border-b border-slate-200 dark:border-white/5 rounded-t-3xl shrink-0">
                                 <div class="flex items-center gap-2">
                                     <span class="w-3.5 h-3.5 rounded-full bg-red-500/80"></span>
@@ -692,7 +645,6 @@
                                     stream://localhost:8080
                                 </div>
                             </div>
-                            <!-- Logs area -->
                             <div id="logTerminal" class="flex-1 p-6 overflow-y-auto space-y-2 bg-slate-950 text-slate-300 font-mono text-xs select-all">
                                 <p class="text-slate-600">> Kernel telemetry stream attached. Standing by...</p>
                             </div>
@@ -704,8 +656,31 @@
         </main>
     </div>
 
+    <!-- Web File Browser Modal Overlay -->
+    <div id="webBrowserModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 shadow-2xl animate__animated animate__zoomIn">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold flex items-center gap-2">
+                    <i data-lucide="folder" class="text-accent"></i>
+                    <span>Select Directory</span>
+                </h3>
+                <button onclick="closeWebBrowserModal()" class="text-slate-400 hover:text-slate-100"><i data-lucide="x"></i></button>
+            </div>
+            <div class="mb-3">
+                <div class="flex gap-2">
+                    <button onclick="navigateBrowserUp()" class="bg-white/5 hover:bg-white/10 px-3 py-2 rounded-xl text-xs"><i data-lucide="arrow-up" class="w-4 h-4"></i></button>
+                    <input type="text" id="browserCurrentPath" readonly class="flex-1 input-premium px-3 py-2 rounded-xl text-xs font-mono select-all">
+                </div>
+            </div>
+            <div id="browserDirsList" class="space-y-1.5 max-h-80 overflow-y-auto bg-black/30 rounded-2xl p-3 border border-white/5"></div>
+            <div class="flex justify-end gap-3 mt-4">
+                <button onclick="closeWebBrowserModal()" class="px-4 py-2 rounded-xl text-xs bg-slate-100 dark:bg-white/5 hover:bg-slate-200">Cancel</button>
+                <button onclick="confirmSelectedPath()" class="px-5 py-2 rounded-xl text-xs bg-accent text-white font-bold hover:opacity-90">Select Current Folder</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- TRANSLATION SYSTEM (i18n) ---
         const i18n = {
             en: {
                 "core_engine": "Sorter", "toggle_theme": "Interface Theme", "interface_language": "Language",
@@ -727,13 +702,11 @@
                 "ignore_hidden_desc": "Skip hidden system directories and file paths", "skip_hidden_dupes": "Skip hidden duplicates",
                 "size_filters": "Size Filters (MB)", "min_size_label": "Min Size (0=None)", "max_size_label": "Max Size (0=None)",
                 "aesthetic_customizer": "Aesthetic customizer",
-                // Folder monitoring details
                 "nav_monitor": "Folder Monitor", "monitor_title": "Real-time Folder Monitor", "monitor_desc": "Automatically sort incoming files in monitored directories in real-time.",
                 "beta_warning_title": "BETA FEATURE WARNING", "beta_warning_desc": "Folder monitoring is currently in BETA. It runs as a background process and may consume disk I/O. Please make sure to back up important files.",
                 "btn_start_monitor": "Enable Live Monitoring", "btn_stop_monitor": "Disable Live Monitoring",
                 "monitor_status_active": "Monitoring Active", "monitor_status_inactive": "Monitoring Suspended",
                 "monitor_interval": "Check Interval (seconds)", "monitored_paths": "Monitored Folders",
-                // Custom background details
                 "custom_image": "Custom Image", "bg_image_path": "Background Image Path", "ph_bg_image_path": "Path to image (e.g. bg.png)",
                 "bg_blur": "Background Blur", "bg_opacity": "Background Opacity"
             },
@@ -757,13 +730,11 @@
                 "ignore_hidden_desc": "Игнорировать скрытые директории и файлы ОС", "skip_hidden_dupes": "Пропускать скрытые дубликаты",
                 "size_filters": "Фильтрация размера (МБ)", "min_size_label": "Мин. размер (0=выкл)", "max_size_label": "Макс. размер (0=выкл)",
                 "aesthetic_customizer": "Кастомизация дизайна",
-                // Folder monitoring details
                 "nav_monitor": "Мониторинг папок", "monitor_title": "Мониторинг папок в реальном времени", "monitor_desc": "Автоматически сортируйте файлы по мере их появления в выбранных папках.",
                 "beta_warning_title": "ПРЕДУПРЕЖДЕНИЕ: БЕТА-ВЕРСИЯ", "beta_warning_desc": "Мониторинг папок находится в режиме БЕТА-тестирования. Процесс работает в фоновом режиме и может нагружать диск. Пожалуйста, сделайте бэкап важных файлов перед использованием.",
                 "btn_start_monitor": "Включить мониторинг", "btn_stop_monitor": "Выключить мониторинг",
                 "monitor_status_active": "Мониторинг запущен", "monitor_status_inactive": "Мониторинг приостановлен",
                 "monitor_interval": "Интервал проверки (в секундах)", "monitored_paths": "Отслеживаемые папки",
-                // Custom background details
                 "custom_image": "Своё изображение", "bg_image_path": "Путь к фону", "ph_bg_image_path": "Путь к картинке (например, bg.png)",
                 "bg_blur": "Размытие фона", "bg_opacity": "Прозрачность фона"
             },
@@ -774,7 +745,7 @@
                 "sort_by_date": "Ordenar por Fecha", "overwrite_conflicts": "Sobrescribir Conflictos", "clean_empty": "Limpiar Vacíos", "btn_start_single": "Iniciar Ordenación", "btn_reverse": "Revertir Acción",
                 "multi_title": "Recolector Multi-Origen", "multi_desc": "Agrega flujos de datos de carpetas distintas a un destino común.", "target_folder": "Carpeta Destino (Destino)", "ph_multi_target": "¿A dónde deben ir los archivos?",
                 "sources_origin": "Orígenes", "btn_add": "Añadir", "include_target": "Incluir Carpeta Destino (Auto-Ordenar)", "btn_start_multi": "Ensamblar Orígenes",
-                "dupes_title": "Buscador de Duplicados Hash", "dupes_desc": "Realiza análisis MD5 acelerados por hardware para localizar clones binarios.", "folder_scan": "Directorio a Analizar", "ph_dupe_path": "/home/user/Documentos",
+                "dupes_title": "Buscador de Duplicados Hash", "dupes_desc": "Realiza análisis MD5 acelarados por hardware para localizar clones binarios.", "folder_scan": "Directorio a Analizar", "ph_dupe_path": "/home/user/Documentos",
                 "auto_dupes_desc": "Eliminación Inmediata (Omitir selección manual)", "btn_start_scan": "Iniciar Análisis Profundo", "select_to_delete": "Grupos de Archivos Binarios", "btn_delete_selected": "Eliminar Clones Seleccionados",
                 "group": "Grupo", "files": "archivos", "original_keep": "Original (Conservar)", "duplicate_delete": "Duplicado (Eliminar)",
                 "settings_title": "Panel de Control", "settings_desc": "Ajusta características estéticas, rendimiento y diccionario de categorización.", "global_toggles": "Núcleo de Operación y Filtros", "move_unknown": "Aislar Desconocidos",
@@ -787,13 +758,11 @@
                 "ignore_hidden_desc": "Omitir directorios y rutas de archivos ocultos del sistema", "skip_hidden_dupes": "Omitir duplicados ocultos",
                 "size_filters": "Filtros de Tamaño (MB)", "min_size_label": "Tamaño Mín (0=Ninguno)", "max_size_label": "Tamaño Máx (0=Ninguno)",
                 "aesthetic_customizer": "Personalizador Estético",
-                // Folder monitoring details
                 "nav_monitor": "Monitoreo", "monitor_title": "Monitoreo de Carpetas en Tiempo Real", "monitor_desc": "Clasifique automáticamente los archivos entrantes en los directorios monitoreados.",
                 "beta_warning_title": "ADVERTENCIA DE FUNCIÓN BETA", "beta_warning_desc": "El monitoreo de carpetas está en fase BETA. Se ejecuta como un proceso de fondo. Asegúrese de realizar copias de seguridad de sus archivos importantes.",
                 "btn_start_monitor": "Activar Monitoreo en Vivo", "btn_stop_monitor": "Desactivar Monitoreo",
                 "monitor_status_active": "Monitoreo Activo", "monitor_status_inactive": "Monitoreo Suspendido",
                 "monitor_interval": "Intervalo de comprobación (segundos)", "monitored_paths": "Carpetas Monitoreadas",
-                // Custom background details
                 "custom_image": "Imagen Personalizada", "bg_image_path": "Ruta de la Imagen de Fondo", "ph_bg_image_path": "Ruta a la imagen (ej. bg.png)",
                 "bg_blur": "Desenfoque de Fondo", "bg_opacity": "Opacidad del Fondo"
             },
@@ -817,13 +786,11 @@
                 "ignore_hidden_desc": "跳过隐藏的系统目录和文件路径", "skip_hidden_dupes": "跳过隐藏的重复文件",
                 "size_filters": "大小过滤器 (MB)", "min_size_label": "最小大小 (0=无限制)", "max_size_label": "最大大小 (0=无限制)",
                 "aesthetic_customizer": "美学定制器",
-                // Folder monitoring details
                 "nav_monitor": "文件夹监控", "monitor_title": "实时文件夹监控", "monitor_desc": "实时自动整理监控目录中新传入的文件。",
                 "beta_warning_title": "测试版功能警告", "beta_warning_desc": "文件夹监控目前处于测试阶段 (BETA)。它作为后台进程运行，可能会消耗磁盘 I/O。请务必备份重要文件。",
                 "btn_start_monitor": "启用实时监控", "btn_stop_monitor": "禁用实时监控",
                 "monitor_status_active": "监控已激活", "monitor_status_inactive": "监控已挂起",
                 "monitor_interval": "检查间隔（秒）", "monitored_paths": "受监控的文件夹",
-                // Custom background details
                 "custom_image": "自定义图片", "bg_image_path": "背景图片路径", "ph_bg_image_path": "图片路径 (例如 bg.png)",
                 "bg_blur": "背景模糊", "bg_opacity": "背景透明度"
             },
@@ -847,25 +814,43 @@
                 "ignore_hidden_desc": "Versteckte Systemverzeichnisse und Dateipfade überspringen", "skip_hidden_dupes": "Versteckte Duplikate überspringen",
                 "size_filters": "Größenfilter (MB)", "min_size_label": "Min. Größe (0=Keine)", "max_size_label": "Max. Größe (0=Keine)",
                 "aesthetic_customizer": "Ästhetische Anpassung",
-                // Folder monitoring details
                 "nav_monitor": "Überwachung", "monitor_title": "Echtzeit-Ordnerüberwachung", "monitor_desc": "Eingehende Dateien in überwachten Verzeichnissen automatisch in Echtzeit sortieren.",
                 "beta_warning_title": "WARNUNG: BETA-FUNKTION", "beta_warning_desc": "Die Ordnerüberwachung befindet sich in der BETA-Phase. Sie läuft als Hintergrundprozess. Bitte sichern Sie Ihre wichtigen Dateien ab.",
                 "btn_start_monitor": "Echtzeit-Überwachung aktivieren", "btn_stop_monitor": "Überwachung deaktivieren",
                 "monitor_status_active": "Überwachung aktiv", "monitor_status_inactive": "Überwachung ausgesetzt",
                 "monitor_interval": "Prüfintervall (Sekunden)", "monitored_paths": "Überwachte Ordner",
-                // Custom background details
                 "custom_image": "Benutzerdefiniertes Bild", "bg_image_path": "Hintergrundbild-Pfad", "ph_bg_image_path": "Pfad zum Bild (z.B. bg.png)",
                 "bg_blur": "Hintergrund-Unschärfe", "bg_opacity": "Hintergrund-Deckkraft"
             }
         };
 
         let currentLang = localStorage.getItem('lang') || 'en';
+        let eventSource = null;
+        let multiSourcesArray = [];
+        let monitorFoldersArray = [];
+        let monitorEnabled = false;
+        let isSlowMode = false;
+        let eventQueue = [];
+        let isProcessingQueue = false;
+        let categoryExtensionsState = {};
+        let activeInputTargetId = null; 
+
+        function escapeHtml(text) {
+            if (typeof text !== 'string') return text;
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
 
         function setLang(lang) {
             currentLang = lang;
             localStorage.setItem('lang', lang);
 
-            // Update language selector active attributes
             document.querySelectorAll('[data-lang-btn]').forEach(btn => {
                 const btnLang = btn.getAttribute('data-lang-btn');
                 if (btnLang === lang) {
@@ -897,17 +882,6 @@
             updateMonitorUIState();
         }
 
-        // --- CORE APP LOGIC ---
-        let eventSource = null;
-        let multiSourcesArray = [];
-        let monitorFoldersArray = [];
-        let monitorEnabled = false;
-        let isSlowMode = false;
-        let eventQueue = [];
-        let isProcessingQueue = false;
-        let categoryExtensionsState = {}; // Global extension status tracking
-
-        // SPECIAL COMBO (ALT + M)
         document.addEventListener('keydown', (e) => {
             if (e.altKey && e.key.toLowerCase() === 'm') {
                 isSlowMode = !isSlowMode;
@@ -915,7 +889,6 @@
             }
         });
 
-        // SECOND SPECIAL COMBO (CTRL + SHIFT + S) - Slow-mo layout updates
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's') {
                 isSlowMode = !isSlowMode;
@@ -926,7 +899,6 @@
             }
         });
 
-        // Set palette accent
         function setSystemAccent(primary, glow, gradient) {
             document.documentElement.style.setProperty('--accent-color', primary);
             document.documentElement.style.setProperty('--accent-glow', glow);
@@ -935,7 +907,7 @@
             localStorage.setItem('--accent-glow', glow);
             localStorage.setItem('--accent-gradient', gradient);
             addLog("System Core palette accent updated.", "success");
-            setLang(currentLang); // Update lang selections
+            setLang(currentLang);
             renderCategoryExtensions();
         }
 
@@ -944,7 +916,6 @@
             const mesh = document.querySelector('.bg-mesh');
             const imgLayer = document.getElementById('bgImageLayer');
             
-            // Hide all by default
             if (grid) grid.style.opacity = '0';
             if (mesh) mesh.style.opacity = '0';
             if (imgLayer) imgLayer.classList.add('hidden');
@@ -956,13 +927,11 @@
                 if (mesh) mesh.style.opacity = '1';
             } else if (style === 'image') {
                 if (imgLayer) imgLayer.classList.remove('hidden');
-                // Retain light overlay on blurred background image
                 if (mesh) mesh.style.opacity = '0.4'; 
             }
             
             localStorage.setItem('bgStyle', style);
 
-            // Update active state in UI
             document.querySelectorAll('[data-bg-pattern-btn]').forEach(btn => {
                 const btnStyle = btn.getAttribute('data-bg-pattern-btn');
                 if (btnStyle === style) {
@@ -974,7 +943,6 @@
                 }
             });
 
-            // Toggle visibility of image configuration section
             const imgConfigSec = document.getElementById('bgImageConfigSection');
             if (imgConfigSec) {
                 if (style === 'image') {
@@ -1004,7 +972,6 @@
             document.getElementById('nav-' + tabId).classList.add('active');
         }
 
-        // Toggle theme layout
         function toggleTheme() {
             const isDark = document.documentElement.classList.contains('dark');
             if (isDark) {
@@ -1018,7 +985,6 @@
             }
         }
         
-        // Restore active theme
         if (localStorage.getItem('theme') === 'light') {
             document.documentElement.classList.remove('dark');
             document.documentElement.classList.add('light');
@@ -1057,7 +1023,7 @@
             if (term) {
                 const el = document.createElement("div");
                 el.className = "flex items-start gap-2 py-0.5 animate__animated animate__fadeInLeft hover:bg-slate-900 px-2 rounded transition-colors";
-                el.innerHTML = `<span class="text-slate-600 text-[10px] mt-0.5 shrink-0">[${time}]</span><span class="${iconColor} mt-0.5 shrink-0"><i data-lucide="${icon}" class="w-3.5 h-3.5"></i></span><span class="${color}">${msg}</span>`;
+                el.innerHTML = `<span class="text-slate-600 text-[10px] mt-0.5 shrink-0">[${time}]</span><span class="${iconColor} mt-0.5 shrink-0"><i data-lucide="${icon}" class="w-3.5 h-3.5"></i></span><span class="${color}">${escapeHtml(msg)}</span>`;
                 term.appendChild(el);
                 term.scrollTop = term.scrollHeight;
             }
@@ -1074,13 +1040,11 @@
             lucide.createIcons();
         }
 
-        // QUEUE PROCESSOR FOR SLOW MODE
         async function processQueue() {
             isProcessingQueue = true;
             while (eventQueue.length > 0) {
                 const data = eventQueue.shift();
                 handleEventData(data);
-                // Delay updates by 500ms
                 await new Promise(r => setTimeout(r, 500));
             }
             isProcessingQueue = false;
@@ -1103,66 +1067,147 @@
             }
         }
 
-        async function browseFolder(inputId) {
-            try {
-                const res = await fetch('/api/browse');
-                const data = await res.json();
-                if (data.path) document.getElementById(inputId).value = data.path;
-            } catch (e) { addLog("Folder browse error", "error"); }
+        // --- WEB BROWSER DIALOG SYSTEM ---
+        async function openWebBrowserModal(targetInputId) {
+            activeInputTargetId = targetInputId;
+            const startPath = document.getElementById(targetInputId).value || "";
+            document.getElementById('webBrowserModal').classList.remove('hidden');
+            await loadWebBrowserPath(startPath);
         }
 
-        async function addSourceUI() {
-            try {
-                const res = await fetch('/api/browse');
-                const data = await res.json();
-                if (data.path && !multiSourcesArray.includes(data.path)) {
-                    multiSourcesArray.push(data.path);
-                    renderSources();
-                }
-            } catch (e) { }
+        function closeWebBrowserModal() {
+            document.getElementById('webBrowserModal').classList.add('hidden');
+            activeInputTargetId = null;
         }
+
+        async function loadWebBrowserPath(path) {
+            try {
+                const res = await fetch(`/api/browse?path=${encodeURIComponent(path)}`);
+                const data = await res.json();
+                if (data.error && data.path) {
+                    addLog(`Error navigating: ${data.error}`, "error");
+                }
+                
+                document.getElementById('browserCurrentPath').value = data.path;
+                const dirsList = document.getElementById('browserDirsList');
+                dirsList.innerHTML = '';
+
+                if (data.parent) {
+                    dirsList.innerHTML += `
+                        <div onclick="loadWebBrowserPath('${data.parent.replace(/\\/g, '\\\\')}')" class="flex items-center gap-2 p-2.5 rounded-xl hover:bg-white/5 cursor-pointer text-xs font-semibold text-slate-400">
+                            <i data-lucide="folder-up" class="w-4 h-4 text-accent"></i>
+                            <span>.. (Parent Directory)</span>
+                        </div>
+                    `;
+                }
+
+                if (data.dirs && data.dirs.length > 0) {
+                    data.dirs.forEach(d => {
+                        const fullPath = (data.path + (data.path.endsWith('/') || data.path.endsWith('\\') ? '' : '/') + d).replace(/\\/g, '\\\\');
+                        dirsList.innerHTML += `
+                            <div onclick="loadWebBrowserPath('${fullPath}')" class="flex items-center gap-2 p-2.5 rounded-xl hover:bg-white/10 cursor-pointer text-xs font-semibold">
+                                <i data-lucide="folder" class="w-4 h-4 text-accent shrink-0"></i>
+                                <span class="truncate">${escapeHtml(d)}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    dirsList.innerHTML += `<div class="p-4 text-center text-xs text-slate-500">No folders found inside this path.</div>`;
+                }
+                lucide.createIcons();
+            } catch (e) {
+                addLog("File browser directory fetch failed.", "error");
+            }
+        }
+
+        function navigateBrowserUp() {
+            const current = document.getElementById('browserCurrentPath').value;
+            if (current) {
+                const idx = Math.max(current.lastIndexOf('/'), current.lastIndexOf('\\'));
+                if (idx > 0) {
+                    loadWebBrowserPath(current.substring(0, idx));
+                }
+            }
+        }
+
+        function confirmSelectedPath() {
+            const selected = document.getElementById('browserCurrentPath').value;
+            if (activeInputTargetId && selected) {
+                document.getElementById(activeInputTargetId).value = selected;
+                silentSaveConfig();
+            }
+            closeWebBrowserModal();
+        }
+
+        async function addSourceUIWeb() {
+            activeInputTargetId = "SPECIAL_MULTI_SOURCE";
+            document.getElementById('webBrowserModal').classList.remove('hidden');
+            await loadWebBrowserPath("");
+        }
+
+        async function addMonitorFolderUIWeb() {
+            activeInputTargetId = "SPECIAL_MONITOR_SOURCE";
+            document.getElementById('webBrowserModal').classList.remove('hidden');
+            await loadWebBrowserPath("");
+        }
+
+        function confirmSpecialPaths(path) {
+            if (activeInputTargetId === "SPECIAL_MULTI_SOURCE") {
+                if (path && !multiSourcesArray.includes(path)) {
+                    multiSourcesArray.push(path);
+                    renderSources();
+                    silentSaveConfig();
+                }
+            } else if (activeInputTargetId === "SPECIAL_MONITOR_SOURCE") {
+                if (path && !monitorFoldersArray.includes(path)) {
+                    monitorFoldersArray.push(path);
+                    renderMonitorFolders();
+                    silentSaveConfig();
+                }
+            }
+        }
+
+        // Override original confirm selected path for special triggers
+        const originalConfirm = confirmSelectedPath;
+        confirmSelectedPath = function() {
+            const selected = document.getElementById('browserCurrentPath').value;
+            if (activeInputTargetId === "SPECIAL_MULTI_SOURCE" || activeInputTargetId === "SPECIAL_MONITOR_SOURCE") {
+                confirmSpecialPaths(selected);
+                closeWebBrowserModal();
+            } else {
+                originalConfirm();
+            }
+        };
+
         function remSourceUI(idx) {
             multiSourcesArray.splice(idx, 1);
             renderSources();
+            silentSaveConfig();
         }
+
         function renderSources() {
             const list = document.getElementById('sourcesListUI');
             list.innerHTML = multiSourcesArray.map((s, i) => `
-                <div class="flex justify-between items-center bg-white/5 border border-white/5 p-3 rounded-xl hover:bg-white/10 transition group">
-                    <span class="text-xs font-mono text-slate-500 dark:text-slate-300 break-all">${s}</span>
+                <div class="flex justify-between items-center bg-white/5 border border-white/5 p-3 rounded-xl hover:bg-white/10 transition group animate__animated animate__fadeIn">
+                    <span class="text-xs font-mono text-slate-500 dark:text-slate-300 break-all">${escapeHtml(s)}</span>
                     <button onclick="remSourceUI(${i})" class="text-slate-400 hover:text-red-500 p-1 transition"><i data-lucide="trash" class="w-4 h-4"></i></button>
                 </div>
             `).join('');
             lucide.createIcons();
         }
 
-        // --- BACKGROUND MONITOR INTERFACE LOGIC ---
-        async function addMonitorFolderUI() {
-            try {
-                const res = await fetch('/api/browse');
-                const data = await res.json();
-                if (data.path && !monitorFoldersArray.includes(data.path)) {
-                    monitorFoldersArray.push(data.path);
-                    renderMonitorFolders();
-                    if (monitorEnabled) {
-                        await silentSaveConfig();
-                    }
-                }
-            } catch (e) {}
-        }
         function remMonitorFolderUI(idx) {
             monitorFoldersArray.splice(idx, 1);
             renderMonitorFolders();
-            if (monitorEnabled) {
-                silentSaveConfig();
-            }
+            silentSaveConfig();
         }
+
         function renderMonitorFolders() {
             const list = document.getElementById('monitorFoldersListUI');
             if (!list) return;
             list.innerHTML = monitorFoldersArray.map((s, i) => `
-                <div class="flex justify-between items-center bg-white/5 border border-white/5 p-3 rounded-xl hover:bg-white/10 transition group">
-                    <span class="text-xs font-mono text-slate-500 dark:text-slate-300 break-all">${s}</span>
+                <div class="flex justify-between items-center bg-white/5 border border-white/5 p-3 rounded-xl hover:bg-white/10 transition group animate__animated animate__fadeIn">
+                    <span class="text-xs font-mono text-slate-500 dark:text-slate-300 break-all">${escapeHtml(s)}</span>
                     <button onclick="remMonitorFolderUI(${i})" class="text-slate-400 hover:text-red-500 p-1 transition"><i data-lucide="trash" class="w-4 h-4"></i></button>
                 </div>
             `).join('');
@@ -1200,7 +1245,6 @@
             lucide.createIcons();
         }
 
-        // --- DICTIONARY MAPPING ---
         function renderCategoryExtensions() {
             const area = document.getElementById('configArea');
             if (!area) return;
@@ -1212,7 +1256,7 @@
                     if (!cleanExt) return '';
                     return `
                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 shadow-sm animate__animated animate__zoomIn">
-                            <span>${cleanExt}</span>
+                            <span>${escapeHtml(cleanExt)}</span>
                             <button onclick="removeExtensionTag('${cat}', '${cleanExt}')" class="text-slate-400 hover:text-red-500 transition-colors font-black text-xs leading-none">×</button>
                         </span>
                     `;
@@ -1220,7 +1264,7 @@
 
                 area.innerHTML += `
                     <div class="flex flex-col gap-3 p-5 bg-white/5 rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm">
-                        <span class="font-extrabold text-xs uppercase text-slate-500 dark:text-slate-400 tracking-wider">${cat}</span>
+                        <span class="font-extrabold text-xs uppercase text-slate-500 dark:text-slate-400 tracking-wider">${escapeHtml(cat)}</span>
                         
                         <div class="flex flex-wrap gap-2 max-h-36 overflow-y-auto pr-1">
                             ${tagsHtml || `<span class="text-xs text-slate-500 italic">No extensions</span>`}
@@ -1254,7 +1298,6 @@
             input.value = '';
         }
 
-        // Custom Background update helper
         function updateBgImageLayer() {
             const imgLayer = document.getElementById('bgImageLayer');
             if (!imgLayer) return;
@@ -1265,19 +1308,7 @@
             imgLayer.style.backgroundImage = `url('/api/bg?path=${encodeURIComponent(path)}&t=${Date.now()}')`;
             imgLayer.style.filter = `blur(${blur}px)`;
             imgLayer.style.opacity = opacity;
-            imgLayer.style.transform = 'scale(1.1)'; // Prevents vignette edge artifacts during blur
-        }
-
-        async function browseBgImage() {
-            try {
-                const res = await fetch('/api/browse?mode=file');
-                const data = await res.json();
-                if (data.path) {
-                    document.getElementById('cfg_bg_image_path').value = data.path;
-                    updateBgImageLayer();
-                    await silentSaveConfig();
-                }
-            } catch (e) { addLog("File browse error", "error"); }
+            imgLayer.style.transform = 'scale(1.1)'; 
         }
 
         async function silentSaveConfig() {
@@ -1298,12 +1329,10 @@
                 ignore_hidden: ignoreHiddenChecked,
                 min_size_mb: parseFloat(document.getElementById('cfg_min_size').value) || 0,
                 max_size_mb: parseFloat(document.getElementById('cfg_max_size').value) || 0,
-                // Monitoring options
                 monitor_enabled: monitorEnabled,
                 monitor_folders: monitorFoldersArray,
                 monitor_interval_sec: parseFloat(document.getElementById('cfg_monitor_interval').value) || 5.0,
                 monitor_target: document.getElementById('monitorTarget').value,
-                // Background settings
                 bg_style: localStorage.getItem('bgStyle') || 'grid',
                 bg_image_path: document.getElementById('cfg_bg_image_path').value || 'bg.png',
                 bg_blur: parseInt(document.getElementById('cfg_bg_blur').value) || 20,
@@ -1371,15 +1400,15 @@
 
             list.innerHTML = groups.map((g, idx) => `
                 <div class="glass-panel p-4 rounded-2xl transition-colors">
-                    <div class="text-xs text-amber-500 font-bold mb-3">${loc.group} ${idx + 1} (${g.length} ${loc.files})</div>
+                    <div class="text-xs text-amber-500 font-bold mb-3">${escapeHtml(loc.group)} ${idx + 1} (${g.length} ${escapeHtml(loc.files)})</div>
                     ${g.map((f, i) => `
                         <label class="flex items-center justify-between gap-2 mb-1.5 cursor-pointer hover:bg-white/10 p-2.5 rounded-xl transition border ${i === 0 ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-transparent'}">
                             <div class="flex items-center gap-2 truncate">
-                                <input type="checkbox" value="${f}" class="dupe-cb w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-500" ${i > 0 ? 'checked' : ''}>
-                                <span class="text-xs font-mono text-slate-300 truncate" title="${f}">${f}</span>
+                                <input type="checkbox" value="${escapeHtml(f)}" class="dupe-cb w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-500" ${i > 0 ? 'checked' : ''}>
+                                <span class="text-xs font-mono text-slate-300 truncate" title="${escapeHtml(f)}">${escapeHtml(f)}</span>
                             </div>
                             <span class="shrink-0 text-[10px] font-bold uppercase px-2 py-0.5 rounded ${i === 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">
-                                ${i === 0 ? loc.original_keep : loc.duplicate_delete}
+                                ${i === 0 ? escapeHtml(loc.original_keep) : escapeHtml(loc.duplicate_delete)}
                             </span>
                         </label>
                     `).join('')}
@@ -1419,7 +1448,6 @@
             document.getElementById('cfg_auto_dupes').checked = config.auto_dupes;
             document.getElementById('cfg_move_unknown').checked = config.move_unknown;
 
-            // Engine settings sync
             document.getElementById('cfg_dry_run_single').checked = config.dry_run || false;
             document.getElementById('cfg_dry_run_multi').checked = config.dry_run || false;
             document.getElementById('cfg_ignore_hidden_single').checked = config.ignore_hidden !== false;
@@ -1429,7 +1457,6 @@
             document.getElementById('cfg_min_size').value = config.min_size_mb || 0;
             document.getElementById('cfg_max_size').value = config.max_size_mb || 0;
 
-            // Background settings load
             const bgImgPath = config.bg_image_path || 'bg.png';
             document.getElementById('cfg_bg_image_path').value = bgImgPath;
             
@@ -1441,12 +1468,10 @@
             document.getElementById('cfg_bg_opacity').value = bgOpacity;
             document.getElementById('cfg_bg_opacity_val').innerText = bgOpacity + '%';
 
-            // Background layout pattern restoration
             const bgStyle = config.bg_style || localStorage.getItem('bgStyle') || 'grid';
             setPattern(bgStyle);
             updateBgImageLayer();
 
-            // Monitor state restoration
             monitorEnabled = config.monitor_enabled || false;
             monitorFoldersArray = config.monitor_folders || [];
             document.getElementById('cfg_monitor_interval').value = config.monitor_interval_sec || 5.0;
@@ -1466,7 +1491,6 @@
             sync('cfg_overwrite', 'cfg_overwrite_m');
             sync('cfg_dry_run_single', 'cfg_dry_run_multi');
 
-            // Sync ignored statuses across tabs
             const h1 = document.getElementById('cfg_ignore_hidden_single');
             const h2 = document.getElementById('cfg_ignore_hidden_multi');
             const h3 = document.getElementById('cfg_ignore_hidden_dupes');
@@ -1476,7 +1500,6 @@
                 h3.addEventListener('change', () => { h1.checked = h3.checked; h2.checked = h3.checked; });
             }
 
-            // Bind dictionary arrays
             categoryExtensionsState = {};
             for (const [cat, extsString] of Object.entries(config.extensions)) {
                 categoryExtensionsState[cat] = extsString

@@ -7,7 +7,6 @@ import time
 from colorama import init, Fore, Back, Style
 from sorter_core import FileSorterCore
 
-# Initialize colorama with automatic style reset on each operation
 init(autoreset=True)
 
 def main():
@@ -43,12 +42,10 @@ def main():
 """
     )
     
-    # Mode configurations
     mode_group = parser.add_argument_group(f"{Fore.MAGENTA}Режимы работы (выберите один){Style.RESET_ALL}")
     mode_group.add_argument("mode", choices=["single", "multi", "unsort", "dupes", "monitor", "rollback", "stats"], 
                         help="Режим работы программы")
     
-    # Path configuration group
     path_group = parser.add_argument_group(f"{Fore.MAGENTA}Настройка путей{Style.RESET_ALL}")
     path_group.add_argument("-p", "--path", type=str, metavar="PATH",
                         help="Путь к целевой папке (для режимов 'single', 'unsort', 'dupes', 'monitor' и 'stats')")
@@ -57,7 +54,6 @@ def main():
     path_group.add_argument("-s", "--sources", type=str, nargs="+", metavar="SOURCES",
                         help="Список исходных папок через пробел (для режимов 'multi' и 'monitor')")
     
-    # Engine option attributes
     config_group = parser.add_argument_group(f"{Fore.MAGENTA}Параметры сортировки{Style.RESET_ALL}")
     config_group.add_argument("-r", "--recursive", action="store_true",
                               help="Рекурсивно искать и перемещать файлы из всех вложенных папок")
@@ -76,17 +72,14 @@ def main():
     config_group.add_argument("--interval", type=float, default=5.0,
                               help="Интервал проверки в секундах для режима 'monitor' (по умолчанию: 5)")
     
-    # Print usage statistics if executed empty
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(0)
         
     args = parser.parse_args()
     
-    # Initialize Core sorter engine
     core = FileSorterCore()
     
-    # Synchronize script arguments with configuration dictionary
     if args.recursive: core.config['recursive_sort'] = True
     if args.date_sort: core.config['date_sort'] = True
     if args.clean_empty: core.config['clean_empty'] = True
@@ -98,7 +91,6 @@ def main():
     print(f"\n{Fore.MAGENTA}{Style.BRIGHT}=== MogDop File Utils CLI ==={Style.RESET_ALL}")
     
     def process_generator(generator):
-        """Displays core step outputs alongside terminal color schemes."""
         last_was_progress = False
         
         for e_type, msg in generator:
@@ -135,10 +127,9 @@ def main():
                     print(f"  - {Fore.CYAN}{ext_display:<15}{Style.RESET_ALL}: {Fore.WHITE}{info['count']} шт.{Style.RESET_ALL} ({info['size_mb']} MB)")
             else:
                 if last_was_progress:
-                    print()  # Reset line output
+                    print()
                     last_was_progress = False
                 
-                # Assign terminal coloration mappings based on core step
                 if e_type == "error":
                     color_prefix = f"{Fore.RED}{Style.BRIGHT}[ERROR]{Style.RESET_ALL} {Fore.RED}"
                 elif e_type == "success":
@@ -149,12 +140,11 @@ def main():
                     color_prefix = f"{Style.DIM}[SKIP] "
                 elif e_type == "move":
                     color_prefix = f"{Fore.GREEN}[MOVE] "
-                else:  # Information details
+                else:
                     color_prefix = f"{Fore.CYAN}[INFO] "
                 
                 print(f"{color_prefix}{msg}{Style.RESET_ALL}")
 
-    # Process mode routing choices
     if args.mode == "single":
         if not args.path:
             print(f"{Fore.RED}[ERROR] Аргумент --path (-p) обязателен для режима single.{Style.RESET_ALL}")
@@ -195,7 +185,6 @@ def main():
     elif args.mode == "monitor":
         print(f"\n{Fore.YELLOW}{Style.BRIGHT}[ВНИМАНИЕ] Функция автоматического мониторинга папок запущена в режиме BETA! Пожалуйста, сделайте резервную копию важных файлов.{Style.RESET_ALL}")
         
-        # Build collection of monitoring paths
         monitor_paths = []
         if args.path:
             monitor_paths.append(args.path)
