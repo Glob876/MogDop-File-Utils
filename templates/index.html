@@ -648,6 +648,16 @@
                             <div id="logTerminal" class="flex-1 p-6 overflow-y-auto space-y-2 bg-slate-950 text-slate-300 font-mono text-xs select-all">
                                 <p class="text-slate-600">> Kernel telemetry stream attached. Standing by...</p>
                             </div>
+                            <!-- Interactive CLI Prompt -->
+                            <div class="p-3 bg-slate-900/90 border-t border-slate-200 dark:border-white/5 flex items-center gap-2 shrink-0 rounded-b-3xl">
+                                <span class="text-accent font-mono font-bold text-xs select-none">guest@md-utils:~$</span>
+                                <input type="text" id="cliInput" placeholder="Enter command (e.g. stats -p /home/user or single -p /path)..." 
+                                    class="flex-1 bg-transparent border-none outline-none font-mono text-xs text-white placeholder-slate-600 focus:ring-0" 
+                                    onkeydown="handleCliKeyDown(event)">
+                                <button onclick="submitCliCommand()" class="text-accent hover:text-white transition">
+                                    <i data-lucide="send" class="w-4 h-4"></i>
+                                </button>
+                            </div>
                         </div>
                     </section>
 
@@ -798,7 +808,7 @@
                 "core_engine": "Sortierer", "toggle_theme": "Oberflächendesign", "interface_language": "Sprache",
                 "nav_single": "Einzelmodus", "nav_multi": "Multi-Quelle", "nav_dupes": "Duplikate", "nav_settings": "Einstellungen", "nav_logs": "Terminal",
                 "single_title": "Einzelner Arbeitsbereich", "single_desc": "Inhalte sofort verteilen, sortieren und kategorisieren.", "workspace_folder": "Arbeitsverzeichnis", "ph_single_path": "/home/user/Downloads",
-                "sort_by_date": "Nach Datum sortieren", "overwrite_conflicts": "Konflikte überschreiben", "clean_empty": "Leere Ordner bereinigen", "btn_start_single": "Sortierung starten", "btn_reverse": "Aktion rückgängig machen",
+                "sort_by_date": "Nach Datum sortieren", "overwrite_conflicts": "Konflikte überschreiben", "clean_empty": "Leere Ordner bereigen", "btn_start_single": "Sortierung starten", "btn_reverse": "Aktion rückgängig machen",
                 "multi_title": "Multi-Quellen-Sammler", "multi_desc": "Datenströme aus verschiedenen Ordnern in einem Ziel-Pool zusammenführen.", "target_folder": "Zielordner (Ziel)", "ph_multi_target": "Wohin sollen die Dateien verschoben werden?",
                 "sources_origin": "Quellen", "btn_add": "Hinzufügen", "include_target": "Zielordner einbeziehen (Selbstsortierung)", "btn_start_multi": "Quellen zusammenführen",
                 "dupes_title": "Hash-Duplikatsuche", "dupes_desc": "Führen Sie hardwarebeschleunigte MD5-Scans durch, um binäre Klone zu finden.", "folder_scan": "Zu analysierendes Verzeichnis", "ph_dupe_path": "/home/user/Dokumente",
@@ -1524,6 +1534,99 @@
                     clock.innerText = now.toLocaleTimeString([], { hour12: false });
                 }, 1000);
             }
+        }
+
+        // --- INTERACTIVE TERMINAL CLI PROMPT ---
+        let cliHistory = [];
+        let cliHistoryIdx = -1;
+        let cliEventSource = null;
+
+        function handleCliKeyDown(e) {
+            if (e.key === 'Enter') {
+                submitCliCommand();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (cliHistory.length > 0) {
+                    if (cliHistoryIdx === -1) {
+                        cliHistoryIdx = cliHistory.length - 1;
+                    } else if (cliHistoryIdx > 0) {
+                        cliHistoryIdx--;
+                    }
+                    document.getElementById('cliInput').value = cliHistory[cliHistoryIdx];
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (cliHistoryIdx !== -1) {
+                    if (cliHistoryIdx < cliHistory.length - 1) {
+                        cliHistoryIdx++;
+                        document.getElementById('cliInput').value = cliHistory[cliHistoryIdx];
+                    } else {
+                        cliHistoryIdx = -1;
+                        document.getElementById('cliInput').value = '';
+                    }
+                }
+            }
+        }
+
+        function submitCliCommand() {
+            const input = document.getElementById('cliInput');
+            const cmd = input.value.trim();
+            if (!cmd) return;
+
+            cliHistory.push(cmd);
+            cliHistoryIdx = -1;
+            input.value = '';
+
+            const term = document.getElementById('logTerminal');
+            const userLine = document.createElement("p");
+            userLine.className = "text-accent font-bold mt-2 font-mono";
+            userLine.innerText = `guest@md-utils:~$ ${cmd}`;
+            term.appendChild(userLine);
+            term.scrollTop = term.scrollHeight;
+
+            if (cliEventSource) cliEventSource.close();
+
+            cliEventSource = new EventSource(`/api/stream/cli?cmd=${encodeURIComponent(cmd)}`);
+            cliEventSource.onmessage = function (e) {
+                const data = JSON.parse(e.data);
+                if (data.type === 'eof') {
+                    cliEventSource.close();
+                    return;
+                }
+
+                const line = document.createElement("p");
+                line.className = "font-mono text-xs";
+
+                if (data.text.startsWith('\r') || data.text.includes('[PROGRESS]')) {
+                    line.className = "text-cyan-400 font-mono";
+                    const lastChild = term.lastElementChild;
+                    if (lastChild && (lastChild.innerText.includes('[PROGRESS]') || lastChild.classList.contains('cli-progress-line'))) {
+                        lastChild.innerText = data.text.replace(/\r/g, '');
+                        return;
+                    }
+                    line.classList.add('cli-progress-line');
+                    line.innerText = data.text.replace(/\r/g, '');
+                } else if (data.type === 'stderr' || data.text.includes('[ERROR]')) {
+                    line.className = "text-rose-400 font-bold";
+                } else if (data.text.includes('[SUCCESS]')) {
+                    line.className = "text-emerald-400 font-bold";
+                } else if (data.text.includes('[CONFLICT]')) {
+                    line.className = "text-amber-300";
+                } else if (data.text.includes('[SKIP]')) {
+                    line.className = "text-slate-500 italic";
+                } else if (data.text.includes('[MOVE]')) {
+                    line.className = "text-emerald-500";
+                } else {
+                    line.className = "text-slate-300";
+                }
+
+                line.innerText = data.text;
+                term.appendChild(line);
+                term.scrollTop = term.scrollHeight;
+            };
+            cliEventSource.onerror = function () {
+                cliEventSource.close();
+            };
         }
 
         window.onload = () => {
