@@ -2,7 +2,7 @@
 pkgname=mdfu-git
 pkgver=r1.0.0
 pkgrel=1
-pkgdesc="MogDop File Utils - CLI File Sorter (Git version)"
+pkgdesc="MogDop File Utils - Console & UI file sorter what yo need"
 arch=('any')
 url="https://github.com/Glob876/MogDop-File-Utils"
 license=('MIT')
