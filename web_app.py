@@ -7,16 +7,36 @@ from tkinter import filedialog
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context, send_from_directory
 from sorter_core import FileSorterCore
 
-app = Flask(__name__)
+# Explicitly set the template folder relative to this file to prevent launch path errors
+base_dir = os.path.dirname(os.path.abspath(__file__))
+app = Flask(__name__, template_folder=os.path.join(base_dir, 'templates'))
 core = FileSorterCore()
 
-if not os.path.exists('templates'):
-    os.makedirs('templates')
+# Ensure templates directory exists
+templates_dir = os.path.join(base_dir, 'templates')
+if not os.path.exists(templates_dir):
+    os.makedirs(templates_dir)
+
+def get_bg_dir():
+    """Finds the absolute path to the 'bg' directory, checking multiple fallbacks case-insensitively."""
+    # Try current working directory and script directory case-insensitively
+    for parent in [os.getcwd(), base_dir]:
+        if os.path.exists(parent):
+            try:
+                for item in os.listdir(parent):
+                    if item.lower() == 'bg' and os.path.isdir(os.path.join(parent, item)):
+                        return os.path.join(parent, item)
+            except Exception:
+                pass
+    # Default fallback
+    dir_script = os.path.join(base_dir, 'bg')
+    os.makedirs(dir_script, exist_ok=True)
+    return dir_script
 
 @app.route('/logo.ico')
 def favicon():
     """Utility route serving the main dashboard favicon icon."""
-    return send_from_directory(os.path.abspath('.'), 'logo.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(base_dir, 'logo.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/')
 def index():
@@ -24,19 +44,112 @@ def index():
 
 @app.route('/api/bg')
 def get_custom_bg():
-    """Route serving the custom background image safely."""
+    """Route serving the custom background image safely with multiple path fallbacks."""
     path = request.args.get('path', 'bg.png')
     if not path:
         path = 'bg.png'
         
+    # 1. Check if the path exists directly relative to the current working directory
     abs_path = os.path.abspath(path)
     if os.path.exists(abs_path) and os.path.isfile(abs_path):
         return send_from_directory(os.path.dirname(abs_path), os.path.basename(abs_path))
         
-    if os.path.exists('bg.png'):
-        return send_from_directory(os.path.abspath('.'), 'bg.png')
+    # 2. Check relative to the script's directory
+    script_path = os.path.join(base_dir, path)
+    if os.path.exists(script_path) and os.path.isfile(script_path):
+        return send_from_directory(os.path.dirname(script_path), os.path.basename(script_path))
+        
+    # 3. Check inside the 'bg' directory (base_dir or cwd)
+    for bg_parent in [os.path.join(base_dir, 'bg'), os.path.join(os.getcwd(), 'bg')]:
+        fallback_path = os.path.join(bg_parent, os.path.basename(path))
+        if os.path.exists(fallback_path) and os.path.isfile(fallback_path):
+            return send_from_directory(bg_parent, os.path.basename(path))
+        
+    # 4. Final fallback to root bg.png
+    root_bg = os.path.join(base_dir, 'bg.png')
+    if os.path.exists(root_bg):
+        return send_from_directory(base_dir, 'bg.png')
         
     return '', 404
+
+@app.route('/api/backgrounds', methods=['GET'])
+def list_backgrounds():
+    """Endpoint listing all background image paths in multiple checked bg directories."""
+    allowed_exts = ('.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp')
+    files = set()
+    try:
+        # Scan case-insensitive bg folders in cwd and base_dir
+        for parent in [os.getcwd(), base_dir]:
+            if not os.path.exists(parent):
+                continue
+            for item in os.listdir(parent):
+                if item.lower() == 'bg':
+                    bg_path = os.path.join(parent, item)
+                    if os.path.isdir(bg_path):
+                        for f in os.listdir(bg_path):
+                            if f.lower().endswith(allowed_exts) and os.path.isfile(os.path.join(bg_path, f)):
+                                files.add(f"bg/{f}")
+        
+        # Scan the root folder for default backgrounds like bg.png
+        if os.path.exists(base_dir):
+            for f in os.listdir(base_dir):
+                if f.lower() == 'bg.png' and os.path.isfile(os.path.join(base_dir, f)):
+                    files.add(f)
+                    
+        sorted_files = sorted(list(files))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+        
+    return jsonify(sorted_files)
+
+@app.route('/api/backgrounds/upload', methods=['POST'])
+def upload_background():
+    """Endpoint allowing file upload directly to the 'bg' directory."""
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+        
+    allowed_exts = ('.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp')
+    if not file.filename.lower().endswith(allowed_exts):
+        return jsonify({"error": "Invalid file type"}), 400
+        
+    bg_dir = get_bg_dir()
+    filename = os.path.basename(file.filename)
+    dest_path = os.path.join(bg_dir, filename)
+    
+    try:
+        os.makedirs(bg_dir, exist_ok=True)
+        file.save(dest_path)
+        return jsonify({"status": "success", "filename": f"bg/{filename}"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/backgrounds', methods=['DELETE'])
+def delete_background():
+    """Endpoint allowing deletion of a background image file from multiple scanned directories."""
+    name = request.args.get('name', '')
+    if not name:
+        return jsonify({"error": "No filename specified"}), 400
+        
+    filename = os.path.basename(name)
+    target_path = None
+    
+    for parent in [os.path.join(os.getcwd(), 'bg'), os.path.join(base_dir, 'bg'), base_dir]:
+        p = os.path.join(parent, filename)
+        if os.path.exists(p) and os.path.isfile(p):
+            target_path = p
+            break
+            
+    if target_path:
+        try:
+            os.remove(target_path)
+            return jsonify({"status": "deleted"})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+    else:
+        return jsonify({"error": "File not found"}), 404
 
 @app.route('/api/stream')
 def stream_action():
@@ -100,6 +213,32 @@ def handle_config():
 
 @app.route('/api/browse', methods=['GET'])
 def browse():
+    """Directory browsing logic supporting both web modal exploration and native OS dialog fallbacks."""
+    path = request.args.get('path', '')
+    
+    if path:
+        abs_path = os.path.abspath(path)
+        if os.path.exists(abs_path) and os.path.isdir(abs_path):
+            try:
+                dirs = []
+                for item in os.listdir(abs_path):
+                    full_item_path = os.path.join(abs_path, item)
+                    if os.path.isdir(full_item_path) and not item.startswith('.'):
+                        dirs.append(item)
+                
+                dirs.sort()
+                parent = os.path.dirname(abs_path)
+                if parent == abs_path:
+                    parent = ""
+                    
+                return jsonify({
+                    "path": abs_path,
+                    "parent": parent,
+                    "dirs": dirs
+                })
+            except Exception as e:
+                return jsonify({"error": str(e), "path": abs_path, "parent": "", "dirs": []})
+
     mode = request.args.get('mode', 'dir')
     selected_path = ""
     if sys.platform.startswith('linux'):
@@ -129,7 +268,11 @@ def browse():
         except Exception as e:
             return jsonify({"error": str(e), "path": ""})
 
-    return jsonify({"path": selected_path})
+    return jsonify({
+        "path": selected_path,
+        "parent": os.path.dirname(selected_path) if selected_path else "",
+        "dirs": []
+    })
 
 if __name__ == '__main__':
     if sys.platform.startswith('linux'):

@@ -547,10 +547,18 @@
 
                                 <div id="bgImageConfigSection" class="hidden space-y-4 pt-3 border-t border-slate-200 dark:border-white/5 animate__animated animate__fadeIn">
                                     <div>
-                                        <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-2" data-i18n="bg_image_path">Background Image Path</label>
+                                        <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-2" data-i18n="bg_image_select">Background Image Selection</label>
                                         <div class="flex gap-2">
-                                            <input type="text" id="cfg_bg_image_path" placeholder="bg.png"
-                                                class="flex-1 input-premium rounded-xl px-3 py-2 text-xs outline-none" onchange="updateBgImageLayer(); silentSaveConfig();">
+                                            <select id="cfg_bg_image_path" class="flex-1 input-premium rounded-xl px-3 py-2 text-xs outline-none bg-slate-100 dark:bg-black/25" onchange="updateBgImageLayer(); silentSaveConfig();">
+                                                <option value="" class="bg-slate-900 text-white">None</option>
+                                            </select>
+                                            <button onclick="triggerBgUpload()" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 px-3.5 py-2 rounded-xl transition text-xs font-bold flex items-center justify-center shrink-0" title="Upload background">
+                                                <i data-lucide="upload" class="w-4 h-4"></i>
+                                            </button>
+                                            <button onclick="deleteCurrentBg()" class="bg-red-500/10 hover:bg-red-500/20 text-red-500 px-3.5 py-2 rounded-xl transition text-xs font-bold flex items-center justify-center shrink-0" title="Delete background">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
+                                            <input type="file" id="bgFileInput" accept="image/*" class="hidden" onchange="uploadBgImage(event)">
                                         </div>
                                     </div>
                                     
@@ -718,6 +726,7 @@
                 "monitor_status_active": "Monitoring Active", "monitor_status_inactive": "Monitoring Suspended",
                 "monitor_interval": "Check Interval (seconds)", "monitored_paths": "Monitored Folders",
                 "custom_image": "Custom Image", "bg_image_path": "Background Image Path", "ph_bg_image_path": "Path to image (e.g. bg.png)",
+                "bg_image_select": "Background Image Selection",
                 "bg_blur": "Background Blur", "bg_opacity": "Background Opacity"
             },
             ru: {
@@ -746,6 +755,7 @@
                 "monitor_status_active": "Мониторинг запущен", "monitor_status_inactive": "Мониторинг приостановлен",
                 "monitor_interval": "Интервал проверки (в секундах)", "monitored_paths": "Отслеживаемые папки",
                 "custom_image": "Своё изображение", "bg_image_path": "Путь к фону", "ph_bg_image_path": "Путь к картинке (например, bg.png)",
+                "bg_image_select": "Выбор фонового изображения",
                 "bg_blur": "Размытие фона", "bg_opacity": "Прозрачность фона"
             },
             es: {
@@ -774,12 +784,13 @@
                 "monitor_status_active": "Monitoreo Activo", "monitor_status_inactive": "Monitoreo Suspendido",
                 "monitor_interval": "Intervalo de comprobación (segundos)", "monitored_paths": "Carpetas Monitoreadas",
                 "custom_image": "Imagen Personalizada", "bg_image_path": "Ruta de la Imagen de Fondo", "ph_bg_image_path": "Ruta a la imagen (ej. bg.png)",
+                "bg_image_select": "Selección de Imagen de Fondo",
                 "bg_blur": "Desenfoque de Fondo", "bg_opacity": "Opacidad del Fondo"
             },
             zh: {
                 "core_engine": "分类器", "toggle_theme": "界面主题", "interface_language": "语言",
                 "nav_single": "单文件夹模式", "nav_multi": "多源汇总", "nav_dupes": "重复文件", "nav_settings": "设置", "nav_logs": "终端",
-                "single_title": "单空间工作区", "single_desc": "立即分发、排序和分类目录内容。", "workspace_folder": "工作区文件夹", "ph_single_path": "/home/user/Downloads",
+                "single_title": "单空间工作区", "single_desc": "立即分发、排序 and 分类目录内容。", "workspace_folder": "工作区文件夹", "ph_single_path": "/home/user/Downloads",
                 "sort_by_date": "按日期排序", "overwrite_conflicts": "覆盖冲突", "clean_empty": "清理空文件夹", "btn_start_single": "开始排序", "btn_reverse": "撤销操作",
                 "multi_title": "多源收集器", "multi_desc": "将不同文件夹的数据流汇总到目标池中。", "target_folder": "目标文件夹（目的地）", "ph_multi_target": "文件应该存放到哪里？",
                 "sources_origin": "源目录", "btn_add": "添加", "include_target": "包括目标文件夹（自排序）", "btn_start_multi": "汇聚源文件",
@@ -802,6 +813,7 @@
                 "monitor_status_active": "监控已激活", "monitor_status_inactive": "监控已挂起",
                 "monitor_interval": "检查间隔（秒）", "monitored_paths": "受监控的文件夹",
                 "custom_image": "自定义图片", "bg_image_path": "背景图片路径", "ph_bg_image_path": "图片路径 (例如 bg.png)",
+                "bg_image_select": "背景图片选择",
                 "bg_blur": "背景模糊", "bg_opacity": "背景透明度"
             },
             de: {
@@ -812,7 +824,7 @@
                 "multi_title": "Multi-Quellen-Sammler", "multi_desc": "Datenströme aus verschiedenen Ordnern in einem Ziel-Pool zusammenführen.", "target_folder": "Zielordner (Ziel)", "ph_multi_target": "Wohin sollen die Dateien verschoben werden?",
                 "sources_origin": "Quellen", "btn_add": "Hinzufügen", "include_target": "Zielordner einbeziehen (Selbstsortierung)", "btn_start_multi": "Quellen zusammenführen",
                 "dupes_title": "Hash-Duplikatsuche", "dupes_desc": "Führen Sie hardwarebeschleunigte MD5-Scans durch, um binäre Klone zu finden.", "folder_scan": "Zu analysierendes Verzeichnis", "ph_dupe_path": "/home/user/Dokumente",
-                "auto_dupes_desc": "Sofortige Löschung (Manuelle Auswahl überspringen)", "btn_start_scan": "Tiefenscan initialisieren", "select_to_delete": "Binäre Übereinstimmungsgruppen", "btn_delete_selected": "Ausgewählte Klone bereinigen",
+                "auto_dupes_desc": "Sofortige Löschung (Manuelle Auswahl überspringen)", "btn_start_scan": "Tiefenscan initialisieren", "select_to_delete": "Binäre Übereinstimmungsgruppen", "btn_delete_selected": "Ausgewählte Klone bereigen",
                 "group": "Gruppe", "files": "Dateien", "original_keep": "Original (Behalten)", "duplicate_delete": "Duplikat (Löschen)",
                 "settings_title": "Systemsteuerung", "settings_desc": "Passen Sie ästhetische Merkmale, Leistung und das Zuordnungswörterbuch an.", "global_toggles": "Betriebskern & Filter", "move_unknown": "Unbekannte isolieren",
                 "category_extensions": "Kategorie-Zuordnung", "btn_save_config": "Wörterbuch aktualisieren",
@@ -830,6 +842,7 @@
                 "monitor_status_active": "Überwachung aktiv", "monitor_status_inactive": "Überwachung ausgesetzt",
                 "monitor_interval": "Prüfintervall (Sekunden)", "monitored_paths": "Überwachte Ordner",
                 "custom_image": "Benutzerdefiniertes Bild", "bg_image_path": "Hintergrundbild-Pfad", "ph_bg_image_path": "Pfad zum Bild (z.B. bg.png)",
+                "bg_image_select": "Hintergrundbild-Auswahl",
                 "bg_blur": "Hintergrund-Unschärfe", "bg_opacity": "Hintergrund-Deckkraft"
             }
         };
@@ -1311,14 +1324,22 @@
         function updateBgImageLayer() {
             const imgLayer = document.getElementById('bgImageLayer');
             if (!imgLayer) return;
-            const path = document.getElementById('cfg_bg_image_path').value || 'bg.png';
+            const path = document.getElementById('cfg_bg_image_path').value || '';
             const blur = document.getElementById('cfg_bg_blur').value || 20;
             const opacity = (document.getElementById('cfg_bg_opacity').value || 40) / 100;
 
-            imgLayer.style.backgroundImage = `url('/api/bg?path=${encodeURIComponent(path)}&t=${Date.now()}')`;
-            imgLayer.style.filter = `blur(${blur}px)`;
-            imgLayer.style.opacity = opacity;
-            imgLayer.style.transform = 'scale(1.1)'; 
+            if (path) {
+                imgLayer.style.backgroundImage = `url('/api/bg?path=${encodeURIComponent(path)}&t=${Date.now()}')`;
+                imgLayer.style.filter = `blur(${blur}px)`;
+                imgLayer.style.opacity = opacity;
+                imgLayer.style.transform = 'scale(1.1)'; 
+                if (localStorage.getItem('bgStyle') === 'image') {
+                    imgLayer.classList.remove('hidden');
+                }
+            } else {
+                imgLayer.style.backgroundImage = 'none';
+                imgLayer.classList.add('hidden');
+            }
         }
 
         async function silentSaveConfig() {
@@ -1344,7 +1365,7 @@
                 monitor_interval_sec: parseFloat(document.getElementById('cfg_monitor_interval').value) || 5.0,
                 monitor_target: document.getElementById('monitorTarget').value,
                 bg_style: localStorage.getItem('bgStyle') || 'grid',
-                bg_image_path: document.getElementById('cfg_bg_image_path').value || 'bg.png',
+                bg_image_path: document.getElementById('cfg_bg_image_path').value || '',
                 bg_blur: parseInt(document.getElementById('cfg_bg_blur').value) || 20,
                 bg_opacity: parseInt(document.getElementById('cfg_bg_opacity').value) || 40
             };
@@ -1439,6 +1460,128 @@
             setTimeout(() => setGlowState('idle'), 4000);
         }
 
+        async function loadBackgroundsList() {
+            try {
+                const res = await fetch('/api/backgrounds');
+                if (!res.ok) throw new Error("Failed to fetch backgrounds");
+                const files = await res.json();
+                
+                // Sort alphabetically
+                files.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+                const select = document.getElementById('cfg_bg_image_path');
+                if (!select) return;
+
+                const currentVal = select.value;
+                
+                // Clear and always set None as the first option
+                select.innerHTML = '<option value="" class="bg-slate-900 text-slate-100 dark:bg-slate-950">None</option>';
+
+                files.forEach(file => {
+                    let val = file;
+                    if (!val.startsWith('bg/') && !val.includes('/') && !val.includes('\\')) {
+                        val = 'bg/' + val;
+                    }
+                    const displayName = file.includes('/') ? file.substring(file.lastIndexOf('/') + 1) : (file.includes('\\') ? file.substring(file.lastIndexOf('\\') + 1) : file);
+                    
+                    const opt = document.createElement('option');
+                    opt.value = val;
+                    opt.innerText = displayName;
+                    opt.className = 'bg-slate-900 text-slate-100 dark:bg-slate-950';
+                    select.appendChild(opt);
+                });
+
+                // Restore previous selection if valid, otherwise fallback to empty (None)
+                if (currentVal && files.some(f => {
+                    let checked = f;
+                    if (!checked.startsWith('bg/') && !checked.includes('/') && !checked.includes('\\')) {
+                        checked = 'bg/' + checked;
+                    }
+                    return checked === currentVal;
+                })) {
+                    select.value = currentVal;
+                } else {
+                    select.value = currentVal || "";
+                }
+            } catch (e) {
+                addLog("Failed to load background files from 'bg' directory.", "error");
+            }
+        }
+
+        function triggerBgUpload() {
+            document.getElementById('bgFileInput').click();
+        }
+
+        async function uploadBgImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                addLog(`Uploading new background: ${file.name}...`, "info");
+                const res = await fetch('/api/backgrounds/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (res.ok) {
+                    addLog(`Background uploaded successfully: ${file.name}`, "success");
+                    await loadBackgroundsList();
+                    const select = document.getElementById('cfg_bg_image_path');
+                    if (select) {
+                        for (let i = 0; i < select.options.length; i++) {
+                            if (select.options[i].value.endsWith(file.name)) {
+                                select.value = select.options[i].value;
+                                break;
+                            }
+                        }
+                        updateBgImageLayer();
+                        await silentSaveConfig();
+                    }
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    addLog(`Upload failed: ${errData.error || res.statusText}`, "error");
+                }
+            } catch (e) {
+                addLog("Network error during background upload.", "error");
+            } finally {
+                event.target.value = '';
+            }
+        }
+
+        async function deleteCurrentBg() {
+            const select = document.getElementById('cfg_bg_image_path');
+            if (!select) return;
+            const currentVal = select.value;
+            if (!currentVal) {
+                addLog("No background selected for deletion.", "error");
+                return;
+            }
+
+            const confirmMsg = currentLang === 'ru' ? `Удалить фоновое изображение "${currentVal}"?` : `Delete background image "${currentVal}"?`;
+            if (!confirm(confirmMsg)) return;
+
+            try {
+                addLog(`Deleting background: ${currentVal}...`, "info");
+                const res = await fetch(`/api/backgrounds?name=${encodeURIComponent(currentVal)}`, {
+                    method: 'DELETE'
+                });
+
+                if (res.ok) {
+                    addLog(`Background deleted successfully: ${currentVal}`, "success");
+                    await loadBackgroundsList();
+                    await silentSaveConfig();
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    addLog(`Deletion failed: ${errData.error || res.statusText}`, "error");
+                }
+            } catch (e) {
+                addLog("Network error during background deletion.", "error");
+            }
+        }
+
         async function loadConfig() {
             const res = await fetch('/api/config');
             const config = await res.json();
@@ -1467,8 +1610,24 @@
             document.getElementById('cfg_min_size').value = config.min_size_mb || 0;
             document.getElementById('cfg_max_size').value = config.max_size_mb || 0;
 
-            const bgImgPath = config.bg_image_path || 'bg.png';
-            document.getElementById('cfg_bg_image_path').value = bgImgPath;
+            await loadBackgroundsList();
+
+            const bgImgPath = config.bg_image_path !== undefined ? config.bg_image_path : '';
+            const bgSelect = document.getElementById('cfg_bg_image_path');
+            if (bgSelect) {
+                let hasOption = false;
+                for (let i = 0; i < bgSelect.options.length; i++) {
+                    if (bgSelect.options[i].value === bgImgPath) {
+                        hasOption = true;
+                        break;
+                    }
+                }
+                if (hasOption) {
+                    bgSelect.value = bgImgPath;
+                } else {
+                    bgSelect.value = "";
+                }
+            }
             
             const bgBlur = config.bg_blur !== undefined ? config.bg_blur : 20;
             document.getElementById('cfg_bg_blur').value = bgBlur;
