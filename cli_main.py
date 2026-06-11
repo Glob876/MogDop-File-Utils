@@ -81,15 +81,24 @@ def main():
                               help="Что конвертировать (для режима 'convert'): @images, @video, @audio, расширение (.bmp) или файл")
     config_group.add_argument("--conv-output", type=str, metavar="OUTPUT",
                               help="Целевой формат для конвертации (для режима 'convert'): png, jpg, mp4, mp3")
-    
-    parser.add_argument("conv_args", nargs="*", metavar="CONV_ARGS",
-                        help="Дополнительные позиционные параметры для режима 'convert' (входной тип и целевой формат)")
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(0)
         
-    args = parser.parse_args()
+    args, remaining = parser.parse_known_args()
+    
+    # Отлавливаем непредвиденные флаги (начинающиеся с '-') для сохранения стандартного поведения при ошибках
+    unrecognized_opts = [arg for arg in remaining if arg.startswith('-')]
+    if unrecognized_opts:
+        parser.error(f"unrecognized arguments: {' '.join(unrecognized_opts)}")
+        
+    # Извлекаем оставшиеся позиционные аргументы, которые не являются опциями
+    positional_remaining = [arg for arg in remaining if not arg.startswith('-')]
+    
+    # Если режим работы не 'convert', но переданы лишние позиционные аргументы, сообщаем об ошибке
+    if args.mode != "convert" and positional_remaining:
+        parser.error(f"unrecognized arguments: {' '.join(positional_remaining)}")
     
     core = FileSorterCore()
     
@@ -203,11 +212,11 @@ def main():
         conv_input = None
         conv_output = None
         
-        if args.conv_args:
-            if len(args.conv_args) >= 1:
-                conv_input = args.conv_args[0]
-            if len(args.conv_args) >= 2:
-                conv_output = args.conv_args[1]
+        if positional_remaining:
+            if len(positional_remaining) >= 1:
+                conv_input = positional_remaining[0]
+            if len(positional_remaining) >= 2:
+                conv_output = positional_remaining[1]
                 
         if not conv_input:
             conv_input = args.conv_input
