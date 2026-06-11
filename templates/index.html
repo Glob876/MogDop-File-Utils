@@ -556,9 +556,22 @@
                                     <div>
                                         <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-2" data-i18n="bg_image_select">Background Image Selection</label>
                                         <div class="flex gap-2">
-                                            <select id="cfg_bg_image_path" class="flex-1 input-premium rounded-xl px-3 py-2 text-xs outline-none bg-slate-100 dark:bg-black/25" onchange="updateBgImageLayer(); silentSaveConfig();">
-                                                <option value="" class="bg-slate-900 text-white">None</option>
-                                            </select>
+                                            <!-- Custom Dropdown Container -->
+                                            <div class="relative flex-1" id="customBgDropdown">
+                                                <button type="button" onclick="toggleCustomBgDropdown()" id="customBgDropdownBtn" class="w-full flex items-center justify-between input-premium rounded-xl px-4 py-2.5 text-xs outline-none bg-slate-100 dark:bg-black/25 text-left h-full min-h-[44px]">
+                                                    <span class="flex items-center gap-2 truncate" id="customBgSelectedText">
+                                                        <i data-lucide="image" class="w-4 h-4 text-slate-400 shrink-0"></i>
+                                                        <span>None</span>
+                                                    </span>
+                                                    <i data-lucide="chevron-down" id="customBgDropdownArrow" class="w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0"></i>
+                                                </button>
+                                                <input type="hidden" id="cfg_bg_image_path" value="">
+                                                
+                                                <div id="customBgDropdownList" class="absolute left-0 right-0 mt-1.5 hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar select-none animate__animated animate__fadeIn">
+                                                    <!-- Dynamic Options -->
+                                                </div>
+                                            </div>
+
                                             <button onclick="triggerBgUpload()" class="bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 px-3.5 py-2 rounded-xl transition text-xs font-bold flex items-center justify-center shrink-0" title="Upload background">
                                                 <i data-lucide="upload" class="w-4 h-4"></i>
                                             </button>
@@ -864,6 +877,7 @@
         let isProcessingQueue = false;
         let categoryExtensionsState = {};
         let activeInputTargetId = null; 
+        let backgroundsArray = [];
 
         function escapeHtml(text) {
             if (typeof text !== 'string') return text;
@@ -1467,6 +1481,93 @@
             setTimeout(() => setGlowState('idle'), 4000);
         }
 
+        // --- CUSTOM DROPDOWN SYSTEM ---
+        function toggleCustomBgDropdown() {
+            const dropdown = document.getElementById('customBgDropdown');
+            const list = document.getElementById('customBgDropdownList');
+            const arrow = document.getElementById('customBgDropdownArrow');
+            if (list && dropdown) {
+                const isHidden = list.classList.contains('hidden');
+                const parentCard = dropdown.closest('.glass-panel');
+                
+                if (isHidden) {
+                    list.classList.remove('hidden');
+                    if (arrow) arrow.classList.add('rotate-180');
+                    if (parentCard) {
+                        parentCard.classList.add('relative', 'z-30');
+                    }
+                } else {
+                    list.classList.add('hidden');
+                    if (arrow) arrow.classList.remove('rotate-180');
+                    if (parentCard) {
+                        parentCard.classList.remove('relative', 'z-30');
+                    }
+                }
+            }
+        }
+
+        // Close on click outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('customBgDropdown');
+            const list = document.getElementById('customBgDropdownList');
+            const arrow = document.getElementById('customBgDropdownArrow');
+            if (dropdown && !dropdown.contains(e.target)) {
+                if (list) list.classList.add('hidden');
+                if (arrow) arrow.classList.remove('rotate-180');
+                
+                const parentCard = dropdown.closest('.glass-panel');
+                if (parentCard) {
+                    parentCard.classList.remove('relative', 'z-30');
+                }
+            }
+        });
+
+        function selectBgImage(val, preventSave = false) {
+            const hiddenInput = document.getElementById('cfg_bg_image_path');
+            const selectedText = document.getElementById('customBgSelectedText');
+            const list = document.getElementById('customBgDropdownList');
+            const arrow = document.getElementById('customBgDropdownArrow');
+            const dropdown = document.getElementById('customBgDropdown');
+            
+            if (hiddenInput) {
+                hiddenInput.value = val;
+            }
+
+            if (selectedText) {
+                if (val === '') {
+                    selectedText.innerHTML = `
+                        <i data-lucide="image" class="w-4 h-4 text-slate-400 shrink-0"></i>
+                        <span>None</span>
+                    `;
+                } else {
+                    const displayName = val.includes('/') ? val.substring(val.lastIndexOf('/') + 1) : (val.includes('\\') ? val.substring(val.lastIndexOf('\\') + 1) : val);
+                    const thumbUrl = `/api/bg?path=${encodeURIComponent(val)}`;
+                    selectedText.innerHTML = `
+                        <div class="w-5 h-5 rounded bg-cover bg-center border border-slate-200 dark:border-white/10 shrink-0" style="background-image: url('${thumbUrl}')"></div>
+                        <span class="truncate font-medium">${escapeHtml(displayName)}</span>
+                    `;
+                }
+                lucide.createIcons();
+            }
+
+            if (list) list.classList.add('hidden');
+            if (arrow) arrow.classList.remove('rotate-180');
+            
+            if (dropdown) {
+                const parentCard = dropdown.closest('.glass-panel');
+                if (parentCard) {
+                    parentCard.classList.remove('relative', 'z-30');
+                }
+            }
+
+            updateBgImageLayer();
+            renderCustomBgDropdownList(); 
+            
+            if (!preventSave) {
+                silentSaveConfig();
+            }
+        }
+
         async function loadBackgroundsList() {
             try {
                 const res = await fetch('/api/backgrounds');
@@ -1476,43 +1577,55 @@
                 // Sort alphabetically
                 files.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
-                const select = document.getElementById('cfg_bg_image_path');
-                if (!select) return;
-
-                const currentVal = select.value;
-                
-                // Clear and always set None as the first option
-                select.innerHTML = '<option value="" class="bg-slate-900 text-slate-100 dark:bg-slate-950">None</option>';
-
-                files.forEach(file => {
+                backgroundsArray = files.map(file => {
                     let val = file;
                     if (!val.startsWith('bg/') && !val.includes('/') && !val.includes('\\')) {
                         val = 'bg/' + val;
                     }
-                    const displayName = file.includes('/') ? file.substring(file.lastIndexOf('/') + 1) : (file.includes('\\') ? file.substring(file.lastIndexOf('\\') + 1) : file);
-                    
-                    const opt = document.createElement('option');
-                    opt.value = val;
-                    opt.innerText = displayName;
-                    opt.className = 'bg-slate-900 text-slate-100 dark:bg-slate-950';
-                    select.appendChild(opt);
+                    return {
+                        value: val,
+                        name: file.includes('/') ? file.substring(file.lastIndexOf('/') + 1) : (file.includes('\\') ? file.substring(file.lastIndexOf('\\') + 1) : file)
+                    };
                 });
 
-                // Restore previous selection if valid, otherwise fallback to empty (None)
-                if (currentVal && files.some(f => {
-                    let checked = f;
-                    if (!checked.startsWith('bg/') && !checked.includes('/') && !checked.includes('\\')) {
-                        checked = 'bg/' + checked;
-                    }
-                    return checked === currentVal;
-                })) {
-                    select.value = currentVal;
-                } else {
-                    select.value = currentVal || "";
-                }
+                renderCustomBgDropdownList();
             } catch (e) {
                 addLog("Failed to load background files from 'bg' directory.", "error");
             }
+        }
+
+        function renderCustomBgDropdownList() {
+            const list = document.getElementById('customBgDropdownList');
+            if (!list) return;
+
+            const currentVal = document.getElementById('cfg_bg_image_path').value || '';
+
+            let html = `
+                <div onclick="selectBgImage('')" class="flex items-center justify-between px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer transition text-xs ${currentVal === '' ? 'bg-slate-50 dark:bg-white/5 font-bold text-accent' : 'text-slate-600 dark:text-slate-300'}">
+                    <span class="flex items-center gap-2">
+                        <i data-lucide="image" class="w-4 h-4 text-slate-400 shrink-0"></i>
+                        <span>None</span>
+                    </span>
+                    ${currentVal === '' ? '<i data-lucide="check" class="w-4 h-4 text-accent shrink-0"></i>' : ''}
+                </div>
+            `;
+
+            backgroundsArray.forEach(item => {
+                const thumbUrl = `/api/bg?path=${encodeURIComponent(item.value)}`;
+                const isSelected = item.value === currentVal;
+                html += `
+                    <div onclick="selectBgImage('${item.value.replace(/'/g, "\\'")}')" class="flex items-center justify-between px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer transition text-xs ${isSelected ? 'bg-slate-50 dark:bg-white/5 font-bold text-accent' : 'text-slate-600 dark:text-slate-300'}">
+                        <span class="flex items-center gap-3 truncate">
+                            <div class="w-6 h-6 rounded bg-cover bg-center border border-slate-200 dark:border-white/10 shrink-0" style="background-image: url('${thumbUrl}')"></div>
+                            <span class="truncate">${escapeHtml(item.name)}</span>
+                        </span>
+                        ${isSelected ? '<i data-lucide="check" class="w-4 h-4 text-accent shrink-0"></i>' : ''}
+                    </div>
+                `;
+            });
+
+            list.innerHTML = html;
+            lucide.createIcons();
         }
 
         function triggerBgUpload() {
@@ -1536,16 +1649,13 @@
                 if (res.ok) {
                     addLog(`Background uploaded successfully: ${file.name}`, "success");
                     await loadBackgroundsList();
-                    const select = document.getElementById('cfg_bg_image_path');
-                    if (select) {
-                        for (let i = 0; i < select.options.length; i++) {
-                            if (select.options[i].value.endsWith(file.name)) {
-                                select.value = select.options[i].value;
-                                break;
-                            }
-                        }
-                        updateBgImageLayer();
-                        await silentSaveConfig();
+                    
+                    const uploadedPath = `bg/${file.name}`;
+                    const found = backgroundsArray.find(item => item.value.endsWith(file.name));
+                    if (found) {
+                        selectBgImage(found.value);
+                    } else {
+                        selectBgImage(uploadedPath);
                     }
                 } else {
                     const errData = await res.json().catch(() => ({}));
@@ -1559,9 +1669,9 @@
         }
 
         async function deleteCurrentBg() {
-            const select = document.getElementById('cfg_bg_image_path');
-            if (!select) return;
-            const currentVal = select.value;
+            const hiddenInput = document.getElementById('cfg_bg_image_path');
+            if (!hiddenInput) return;
+            const currentVal = hiddenInput.value;
             if (!currentVal) {
                 addLog("No background selected for deletion.", "error");
                 return;
@@ -1578,8 +1688,8 @@
 
                 if (res.ok) {
                     addLog(`Background deleted successfully: ${currentVal}`, "success");
+                    selectBgImage('');
                     await loadBackgroundsList();
-                    await silentSaveConfig();
                 } else {
                     const errData = await res.json().catch(() => ({}));
                     addLog(`Deletion failed: ${errData.error || res.statusText}`, "error");
@@ -1620,21 +1730,7 @@
             await loadBackgroundsList();
 
             const bgImgPath = config.bg_image_path !== undefined ? config.bg_image_path : '';
-            const bgSelect = document.getElementById('cfg_bg_image_path');
-            if (bgSelect) {
-                let hasOption = false;
-                for (let i = 0; i < bgSelect.options.length; i++) {
-                    if (bgSelect.options[i].value === bgImgPath) {
-                        hasOption = true;
-                        break;
-                    }
-                }
-                if (hasOption) {
-                    bgSelect.value = bgImgPath;
-                } else {
-                    bgSelect.value = "";
-                }
-            }
+            selectBgImage(bgImgPath, true);
             
             const bgBlur = config.bg_blur !== undefined ? config.bg_blur : 20;
             document.getElementById('cfg_bg_blur').value = bgBlur;
