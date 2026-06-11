@@ -45,27 +45,30 @@ def index():
 @app.route('/api/bg')
 def get_custom_bg():
     """Route serving the custom background image safely with multiple path fallbacks."""
-    path = request.args.get('path', 'bg.png')
+    path = request.args.get('path', '')
     if not path:
         path = 'bg.png'
         
-    # 1. Check if the path exists directly relative to the current working directory
-    abs_path = os.path.abspath(path)
-    if os.path.exists(abs_path) and os.path.isfile(abs_path):
-        return send_from_directory(os.path.dirname(abs_path), os.path.basename(abs_path))
-        
-    # 2. Check relative to the script's directory
-    script_path = os.path.join(base_dir, path)
-    if os.path.exists(script_path) and os.path.isfile(script_path):
-        return send_from_directory(os.path.dirname(script_path), os.path.basename(script_path))
-        
-    # 3. Check inside the 'bg' directory (base_dir or cwd)
-    for bg_parent in [os.path.join(base_dir, 'bg'), os.path.join(os.getcwd(), 'bg')]:
-        fallback_path = os.path.join(bg_parent, os.path.basename(path))
-        if os.path.exists(fallback_path) and os.path.isfile(fallback_path):
-            return send_from_directory(bg_parent, os.path.basename(path))
-        
-    # 4. Final fallback to root bg.png
+    # Normalize path and get base filename
+    filename = os.path.basename(path.replace('\\', '/'))
+    
+    # Directories to search for the background image
+    search_dirs = [
+        get_bg_dir(),
+        os.path.join(base_dir, 'bg'),
+        os.path.join(os.getcwd(), 'bg'),
+        base_dir,
+        os.getcwd()
+    ]
+    
+    for directory in search_dirs:
+        if not directory or not os.path.exists(directory):
+            continue
+        full_path = os.path.join(directory, filename)
+        if os.path.exists(full_path) and os.path.isfile(full_path):
+            return send_from_directory(directory, filename)
+            
+    # Fallback to root bg.png
     root_bg = os.path.join(base_dir, 'bg.png')
     if os.path.exists(root_bg):
         return send_from_directory(base_dir, 'bg.png')

@@ -47,12 +47,19 @@
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             transition: background-color 0.5s ease, color 0.5s ease;
+            position: relative;
+            z-index: 0;
+            background-color: transparent !important;
+        }
+
+        #bgImageLayer {
+            z-index: -2 !important;
         }
 
         .bg-mesh {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
+            z-index: -3 !important;
             transition: all 0.8s ease, opacity 0.8s ease;
         }
         .dark .bg-mesh {
@@ -72,7 +79,7 @@
         .bg-grid-pattern {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
+            z-index: -1 !important;
             background-size: 40px 40px;
             opacity: 0.15;
             transition: opacity 0.5s ease;
@@ -181,7 +188,7 @@
 </head>
 
 <body class="text-slate-800 dark:text-slate-100 min-h-screen overflow-hidden flex bg-transparent">
-    <div id="bgImageLayer" class="fixed inset-0 z-[-1] bg-cover bg-center transition-all duration-300 hidden"></div>
+    <div id="bgImageLayer" class="fixed inset-0 bg-cover bg-center transition-all duration-300 hidden"></div>
     <div class="bg-mesh"></div>
     <div class="bg-grid-pattern" id="bgGrid"></div>
 
@@ -776,7 +783,7 @@
                 "dynamic_gradient": "Gradiente Dinámico", "cyber_grid": "Rejilla Cyber", "simulation_mode": "Modo Simulación (Dry Run)",
                 "simulation_desc": "Previsualizar cambios sin escribir en el disco", "ignore_hidden": "Ignorar Archivos Ocultos",
                 "ignore_hidden_desc": "Omitir directorios y rutas de archivos ocultos del sistema", "skip_hidden_dupes": "Omitir duplicados ocultos",
-                "size_filters": "Filtros de Tamaño (MB)", "min_size_label": "Tamaño Mín (0=Ninguno)", "max_size_label": "Tamaño Máx (0=Ninguno)",
+                "size_filters": "Filtros de Tamaño (MB)", "min_size_label": "Tamaño Mín (0=Seguidor)", "max_size_label": "Tamaño Máx (0=Seguidor)",
                 "aesthetic_customizer": "Personalizador Estético",
                 "nav_monitor": "Monitoreo", "monitor_title": "Monitoreo de Carpetas en Tiempo Real", "monitor_desc": "Clasifique automáticamente los archivos entrantes en los directorios monitoreados.",
                 "beta_warning_title": "ADVERTENCIA DE FUNCIÓN BETA", "beta_warning_desc": "El monitoreo de carpetas está en fase BETA. Se ejecuta como un proceso de fondo. Asegúrese de realizar copias de seguridad de sus archivos importantes.",
