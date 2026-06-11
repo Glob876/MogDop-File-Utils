@@ -6,6 +6,7 @@ from datetime import datetime
 import threading
 import time
 import re
+import subprocess
 
 MONTHS_EN = {
     1: "January", 2: "February", 3: "March", 4: "April", 5: "May", 6: "June", 
@@ -650,3 +651,148 @@ class FileSorterCore:
 
         yield "stats_data", stats_summary
         yield "success", f"Statistics generation completed for {path}."
+
+    def convert_files_generator(self, path, conv_input, conv_output):
+        if not path or not os.path.exists(path):
+            yield "error", "Specified path not found!"
+            return
+            
+        if not conv_input or not conv_output:
+            yield "error", "Both input type/file and target format must be specified!"
+            return
+
+        ffmpeg_path = shutil.which("ffmpeg")
+        if not ffmpeg_path:
+            yield "error", "ffmpeg was not found in system PATH. Please install ffmpeg and make sure it is in PATH."
+            return
+
+        target_ext = conv_output.strip().lower().lstrip('.')
+        with self.config_lock:
+            overwrite = self.config.get("overwrite", False)
+            dry_run_mode = self.config.get("dry_run", False)
+            
+        prefix = "[SIMULATION] " if dry_run_mode else ""
+        yield "info", f"{prefix}Searching files for conversion matching '{conv_input}' to '{target_ext}' in: {path}"
+        self._write_log(f"Starting conversion process in {path} (input: {conv_input}, output: {target_ext})")
+
+        files_to_convert = []
+        
+        direct_file = None
+        if os.path.isfile(conv_input):
+            direct_file = conv_input
+        elif os.path.isfile(os.path.join(path, conv_input)):
+            direct_file = os.path.join(path, conv_input)
+            
+        if direct_file:
+            files_to_convert.append(direct_file)
+        else:
+            target_exts = set()
+            conv_input_lower = conv_input.lower().strip()
+            
+            if conv_input_lower == "@images":
+                exts_str = self.config.get("extensions", {}).get("Images", "")
+                target_exts = {e.strip().lower() for e in exts_str.split(",") if e.strip()}
+            elif conv_input_lower in ("@video", "@videos"):
+                exts_str = self.config.get("extensions", {}).get("Video", "")
+                target_exts = {e.strip().lower() for e in exts_str.split(",") if e.strip()}
+            elif conv_input_lower in ("@audio", "@music"):
+                exts_str = self.config.get("extensions", {}).get("Music", "")
+                target_exts = {e.strip().lower() for e in exts_str.split(",") if e.strip()}
+            else:
+                clean_ext = conv_input_lower
+                if not clean_ext.startswith('.'):
+                    clean_ext = '.' + clean_ext
+                target_exts = {clean_ext}
+                
+            target_exts = {e if e.startswith('.') else '.' + e for e in target_exts}
+            
+            recursive_sort = self.config.get("recursive_sort", False)
+            ignore_hidden = self.config.get("ignore_hidden", True)
+            
+            if recursive_sort:
+                for root, dirs, files in os.walk(path):
+                    if ignore_hidden:
+                        dirs[:] = [d for d in dirs if not d.startswith('.')]
+                    for f in files:
+                        if ignore_hidden and f.startswith('.'):
+                            continue
+                        ext = os.path.splitext(f)[1].lower()
+                        if ext in target_exts:
+                            files_to_convert.append(os.path.join(root, f))
+            else:
+                try:
+                    for f in os.listdir(path):
+                        if ignore_hidden and f.startswith('.'):
+                            continue
+                        fp = os.path.join(path, f)
+                        if os.path.isfile(fp):
+                            ext = os.path.splitext(f)[1].lower()
+                            if ext in target_exts:
+                                files_to_convert.append(fp)
+                except Exception as e:
+                    yield "error", f"Failed to scan directory: {str(e)}"
+                    return
+
+        total = len(files_to_convert)
+        if total == 0:
+            yield "skip", f"No matching files found to convert in: {path}"
+            yield "success", "No files to convert."
+            self._write_log(f"Conversion completed: No matching files found in {path}")
+            return
+
+        yield "info", f"Found {total} files matching '{conv_input}'"
+        
+        count = 0
+        for i, fp in enumerate(files_to_convert):
+            yield "progress", {"current": i + 1, "total": total}
+            
+            dir_name = os.path.dirname(fp)
+            base_name = os.path.splitext(os.path.basename(fp))[0]
+            src_ext = os.path.splitext(fp)[1].lower().lstrip('.')
+            
+            if src_ext == target_ext:
+                yield "skip", f"Already in target format: {os.path.basename(fp)}"
+                continue
+                
+            dest_path = os.path.join(dir_name, f"{base_name}.{target_ext}")
+            
+            if os.path.exists(dest_path):
+                if overwrite:
+                    pass
+                else:
+                    counter = 1
+                    while os.path.exists(dest_path):
+                        dest_path = os.path.join(dir_name, f"{base_name}_{counter}.{target_ext}")
+                        counter += 1
+                    yield "conflict", f"Target file already exists. Renamed output to: {os.path.basename(dest_path)}"
+
+            try:
+                if not dry_run_mode:
+                    cmd = [ffmpeg_path, "-y", "-i", fp, dest_path]
+                    
+                    startupinfo = None
+                    if os.name == 'nt':
+                        startupinfo = subprocess.STARTUPINFO()
+                        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                        
+                    subprocess.run(
+                        cmd,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                        startupinfo=startupinfo,
+                        check=True
+                    )
+                count += 1
+                yield "move", f"{prefix}Converted: {os.path.basename(fp)} -> {os.path.basename(dest_path)}"
+                self._write_log(f"{prefix}Converted: {fp} -> {dest_path}")
+            except subprocess.CalledProcessError as e:
+                err_msg = e.stderr.strip() if e.stderr else "Subprocess returned non-zero exit status."
+                yield "error", f"FFmpeg conversion error for {os.path.basename(fp)}: {err_msg}"
+                self._write_log(f"FFmpeg conversion error for {fp} to {dest_path}: {err_msg}")
+            except Exception as e:
+                yield "error", f"Error converting {os.path.basename(fp)}: {str(e)}"
+                self._write_log(f"Error converting {fp} to {dest_path}: {str(e)}")
+
+        yield "success", f"{prefix}Conversion completed! Successfully processed {count} files."
+        self._write_log(f"{prefix}Conversion completed. Processed {count}/{total} files.")

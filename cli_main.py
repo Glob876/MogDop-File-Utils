@@ -12,7 +12,7 @@ init(autoreset=True)
 def main():
     parser = argparse.ArgumentParser(
         description=f"{Fore.CYAN}{Style.BRIGHT}MogDop File Utils - Core Engine CLI{Style.RESET_ALL}\n"
-                    f"Консольный инструмент для автоматической сортировки, извлечения и поиска дубликатов файлов.",
+                    f"Консольный инструмент для автоматической сортировки, извлечения, поиска дубликатов и конвертации файлов.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=f"""
 {Fore.YELLOW}Примеры использования:{Style.RESET_ALL}
@@ -39,24 +39,30 @@ def main():
 
   {Fore.GREEN}8. Постоянный фоновый мониторинг каталогов в реальном времени (BETA):{Style.RESET_ALL}
      python cli_main.py monitor -s /src1 /src2 -t /target_folder
+
+  {Fore.GREEN}9. Пакетная конвертация всех картинок в папке в формат png через FFmpeg:{Style.RESET_ALL}
+     python cli_main.py convert -p /path/to/folder @images png
+
+  {Fore.GREEN}10. Конвертация файлов определенного формата (например, wav в mp3):{Style.RESET_ALL}
+     python cli_main.py convert -p /path/to/folder .wav mp3
 """
     )
     
     mode_group = parser.add_argument_group(f"{Fore.MAGENTA}Режимы работы (выберите один){Style.RESET_ALL}")
-    mode_group.add_argument("mode", choices=["single", "multi", "unsort", "dupes", "monitor", "rollback", "stats"], 
+    mode_group.add_argument("mode", choices=["single", "multi", "unsort", "dupes", "monitor", "rollback", "stats", "convert"], 
                         help="Режим работы программы")
     
     path_group = parser.add_argument_group(f"{Fore.MAGENTA}Настройка путей{Style.RESET_ALL}")
     path_group.add_argument("-p", "--path", type=str, metavar="PATH",
-                        help="Путь к целевой папке (для режимов 'single', 'unsort', 'dupes', 'monitor' и 'stats')")
+                        help="Путь к целевой папке (для режимов 'single', 'unsort', 'dupes', 'monitor', 'stats' и 'convert')")
     path_group.add_argument("-t", "--target", type=str, metavar="TARGET",
                         help="Путь к результирующей папке (для режимов 'multi' и 'monitor')")
     path_group.add_argument("-s", "--sources", type=str, nargs="+", metavar="SOURCES",
                         help="Список исходных папок через пробел (для режимов 'multi' и 'monitor')")
     
-    config_group = parser.add_argument_group(f"{Fore.MAGENTA}Параметры сортировки{Style.RESET_ALL}")
+    config_group = parser.add_argument_group(f"{Fore.MAGENTA}Параметры работы и фильтрации{Style.RESET_ALL}")
     config_group.add_argument("-r", "--recursive", action="store_true",
-                              help="Рекурсивно искать и перемещать файлы из всех вложенных папок")
+                              help="Рекурсивно искать и обрабатывать файлы во всех вложенных папках")
     config_group.add_argument("--date-sort", action="store_true", 
                               help="Дополнительно сортировать файлы во вложенные папки Год/Месяц")
     config_group.add_argument("--clean-empty", action="store_true", 
@@ -71,7 +77,14 @@ def main():
                               help="Отключить запись операций в файл логов")
     config_group.add_argument("--interval", type=float, default=5.0,
                               help="Интервал проверки в секундах для режима 'monitor' (по умолчанию: 5)")
+    config_group.add_argument("--conv-input", type=str, metavar="INPUT",
+                              help="Что конвертировать (для режима 'convert'): @images, @video, @audio, расширение (.bmp) или файл")
+    config_group.add_argument("--conv-output", type=str, metavar="OUTPUT",
+                              help="Целевой формат для конвертации (для режима 'convert'): png, jpg, mp4, mp3")
     
+    parser.add_argument("conv_args", nargs="*", metavar="CONV_ARGS",
+                        help="Дополнительные позиционные параметры для режима 'convert' (входной тип и целевой формат)")
+
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(0)
@@ -139,7 +152,7 @@ def main():
                 elif e_type == "skip":
                     color_prefix = f"{Style.DIM}[SKIP] "
                 elif e_type == "move":
-                    color_prefix = f"{Fore.GREEN}[MOVE] "
+                    color_prefix = f"{Fore.GREEN}[ACTION] "
                 else:
                     color_prefix = f"{Fore.CYAN}[INFO] "
                 
@@ -181,6 +194,32 @@ def main():
             print(f"{Fore.RED}[ERROR] Аргумент --path (-p) обязателен для режима stats.{Style.RESET_ALL}")
             return
         process_generator(core.generate_stats_generator(args.path))
+
+    elif args.mode == "convert":
+        if not args.path:
+            print(f"{Fore.RED}[ERROR] Аргумент --path (-p) обязателен для режима convert.{Style.RESET_ALL}")
+            return
+            
+        conv_input = None
+        conv_output = None
+        
+        if args.conv_args:
+            if len(args.conv_args) >= 1:
+                conv_input = args.conv_args[0]
+            if len(args.conv_args) >= 2:
+                conv_output = args.conv_args[1]
+                
+        if not conv_input:
+            conv_input = args.conv_input
+        if not conv_output:
+            conv_output = args.conv_output
+            
+        if not conv_input or not conv_output:
+            print(f"{Fore.RED}[ERROR] Необходимо указать входящие файлы/тип (например, @images) и исходящий формат (например, png).{Style.RESET_ALL}")
+            print(f"Пример: {Fore.GREEN}python cli_main.py convert -p /path @images png{Style.RESET_ALL}")
+            return
+            
+        process_generator(core.convert_files_generator(args.path, conv_input, conv_output))
             
     elif args.mode == "monitor":
         print(f"\n{Fore.YELLOW}{Style.BRIGHT}[ВНИМАНИЕ] Функция автоматического мониторинга папок запущена в режиме BETA! Пожалуйста, сделайте резервную копию важных файлов.{Style.RESET_ALL}")
