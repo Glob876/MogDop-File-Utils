@@ -195,6 +195,29 @@ def stream_action():
 
     return Response(stream_with_context(format_sse(event_generator())), content_type='text/event-stream')
 
+@app.route('/api/convert', methods=['POST'])
+def convert_file():
+    """Endpoint for file conversion using ffmpeg."""
+    data = request.json
+    input_path = data.get('input_path')
+    output_path = data.get('output_path')
+    format = data.get('format')
+    
+    if not input_path or not output_path or not format:
+        return jsonify({"error": "Missing parameters"}), 400
+        
+    try:
+        # Construct ffmpeg command
+        cmd = ['ffmpeg', '-y', '-i', input_path, output_path]
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if proc.returncode == 0:
+            return jsonify({"status": "success", "message": "Conversion completed"})
+        else:
+            return jsonify({"error": f"FFmpeg error: {proc.stderr}"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/dupes/delete', methods=['POST'])
 def delete_dupes():
     files = request.json.get('files', [])

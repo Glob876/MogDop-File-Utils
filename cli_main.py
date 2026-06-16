@@ -769,10 +769,9 @@ class FileSorterCore:
             try:
                 if not dry_run_mode:
                     cmd = [ffmpeg_path, "-y", "-i", fp]
-                    if target_ext in ('png', 'jpg', 'jpeg', 'bmp', 'tiff', 'ico'):
+                    if target_ext in ("png", "jpg", "jpeg", "bmp", "tiff", "ico"):
                         cmd.extend(["-frames:v", "1"])
                     cmd.append(dest_path)
-                    
                     startupinfo = None
                     if os.name == 'nt':
                         startupinfo = subprocess.STARTUPINFO()

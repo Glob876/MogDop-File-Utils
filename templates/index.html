@@ -232,6 +232,9 @@
                 <button onclick="showTab('monitor')" id="nav-monitor" class="sidebar-item w-full flex items-center gap-4 px-5 py-4 text-sm font-semibold rounded-2xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                     <i data-lucide="eye" class="w-5 h-5"></i> <span data-i18n="nav_monitor">Folder Monitor</span>
                 </button>
+                <button onclick="showTab('convert')" id="nav-convert" class="sidebar-item w-full flex items-center gap-4 px-5 py-4 text-sm font-semibold rounded-2xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                    <i data-lucide="file-type" class="w-5 h-5"></i> <span data-i18n="nav_convert">Converter</span>
+                </button>
                 <div class="border-t border-slate-200 dark:border-white/5 my-4 mx-4"></div>
                 <button onclick="showTab('settings')" id="nav-settings" class="sidebar-item w-full flex items-center gap-4 px-5 py-4 text-sm font-semibold rounded-2xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                     <i data-lucide="sliders" class="w-5 h-5"></i> <span data-i18n="nav_settings">Settings</span>
@@ -508,6 +511,32 @@
                         </div>
                     </section>
 
+                    <section id="tab-convert" class="tab-content">
+                        <header class="mb-8">
+                            <h2 class="text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white" data-i18n="convert_title">FFmpeg Converter</h2>
+                            <p class="text-slate-500 mt-2 text-sm lg:text-base" data-i18n="convert_desc">Convert files between formats using FFmpeg.</p>
+                        </header>
+
+                        <div class="glow-transition glow-rainbow-idle glass-panel rounded-3xl p-8 lg:p-10 space-y-6">
+                            <div>
+                                <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-3">Input File Path</label>
+                                <input type="text" id="convInput" class="w-full input-premium rounded-2xl px-5 py-4 text-sm outline-none" placeholder="/path/to/input/file">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-3">Output File Path</label>
+                                <input type="text" id="convOutput" class="w-full input-premium rounded-2xl px-5 py-4 text-sm outline-none" placeholder="/path/to/output/file">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-3">Format</label>
+                                <input type="text" id="convFormat" class="w-full input-premium rounded-2xl px-5 py-4 text-sm outline-none" placeholder="mp4, mp3, webp...">
+                            </div>
+                            <button onclick="runConvert()" class="w-full bg-accent-gradient text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-wider shadow-lg hover:opacity-95 transition flex justify-center items-center gap-2">
+                                <i data-lucide="play" class="w-5 h-5"></i> <span>Convert</span>
+                            </button>
+                            <div id="convLog" class="hidden p-4 bg-slate-900/90 dark:bg-black/40 rounded-2xl border border-slate-200 dark:border-white/5 font-mono text-[11px] h-32 overflow-y-auto space-y-1"></div>
+                        </div>
+                    </section>
+
                     <section id="tab-settings" class="tab-content">
                         <header class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                             <div>
@@ -741,6 +770,7 @@
                 "size_filters": "Size Filters (MB)", "min_size_label": "Min Size (0=None)", "max_size_label": "Max Size (0=None)",
                 "aesthetic_customizer": "Aesthetic customizer",
                 "nav_monitor": "Folder Monitor", "monitor_title": "Real-time Folder Monitor", "monitor_desc": "Automatically sort incoming files in monitored directories in real-time.",
+                "nav_convert": "Converter", "convert_title": "FFmpeg Converter", "convert_desc": "Convert files between formats using FFmpeg.",
                 "beta_warning_title": "BETA FEATURE WARNING", "beta_warning_desc": "Folder monitoring is currently in BETA. It runs as a background process and may consume disk I/O. Please make sure to back up important files.",
                 "btn_start_monitor": "Enable Live Monitoring", "btn_stop_monitor": "Disable Live Monitoring",
                 "monitor_status_active": "Monitoring Active", "monitor_status_inactive": "Monitoring Suspended",
@@ -770,6 +800,7 @@
                 "size_filters": "Фильтрация размера (МБ)", "min_size_label": "Мин. размер (0=выкл)", "max_size_label": "Макс. размер (0=выкл)",
                 "aesthetic_customizer": "Кастомизация дизайна",
                 "nav_monitor": "Мониторинг папок", "monitor_title": "Мониторинг папок в реальном времени", "monitor_desc": "Автоматически сортируйте файлы по мере их появления в выбранных папках.",
+                "nav_convert": "Конвертер", "convert_title": "FFmpeg Конвертер", "convert_desc": "Конвертируйте файлы между форматами с помощью FFmpeg.",
                 "beta_warning_title": "ПРЕДУПРЕЖДЕНИЕ: БЕТА-ВЕРСИЯ", "beta_warning_desc": "Мониторинг папок находится в режиме БЕТА-тестирования. Процесс работает в фоновом режиме и может нагружать диск. Пожалуйста, сделайте бэкап важных файлов перед использованием.",
                 "btn_start_monitor": "Включить мониторинг", "btn_stop_monitor": "Выключить мониторинг",
                 "monitor_status_active": "Мониторинг запущен", "monitor_status_inactive": "Мониторинг приостановлен",
@@ -1405,6 +1436,33 @@
             if (!path) return;
             await silentSaveConfig();
             startStream(`/api/stream?action=${action}&path=${encodeURIComponent(path)}`);
+        }
+
+        async function runConvert() {
+            const input_path = document.getElementById('convInput').value;
+            const output_path = document.getElementById('convOutput').value;
+            const format = document.getElementById('convFormat').value;
+            if (!input_path || !output_path || !format) return;
+            
+            const log = document.getElementById('convLog');
+            log.classList.remove('hidden');
+            log.innerHTML = 'Converting...';
+            
+            try {
+                const res = await fetch('/api/convert', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ input_path, output_path, format })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    log.innerHTML = 'Conversion success!';
+                } else {
+                    log.innerHTML = 'Error: ' + data.error;
+                }
+            } catch (e) {
+                log.innerHTML = 'Error: ' + e;
+            }
         }
 
         async function runEngineMulti() {
